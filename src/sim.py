@@ -16,7 +16,6 @@ import datetime
 import fcntl
 import logging
 import os
-import pickle
 import socket
 import struct
 import subprocess
@@ -24,6 +23,7 @@ import sys
 import time
 
 import net
+import pickle
 from rpyc.utils.registry import REGISTRY_PORT
 from rpyc.utils.server import ThreadedServer
 
@@ -230,9 +230,13 @@ class BlenderSim:
         if not "save_path" in self.opt:
             results = "WARNING BlenderSim.get_results() : Nothing to show"
         elif os.path.isfile(self.opt["save_path"]):
-            f = open(self.opt["save_path"], 'rb')
-            results = pickle.load(f)
-            f.close()
+            try:
+                f = open(self.opt["save_path"], 'rb')
+                results = pickle.load(f)
+                f.close()
+            except Exception as e:
+                results = "Can't load save file : " + str(e)
+                logging.error(results)
         else:
             results = "ERROR BlenderSim.get_results() : Can't open the file " + self.opt[
                 "save_path"] + ".\nThe file doesn't exist."
