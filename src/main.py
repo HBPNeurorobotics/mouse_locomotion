@@ -24,10 +24,10 @@ keyboard = bge.logic.keyboard
 def save():
     global pickle
     """Save te simulation results"""
-    owner["config"].logger = None
-    f = open(owner["config"].save_path, 'wb')
-    pickle.dump([owner["config"].__dict__, time.time()], f, protocol=2)
-    f.close()
+    del (owner["config"].logger)
+    owner["config"].time = time.time()
+    with open(owner["config"].save_path, 'wb') as f:
+        pickle.dump(owner["config"].__dict__, f, protocol=2)
 
 
 if not owner["config"].logger is None:
