@@ -30,7 +30,7 @@ def save():
         pickle.dump(owner["config"].__dict__, f, protocol=2)
 
 
-if not owner["config"].logger is None:
+if hasattr(owner["config"], 'logger'):
     # Time-step update instructions
     owner["cheesy"].update()
 

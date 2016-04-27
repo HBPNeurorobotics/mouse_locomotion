@@ -11,8 +11,6 @@
 # Data Science Lab - Ghent University. Human Brain Project SP10
 ##
 
-import logging
-
 from brain import Brain
 from muscle import *
 
@@ -120,7 +118,6 @@ class Body:
         self.logger = config_.logger
         self.muscle_type = self.config.muscle_type + "(self.scene, muscle_config)"
         self.name = self.config.body["name"]
-        self.muscle_type = self.config.muscle_type
 
         # Create 4 legs
         self.l_fo_leg = Foreleg(scene_, config_, "L")
@@ -134,7 +131,7 @@ class Body:
         # Create the muscles objects following config
         self.muscles = []
         for muscle_config in self.config.body["muscles"]:
-            self.muscles.append(eval(self.muscle_type) + "(self.scene, muscle_config)")
+            self.muscles.append(eval(self.muscle_type))
 
     def update(self):
         """Update control signals and forces"""
