@@ -335,7 +335,7 @@ class MouseDefConfig(Config):
                  "anch_1": [-0.59, 0, 1.4], "anch_2": [0.117, 0, -0.26], "k": 2000,
                  "c": 100, "kc": 0, "kl0": 0.8}
         body_muscles = []  # neck1, neck2]
-        self.body = {"name": "Cheesy", "obj" : "obj_body", "muscles": body_muscles}
+        self.body = {"name": "Cheesy", "obj": "obj_body", "muscles": body_muscles}
 
 
 class MouseSimpleConfig(Config):
@@ -399,4 +399,4 @@ class MouseSimpleConfig(Config):
                 "anch_1": [-0.59, 0, 1.4], "anch_2": [0.117, 0, -0.26],
                 "brain_sig": None, "maxF": -0.465}
         body_muscles = [neck]
-        self.body = {"name": "Mouse", "muscles": body_muscles}
+        self.body = {"name": "Mouse", "obj": "obj_body", "muscles": body_muscles}
