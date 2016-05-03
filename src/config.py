@@ -2,7 +2,7 @@
 # Mouse Locomotion Simulation
 #
 # Human Brain Project SP10
-# 
+#
 # This project provides the user with a framework based on Blender allowing:
 #  - Edition of a 3D model
 #  - Edition of a physical controller model (torque-based or muscle-based)
@@ -84,7 +84,6 @@ class DogDefConfig(Config):
         Config.__init__(self)
         self.muscle_type = "DampedSpringMuscle"
         self.name = "default_dog_simulation_config"
-        self.sim_speed = 1.0
         self.exit_condition = "bge.logic.getCurrentScene().objects['obj_body'].worldPosition.z < -1.8"
 
         # Back legs
@@ -145,27 +144,6 @@ class DogDefConfig(Config):
         body_muscles = [neck1, neck2]
         self.body = {"name": "Doggy", "obj" : "obj_body", "muscles": body_muscles}
 
-    def get_params_list(self):
-        """Return a list including all the parameters that can be changed to tune the controller model"""
-
-        liste = []
-        for m in self.back_legs_muscles:
-            liste += [m["anch_1"][0], m["anch_1"][1], m["anch_1"][2], m["anch_2"][0], m["anch_2"][1], m["anch_2"][2],
-                      m["k"], m["c"], m["kc"], m["kl0"]]
-
-        for m in self.front_legs_muscles:
-            liste += [m["anch_1"][0], m["anch_1"][1], m["anch_1"][2], m["anch_2"][0], m["anch_2"][1], m["anch_2"][2],
-                      m["k"], m["c"], m["kc"], m["kl0"]]
-
-        for m in self.body["muscles"]:
-            liste += [m["anch_1"][0], m["anch_1"][1], m["anch_1"][2], m["anch_2"][0], m["anch_2"][1], m["anch_2"][2],
-                      m["k"], m["c"], m["kc"], m["kl0"]]
-
-        liste += [self.brain["n_osc"], self.brain["h"], self.brain["tau"], self.brain["T"], self.brain["a"],
-                  self.brain["b"], self.brain["c"], self.brain["aa"], self.brain["time_interval"]]
-
-        return liste
-
 
 class DogVertDefConfig(Config):
     """Default configuration file for dog_vert.blend"""
@@ -177,7 +155,6 @@ class DogVertDefConfig(Config):
         Config.__init__(self)
         self.muscle_type = "DampedSpringMuscle"
         self.name = "default_dog_vert_simulation_config"
-        self.sim_speed = 1.0
         self.exit_condition = "owner['n_iter'] > 2500"  # "bge.logic.getCurrentScene().objects['obj_body.B'].worldPosition.z < -1.8"
 
         # Back legs
@@ -284,27 +261,6 @@ class DogVertDefConfig(Config):
                         vert5_u, vert5_d, vert6_u, vert6_d, abdos]
         self.body = {"name": "Doggy Vertebrate", "obj" : "obj_body", "muscles": body_muscles}
 
-    def get_params_list(self):
-        """Return a list including all the parameters that can be changed to tune the controller model"""
-
-        liste = []
-        for m in self.back_legs_muscles:
-            liste += [m["anch_1"][0], m["anch_1"][1], m["anch_1"][2], m["anch_2"][0], m["anch_2"][1], m["anch_2"][2],
-                      m["k"], m["c"], m["kc"], m["kl0"]]
-
-        for m in self.front_legs_muscles:
-            liste += [m["anch_1"][0], m["anch_1"][1], m["anch_1"][2], m["anch_2"][0], m["anch_2"][1], m["anch_2"][2],
-                      m["k"], m["c"], m["kc"], m["kl0"]]
-
-        for m in self.body["muscles"]:
-            liste += [m["anch_1"][0], m["anch_1"][1], m["anch_1"][2], m["anch_2"][0], m["anch_2"][1], m["anch_2"][2],
-                      m["k"], m["c"], m["kc"], m["kl0"]]
-
-        liste += [self.brain["n_osc"], self.brain["h"], self.brain["tau"], self.brain["T"], self.brain["a"],
-                  self.brain["b"], self.brain["c"], self.brain["aa"], self.brain["time_interval"]]
-
-        return liste
-
 
 class MouseDefConfig(Config):
     """Default configuration file for cheesy.blend"""
@@ -315,7 +271,6 @@ class MouseDefConfig(Config):
         # Simulation parameters
         Config.__init__(self)
         self.name = "default_cheesy_simulation_config"
-        self.sim_speed = 1.0
         self.exit_condition = "bge.logic.getCurrentScene().objects['obj_spine'].worldPosition.z < -1.8"
 
         # Back legs muscles
@@ -382,23 +337,66 @@ class MouseDefConfig(Config):
         body_muscles = []  # neck1, neck2]
         self.body = {"name": "Cheesy", "obj" : "obj_body", "muscles": body_muscles}
 
-    def get_params_list(self):
-        """Return a list including all the parameters that can be changed to tune the controller model"""
 
-        liste = []
-        for m in self.back_legs_muscles:
-            liste += [m["anch_1"][0], m["anch_1"][1], m["anch_1"][2], m["anch_2"][0], m["anch_2"][1], m["anch_2"][2],
-                      m["k"], m["c"], m["kc"], m["kl0"]]
+class MouseSimpleConfig(Config):
+    """Simple configuration file for mouse.blend"""
 
-        for m in self.front_legs_muscles:
-            liste += [m["anch_1"][0], m["anch_1"][1], m["anch_1"][2], m["anch_2"][0], m["anch_2"][1], m["anch_2"][2],
-                      m["k"], m["c"], m["kc"], m["kl0"]]
+    def __init__(self):
+        """Init Mouse Default Config parameters"""
 
-        for m in self.body["muscles"]:
-            liste += [m["anch_1"][0], m["anch_1"][1], m["anch_1"][2], m["anch_2"][0], m["anch_2"][1], m["anch_2"][2],
-                      m["k"], m["c"], m["kc"], m["kl0"]]
+        # Simulation parameters
+        Config.__init__(self)
+        self.logger_name = "INFO"
+        self.logger = logging.Logger(self.logger_name)
+        self.name = "simple_mouse_simulation_config"
+        self.muscle_type = "SimpleMuscle"
+        self.exit_condition = "bge.logic.getCurrentScene().objects['obj_spine'].worldPosition.z < -1.8"
 
-        liste += [self.brain["n_osc"], self.brain["h"], self.brain["tau"], self.brain["T"], self.brain["a"],
-                  self.brain["b"], self.brain["c"], self.brain["aa"], self.brain["time_interval"]]
+        # Back legs muscles
+        BL_HFL = {"name": "B_HFL.L", "logger": "INFO", "obj_1": "obj_hip.L", "obj_2": "obj_shin.L",
+                  "anch_1": [0.14, -0.01, 0.06], "anch_2": [0.017, -0.13, 0.1],
+                  "brain_sig": None}
+        BR_HFL = {"name": "B_HFL.R", "logger": "INFO", "obj_1": "obj_hip.R", "obj_2": "obj_shin.R",
+                  "anch_1": [-0.14, -0.01, 0.06], "anch_2": [-0.017, -0.13, 0.1],
+                  "brain_sig": None}
+        BL_gastrocenius = {"name": "B_gastro.L", "logger": "INFO", "obj_1": "obj_thigh.L", "obj_2": "obj_shin.L",
+                           "anch_1": [-0.19195, -0.69294, 0.20698], "anch_2": [-0.23857, -0.6465, -0.01011],
+                           "brain_sig": None, "maxF": 0.0}
+        BR_gastrocenius = {"name": "B_gastro.R", "logger": "INFO", "obj_1": "obj_thigh.R", "obj_2": "obj_shin.R",
+                           "anch_1": [0.1941, -0.69016, 0.20814], "anch_2": [0.23857, -0.6465, -0.01011],
+                           "brain_sig": None, "maxF": 0.0}
+        BL_tibialis = {"name": "B_tibialis.L", "logger": "INFO", "obj_1": "obj_shin.L", "obj_2": "obj_shin_lower.L",
+                       "anch_1": [-0.23857, -0.6465, -0.01011], "anch_2": [-0.27435, -0.754, -0.1395],
+                       "brain_sig": None, "maxF": -0.0}
+        BR_tibialis = {"name": "B_tibialis.R", "logger": "INFO", "obj_1": "obj_shin.R", "obj_2": "obj_shin_lower.R",
+                       "anch_1": [0.23937, -0.64779, -0.01044], "anch_2": [0.27433, -0.75355, -0.1396],
+                       "brain_sig": None, "maxF": -0.0}
+        self.back_leg_L_muscles = [BL_tibialis, BL_gastrocenius]
+        self.back_leg_R_muscles = [BR_tibialis, BR_gastrocenius]
 
-        return liste
+        # Front Legs muscles
+        FL_biceps = {"name": "F_biceps.L", "logger": "INFO", "obj_1": "obj_upper_arm.L", "obj_2": "obj_forearm.L",
+                     "anch_1": [-0.21322, 0.28541, -0.04615], "anch_2": [-0.27499, 0.32622, -0.22265],
+                     "brain_sig": None, "maxF": 1.1}
+        FR_biceps = {"name": "F_biceps.R", "logger": "INFO", "obj_1": "obj_upper_arm.R", "obj_2": "obj_forearm.R",
+                     "anch_1": [0.21242, 0.29976, -0.04857], "anch_2": [0.2744, 0.32456, -0.22214],
+                     "brain_sig": None, "maxF": 1.1}
+        FL_gastro = {"name": "F_gastro.L", "logger": "INFO", "obj_1": "obj_forearm.L", "obj_2": "obj_wrist.L",
+                     "anch_1": [-0.27499, 0.32622, -0.22265], "anch_2": [-0.2919, 0.51747, -0.28179],
+                     "brain_sig": None, "maxF": -0.01}
+        FR_gastro = {"name": "F_gastro.R", "logger": "INFO", "obj_1": "obj_forearm.R", "obj_2": "obj_wrist.R",
+                     "anch_1": [0.2744, 0.32456, -0.22214], "anch_2": [0.29257, 0.51605, -0.28135],
+                     "brain_sig": None, "maxF": -0.01}
+        self.front_leg_L_muscles = [FL_biceps, FL_gastro]
+        self.front_leg_R_muscles = [FR_biceps, FR_gastro]
+
+        # Brain
+        self.brain = {"name": "default_robot_matsuoka_brain", "n_osc": 4, "h": 1e-3, "tau": 1e-2,
+                      "T": 5e-2, "a": 10.5, "b": 20.5, "c": 0.08, "aa": 3, "time_interval": 1e-3}
+
+        # Body
+        neck = {"name": "muscle_neck2", "logger": "INFO", "obj_1": "joint_1_obj_neck", "obj_2": "obj_neck",
+                "anch_1": [-0.59, 0, 1.4], "anch_2": [0.117, 0, -0.26],
+                "brain_sig": None, "maxF": -0.465}
+        body_muscles = [neck]
+        self.body = {"name": "Mouse", "muscles": body_muscles}

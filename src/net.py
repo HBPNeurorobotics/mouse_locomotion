@@ -159,7 +159,12 @@ class SimManager(Thread):
         # We add the rsp from the simulation to the rsp list
         self.mutex_rsp.acquire()
         if not rsp.error:
-            self.rsp.appendleft(rsp.value)
+            # Since rpyc convert some basic types into its own
+            # we have to cast back to be able to use the classical functions
+            cast = rsp.value
+            if not type(rsp.value) == str:
+                cast = eval(str(cast))
+            self.rsp.appendleft(cast)
         else:
             logging.error('SimManager.response_sim() : The server return an exception\n')
         self.mutex_rsp.release()
@@ -232,8 +237,8 @@ class SimManager(Thread):
 
             # Create rsp buff and remove all rsp elements
             self.mutex_rsp.acquire()
-            rsps = self.rsp
-            self.rsp = []
+            rsps = list(self.rsp)
+            self.rsp = collections.deque([])
             self.mutex_rsp.release()
 
             logging.warning("Simulation finished!")
@@ -242,7 +247,7 @@ class SimManager(Thread):
         # If it isn't print error message and return
         else:
             logging.error("Simulation manager hasn't not finished yet with the" +
-                          "simulation. Try again later")
+                          " simulation. Try again later")
 
             return 0
 

@@ -20,6 +20,7 @@ import math
 from mathutils import Vector as vec
 
 import bge
+import numpy as np
 
 
 class Muscle:
@@ -33,16 +34,16 @@ class Muscle:
 
         self.logger = logging.getLogger(params_["logger"])
 
-        # Check if onject exist
+        # Check if object exists
         if not self.params["obj_1"] in self.scene.objects:
             self.logger.error("Muscle " + self.name + " deactivated: first extremity object doesn't exit." +
-                  " Check your configuration file!")
+                              " Check your configuration file!")
             self.active = False
         else:
             self.obj1 = self.scene.objects[self.params["obj_1"]]
         if not self.params["obj_2"] in self.scene.objects:
             self.logger.error("Muscle " + self.name + " deactivated: second extremity object doesn't exit." +
-                " Check your configuration file!")
+                              " Check your configuration file!")
             self.active = False
         else:
             self.obj2 = self.scene.objects[self.params["obj_2"]]
@@ -50,11 +51,11 @@ class Muscle:
         # Points of application in local coordinates
         if self.params["anch_1"] is None:
             self.logger.error("You have not defined the first application point of muscle " + self.name +
-                  "! Center is taken by default. This may results in erroneous simulation")
+                              "! Center is taken by default. This may results in erroneous simulation")
             self.params["anch_1"] = [0.0, 0.0, 0.0]
         if self.params["anch_2"] is None:
             self.logger.error("You have not defined the second application point of muscle " + self.name +
-                  "! Center is taken by default. This may results in erroneous simulation")
+                              "! Center is taken by default. This may results in erroneous simulation")
             self.params["anch_2"] = [0.0, 0.0, 0.0]
         self.app_point_1 = vec((self.params["anch_1"]))
         self.app_point_2 = vec((self.params["anch_2"]))
@@ -133,7 +134,7 @@ class HillMuscle(Muscle):
             l_CE = kwargs["l_CE"]
         else:
             self.logger.error("Muscle " + self.name + " deactivated: l_CE isn't defined." +
-                  " Check your configuration file!")
+                              " Check your configuration file!")
             self.active = False
             l_CE = 0
 
@@ -141,7 +142,7 @@ class HillMuscle(Muscle):
             l_MTC = kwargs["l_MTC"]
         else:
             self.logger.error("Muscle " + self.name + " deactivated: l_MTC isn't defined." +
-                  " Check your configuration file!")
+                              " Check your configuration file!")
             self.active = False
             l_MTC = 0
 
@@ -149,7 +150,7 @@ class HillMuscle(Muscle):
             dot_l_MTC = kwargs["dot_l_MTC"]
         else:
             self.logger.error("Muscle " + self.name + " deactivated: dot_l_MTC isn't defined." +
-                  " Check your configuration file!")
+                              " Check your configuration file!")
             self.active = False
             dot_l_MTC = 0
 
@@ -157,7 +158,7 @@ class HillMuscle(Muscle):
             q = kwargs["q"]
         else:
             self.logger.error("Muscle " + self.name + " deactivated: q isn't defined." +
-                  " Check your configuration file!")
+                              " Check your configuration file!")
             self.active = False
             q = 0
 
@@ -319,7 +320,7 @@ class DampedSpringMuscle(Muscle):
             self.force = force_s + force_d
             impulse = self.force / bge.logic.getLogicTicRate()
 
-            # apply impusle on an object point only in traction
+            # apply impulse on an object point only in traction
             f_type = "Push"
             if float((self.force * self.l.normalized())) < 0.0:
                 f_type = "Pull"
@@ -448,5 +449,44 @@ class DampedSpringReducedTorqueMuscle(Muscle):
             self.logger.debug("  G O1 = " + str(cg_1) + " ; G O2 = " + str(cg_1))
             self.logger.debug("  G OP 1 = " + str(lever_1_vect) + " ; G CG 2 = " + str(lever_2_vect))
             self.logger.debug("  T1 = " + str(torque_1) + " ; T2 = " + str(torque_2))
+        else:
+            self.logger.warning("Muscle " + self.name + " has been deactivated.")
+
+
+class SimpleMuscle(Muscle):
+    """This class implements a simple muscle which only apply torque on joints without
+    taking care of anything else."""
+
+    def __init__(self, scene_, params_):
+        """Class initialization. Requires scene, controller as well as two object and the local point of application \
+        of the spring forces"""
+
+        Muscle.__init__(self, scene_, params_)
+        # Model constants and variables
+
+        if "maxF" not in self.params:
+            self.logger.error("You have not defined the maximum tension of muscle " + self.name +
+                              "! 1.0 is taken by default. This may results in erroneous simulation")
+            self.maxF = 1.0
+        else:
+            self.maxF = self.params["maxF"]
+        self.orientation = np.array([1.0, 0.0, 0.0])
+
+    def newref(self, vec, mat):
+        return [
+            vec[0] * mat[0][0] + vec[1] * mat[0][1] + vec[2] * mat[0][2],
+            vec[0] * mat[1][0] + vec[1] * mat[1][1] + vec[2] * mat[1][2],
+            vec[0] * mat[2][0] + vec[1] * mat[2][1] + vec[2] * mat[2][2]
+        ]
+
+    def update(self, **kwargs):
+        """Update and apply forces on the objects connected."""
+
+        # If muscle has not been deactivated
+        if self.active:
+            torqueN = self.orientation * self.maxF * 0.8
+            torqueN_W = np.array(self.newref(torqueN, self.obj1.worldOrientation))
+            self.obj1.applyTorque(torqueN_W, False)
+            self.obj2.applyTorque(-torqueN_W, False)
         else:
             self.logger.warning("Muscle " + self.name + " has been deactivated.")

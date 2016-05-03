@@ -2,7 +2,7 @@
 # Mouse Locomotion Simulation
 #
 # Human Brain Project SP10
-# 
+#
 # This project provides the user with a framework based on Blender allowing:
 #  - Edition of a 3D model
 #  - Edition of a physical controller model (torque-based or muscle-based)
@@ -178,7 +178,7 @@ class Body:
         # Get distance
         self.dist = vec(self.position - self.origin).length
 
-        return 
+        return
 
     def compute_power(self):
         """Compute time-step power at each iteration"""

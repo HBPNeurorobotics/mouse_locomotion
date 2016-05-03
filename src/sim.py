@@ -4,7 +4,7 @@
 # Mouse Locomotion Simulation
 #
 # Human Brain Project SP10
-# 
+#
 # This project provides the user with a framework based on Blender allowing:
 #  - Edition of a 3D model
 #  - Edition of a physical controller model (torque-based or muscle-based)
@@ -22,7 +22,6 @@ import fcntl
 import logging
 import os
 import pickle
-import pyevolve
 from pyevolve import *
 import logging
 import socket
@@ -154,7 +153,7 @@ class Simulation:
         return ga
 
     def __eval_fct(self, genome):
-        """Evaluation function of the genetic algorithm. For each set of genome, it compute a 
+        """Evaluation function of the genetic algorithm. For each set of genome, it compute a
         score and returns it"""
 
         score = 0.0
@@ -175,7 +174,7 @@ class Simulation:
         return score
 
     def __conv_fct(self, ga):
-        """Convergence function of the genetic algorithm. It is called at each iteration step and 
+        """Convergence function of the genetic algorithm. It is called at each iteration step and
         return True of Flase depending on a convergence criteria"""
 
         # Get best individus
@@ -302,9 +301,13 @@ class BlenderSim:
         if not "save_path" in self.opt:
             results = "WARNING BlenderSim.get_results() : Nothing to show"
         elif os.path.isfile(self.opt["save_path"]):
-            f = open(self.opt["save_path"], 'rb')
-            results = pickle.load(f)
-            f.close()
+            try:
+                f = open(self.opt["save_path"], 'rb')
+                results = pickle.load(f)
+                f.close()
+            except Exception as e:
+                results = "Can't load save file : " + str(e)
+                logging.error(results)
         else:
             results = "ERROR BlenderSim.get_results() : Can't open the file " + self.opt[
                 "save_path"] + ".\nThe file doesn't exist."
