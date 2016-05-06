@@ -1,47 +1,22 @@
-#!/usr/bin/python2
-
-##
-# Mouse Locomotion Simulation
-#
-# Human Brain Project SP10
-# 
-# This project provides the user with a framework based on Blender allowing:
-#  - Edition of a 3D model
-#  - Edition of a physical controller model (torque-based or muscle-based)
-#  - Edition of a brain controller model (oscillator-based or neural network-based)
-#  - Simulation of the model
-#  - Optimization of the parameters in distributed cloud simulations
-# 
-# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>. March 2016
-# Modified by: Dimitri Rodarie
-##
-
-
-import collections
-import logging
-import os
-import sys
 import threading
-import time
 from threading import Thread, Lock
-
+from collections import deque
+import logging
+import time
 import rpyc
-import sim
-from rpyc.lib import setup_logger
 from rpyc.utils.factory import DiscoveryError
-from rpyc.utils.registry import REGISTRY_PORT, DEFAULT_PRUNING_TIMEOUT
-from rpyc.utils.registry import UDPRegistryServer
-from rpyc.utils.server import ThreadedServer
+
+from simulation import Simulation
 
 
-class SimManager(Thread):
+class Manager(Thread, Simulation):
     """
-    SimManager class provides a high level interface to distribute a large number of
+    Manager class provides a high level interface to distribute a large number of
     simulation requests in a variable size computation cloud using tools like asynchonous
     request and registry server to monitor the network state via UDP requests.
     Usage:
-            # Create and start SimManager thread
-            sm = SimManager()
+            # Create and start Manager thread
+            sm = Manager()
             sm.start()
 
             # Send simulation list and wait for results
@@ -52,17 +27,16 @@ class SimManager(Thread):
             sm.terminate()
     """
 
-    def __init__(self):
+    def __init__(self, opt):
         """Create sim manager parameters and start registry server"""
-
+        Simulation.__init__(self, opt)
         # Simulation list stacks
         # NB: FIFO: append answer on the left and remove the right one
-        self.rqt = collections.deque([])  # Request FIFO
-        self.rsp = collections.deque([])  # Response FIFO
-        self.cloud_state = dict()  # dictionnary of server state on the cloud. Entries are server hashes
+        self.rqt = deque([])  # Request FIFO
+        self.rsp = deque([])  # Response FIFO
+        self.cloud_state = dict()  # dictionary of server state on the cloud. Entries are server hashes
         self.server_list = []  # list of active servers
         self.conn_list = []  # list of active RPYC connections
-
         # Simulation manager parameter
         self.rqt_n = 0
         self.sim_prun_t = 0.1
@@ -74,15 +48,15 @@ class SimManager(Thread):
         self.interrupted = False
         self.interrupt_to = 3
         self.server_dispo = False
-
+        self.t_sim_init = 0
+        self.sim_time = 0
         # Threading
         self.mutex_cloud_state = Lock()
         self.mutex_server_list = Lock()
         self.mutex_conn_list = Lock()
         self.mutex_rsp = Lock()
         self.mutex_rqt = Lock()
-        threading.Thread.__init__(self)
-
+        Thread.__init__(self)
         logging.debug("Sim Manager initialization achieved. Number of active threads = " +
                       str(threading.active_count()))
 
@@ -105,7 +79,7 @@ class SimManager(Thread):
             logging.info("Simulation servers found on the network: " + str(self.server_list))
             self.reg_found = True
 
-        # Lock cloud_state and server_list ressource
+        # Lock cloud_state and server_list resources
         self.mutex_cloud_state.acquire()
         self.mutex_server_list.acquire()
 
@@ -209,8 +183,6 @@ class SimManager(Thread):
     def simulate(self, sim_list):
         """Perform synchronous simulation with the given list and return response list"""
 
-        l_sim_list = len(sim_list)
-
         # If rqt list is empty
         if not self.rqt:
 
@@ -222,6 +194,7 @@ class SimManager(Thread):
 
             # Check for simulation and interrupt when processed or interrupted
             to = 0
+            to_init = 0
             while (len(self.rsp) != sim_n or self.rqt) and (not self.terminated) and \
                     (to < self.interrupt_to):
                 if self.interrupted:
@@ -238,7 +211,7 @@ class SimManager(Thread):
             # Create rsp buff and remove all rsp elements
             self.mutex_rsp.acquire()
             rsps = list(self.rsp)
-            self.rsp = collections.deque([])
+            self.rsp = deque([])
             self.mutex_rsp.release()
 
             logging.warning("Simulation finished!")
@@ -246,7 +219,7 @@ class SimManager(Thread):
 
         # If it isn't print error message and return
         else:
-            logging.error("Simulation manager hasn't not finished yet with the" +
+            logging.error("Simulation manager hasn't not finished yet with the " + str(self.rqt) +
                           " simulation. Try again later")
 
             return 0
@@ -257,9 +230,20 @@ class SimManager(Thread):
         return self.cloud_state
 
     def stop(self):
-        """Stop managing loop"""
+        """Stop the simulation manager"""
+        Simulation.stop(self)
 
+        # Stop managing loop
         self.mng_stop = True
+        time.sleep(1)
+        self.sim_time = time.time() - self.t_sim_init
+
+    def start(self):
+        """Start a simulation manager"""
+        self.t_sim_init = time.time()
+        logging.info("Start sim manager server with PID " + str(self.pid))
+        time.sleep(1)
+        Thread.start(self)
 
     def run(self):
         """Run the managing loop. Check rqt stack for simulation request. Select the candidate \
@@ -299,35 +283,36 @@ class SimManager(Thread):
                     self.mutex_cloud_state.release()
 
                     # Create serving thread to handle answer
+                    bgt = None
                     try:
                         bgt = rpyc.BgServingThread(conn)
                     except Exception as e:
                         logging.error("Exception in serving thread:" + str(e))
                         pass
+                    if bgt is not None:
+                        self.mutex_conn_list.acquire()
+                        self.conn_list.append({"server": server_hash, "conn": conn,
+                                               "thread": bgt})
+                        self.mutex_conn_list.release()
 
-                    self.mutex_conn_list.acquire()
-                    self.conn_list.append({"server": server_hash, "conn": conn,
-                                           "thread": bgt})
-                    self.mutex_conn_list.release()
+                        # Create asynchronous handle
+                        async_simulation = rpyc.async(conn.root.exposed_simulation)
 
-                    # Create asynchronous handle
-                    async_simulation = rpyc.async(conn.root.exposed_simulation)
+                        try:
+                            # Call asynchronous service
+                            res = async_simulation(self.rqt[-1])
 
-                    try:
-                        # Call asynchronous service
-                        res = async_simulation(self.rqt[-1])
+                            # Assign asynchronous callback
+                            res.add_callback(self.response_sim)
 
-                        # Assign asynchronous callback
-                        res.add_callback(self.response_sim)
+                        except Exception as e:
+                            logging.error("Exception from server:" + str(e))
+                            pass
 
-                    except Exception as e:
-                        logging.error("Exception from server:" + str(e))
-                        pass
-
-                    # Clear request from list: TODO: check if async_simulation don't need it anymore!
-                    self.mutex_rqt.acquire()
-                    self.rqt.pop()
-                    self.mutex_rqt.release()
+                        # Clear request from list: TODO: check if async_simulation don't need it anymore!
+                        self.mutex_rqt.acquire()
+                        self.rqt.pop()
+                        self.mutex_rqt.release()
 
                 else:
                     self.server_dispo = False
@@ -340,111 +325,21 @@ class SimManager(Thread):
         self.terminated = True
 
 
-class SimRegistry(UDPRegistryServer):
-    """
-    SimManager class provides a registry server to monitor the network state via UDP requests.
-    Usage:
-            # Create and start SimRegister thread
-            r = SimRegister()
-            r.start()
-    """
+def run_sim(opt):
+    """Run a simple on shot simulation"""
 
-    def __init__(self):
-        super(SimRegistry, self).__init__(host='0.0.0.0', port=REGISTRY_PORT,
-                                          pruning_timeout=DEFAULT_PRUNING_TIMEOUT)
+    # Start manager
+    manager = Manager(opt)
+    manager.start()
+    # Simulate
+    sim_list = [opt]
+    res_list = manager.simulate(sim_list)
 
-    def start(self):
-        setup_logger(False, None)
-        super(SimRegistry, self).start()
-
-
-class SimService(rpyc.Service):
-    """
-    SimManager class provides a services server to listen to external requests and start a Blender
-    simulation remotely and asynchroously. Results are sent back to SimManager
-    Usage:
-            # Create and start SimService thread
-            s = ThreadedServer(SimService, port=18861, auto_register=True)
-            s.start()
-    """
-
-    ALIASES = ["BLENDERSIM", "BLENDER", "BLENDERPLAYER"]
-
-    def on_connect(self):
-        self.a = 4
-        pass
-
-    def on_disconnect(self):
-        pass
-
-    def exposed_simulation(self, opt_):  # this is an exposed method
-
-        # Perform simulation
-        logging.info("Processing simulation request")
-        s = sim.BlenderSim(opt_)
-        s.start_blenderplayer()
-        logging.info("Simulation request processed")
-
-        return s.get_results()
-
-
-# Testing functions ###
-
-def start_manager():
-    N_SIM = 400
-
-    # Create and start SimManager thread
-    t_i = time.time()
-    logging.info("#### Starting Sim Manager Test Program with PID " + str(os.getpid()) + " ####")
-    sm = SimManager()
-    sm.daemon = True
-    sm.start()
-
-    # Send simulation list and wait for results
-    sim_list = []
-    opt = {"blender_path": "blender-2.77/", "blender_model": "dog_vert.blend",
-           "config_name": "DogVertDefConfig", "sim_type": "run", "registry": False, "service": False,
-           "logfile": "stdout", "fullscreen": False, "verbose": "INFO", "save": False}
-    for i in range(N_SIM):
-        sim_list.append(opt)
-    res_list = sm.simulate(sim_list)
-
+    # Stop and display results
+    manager.stop()
+    time.sleep(1)
     rs_ls = ""
     for i in res_list:
         rs_ls += str(i) + " "
     logging.info("Results: " + str(rs_ls))
-
-    # Wait to terminate all work and stop SimManager thread
-    sm.stop()
-    time.sleep(1)
-    logging.info("#### Exiting Sim Manager Test Program - Sim time: " + str(float("{0:.2f}".format(time.time() - t_i))) +
-          " sec for " + str(N_SIM) + " simulations ####")
-
-
-def start_service():
-    t = ThreadedServer(SimService, port=18861, auto_register=True)
-    try:
-        t.start()
-    except KeyboardInterrupt:
-        t.stop()
-        logging.warning("SINGINT caught from user keyboard interrupt")
-        sys.exit(1)
-
-
-def start_registry():
-    r = SimRegistry()
-    r.daemon = True
-    r.start()
-
-
-if __name__ == '__main__':
-
-    if len(sys.argv) == 2:
-        if sys.argv[1] == "-s":
-            start_service()
-        elif sys.argv[1] == "-r":
-            start_registry()
-        elif sys.argv[1] == "-m":
-            start_manager()
-    else:
-        start_manager()
+    logging.info("Simulation Finished!")

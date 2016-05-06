@@ -23,7 +23,7 @@ import time
 
 import bge
 
-root = os.path.dirname(os.path.dirname(bge.logic.expandPath("//")))
+root = os.path.dirname(os.path.dirname(bge.logic.expandPath("//"))).replace("\\", "/")
 src = root + "/src/"
 sys.path.append(src)
 
@@ -44,7 +44,7 @@ if sys.argv[len(sys.argv) - 1] == "FROM_START.PY":
 else:
     # Default config when started directly from Blender
     CONFIG_NAME = "DogVertDefConfig()"
-    LOG_FILE = os.getenv("HOME") + "/.log/qSim.log"
+    LOG_FILE = os.path.expanduser("~").replace("\\", "/") + "/.log/qSim.log"
     dirname = root + "/save"
     filename = "sim_" + datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + ".qsm"
     if not os.path.exists(dirname):
