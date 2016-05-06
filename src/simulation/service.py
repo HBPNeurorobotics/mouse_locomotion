@@ -1,5 +1,22 @@
+#!/usr/bin/python2
+
+##
+# Mouse Locomotion Simulation
+#
+# Human Brain Project SP10
+#
+# This project provides the user with a framework based on Blender allowing:
+#  - Edition of a 3D model
+#  - Edition of a physical controller model (torque-based or muscle-based)
+#  - Edition of a brain controller model (oscillator-based or neural network-based)
+#  - Simulation of the model
+#  - Optimization of the parameters in distributed cloud simulations
+#
+# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>. February 2016
+# Modified by: Dimitri Rodarie
+##
+
 from simulation import Simulation
-from simulation import Blender
 import logging
 import sys
 from rpyc import Service
@@ -9,8 +26,8 @@ from rpyc.utils.server import ThreadedServer
 
 class SimService(Service, Simulation):
     """
-    SimManager class provides a services server to listen to external requests and start a Blender
-    simulation remotely and asynchroously. Results are sent back to SimManager
+    SimService class provides a services server to listen to external requests and start a Simulator
+    simulation remotely and asynchronously.
     Usage:
             # Create and start SimService thread
             s = ThreadedServer(SimService, port=18861, auto_register=True)
@@ -24,8 +41,7 @@ class SimService(Service, Simulation):
 
     def start(self):
         """Start a service server"""
-        Simulation.start(self)
-        logging.info("Start registry server on address: " + str(self.ipaddr) + ":" + str(REGISTRY_PORT))
+        logging.info("Start service server on address: " + str(self.ipaddr) + ":" + str(REGISTRY_PORT))
         try:
             t = ThreadedServer(SimService, port=18861, auto_register=True)
             t.start()
@@ -45,7 +61,7 @@ class SimService(Service, Simulation):
 
         # Perform simulation
         logging.info("Processing simulation request")
-        s = Blender(opt_, "BLENDERPLAYER")
+        s = Simulation(opt_)
         s.start()
         logging.info("Simulation request processed")
 

@@ -17,12 +17,13 @@
 ##
 
 import os
-
-if os.name == 'posix':
-    import fcntl
 import logging
 import socket
 import struct
+from simulator import *
+
+if os.name == 'posix':
+    import fcntl
 
 
 class Simulation:
@@ -30,12 +31,23 @@ class Simulation:
     Main class for high level simulation. It receives a set of simulation options as defined
     in the DEF_OPT dict. Methods start_service() and start_registry can be launched independently
     to run service and registry	servers. Other methods require a call to start_manager which
-    distribute simulation accross the network.
+    distribute simulation across the network.
     """
+
+    SIMULATORS = {"BLENDER": "Blender"}
+    DEFAULT_SIMULATOR = "BLENDER"
 
     def __init__(self, opt_=None):
         """Initialize with CLI options"""
         self.opt = opt_
+        self.results = "No results yet : No simulation launched"
+        if type(self.opt) == dict and "simulator" in self.opt:
+            simulator_ = self.opt["simulator"]
+            if simulator_ not in self.SIMULATORS:
+                simulator_ = self.DEFAULT_SIMULATOR
+        else:
+            simulator_ = self.DEFAULT_SIMULATOR
+        self.simulator = self.SIMULATORS[simulator_] + "(self.opt)"
         if os.name == 'posix':
             self.ipaddr = self.__get_ip_address('eth0')
         else:
@@ -58,7 +70,12 @@ class Simulation:
         return ip_name
 
     def start(self):
-        pass
+        simulator_ = eval(self.simulator)
+        simulator_.launch_simulation()
+        self.results = simulator_.get_results()
 
     def stop(self):
         pass
+
+    def get_results(self):
+        return self.results

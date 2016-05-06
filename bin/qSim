@@ -23,7 +23,7 @@ import os
 from os.path import dirname, realpath
 import sys
 from plumbum import cli
-from simulation import SimService, Blender, Registry, Process
+from simulation import Simulation, SimService, Registry, Process
 
 root = dirname(dirname(realpath(__file__))).replace("\\", "/")
 src = root + "/src"
@@ -34,7 +34,7 @@ class SimCli(cli.Application):
     """This script provide a framework for quadruped locomotion driven by reservoir computing"""
 
     # Default CLI application options
-    DEF_OPT = {"blender_path": "Blender2.77/", "blender_model": "dog_vert.blend", "root_dir": root,
+    DEF_OPT = {"simulator": "BLENDER", "simulator_path": "Blender2.77/", "model": "dog_vert.blend", "root_dir": root,
                "config_name": "DogVertDefConfig", "sim_type": "RUN", "registry": False, "service": False,
                "local": False, "logfile": os.path.expanduser("~").replace("\\", "/") + "/.log/qSim.log",
                "fullscreen": False,
@@ -42,9 +42,11 @@ class SimCli(cli.Application):
     opt = dict()
 
     # Simulation parameters
-    path = cli.SwitchAttr(["-p", "--binpath"], str, default=DEF_OPT["blender_path"],
-                          help="Path of Blender binaries")
-    model = cli.SwitchAttr(["-m", "--model"], str, default=DEF_OPT["blender_model"],
+    simulator = cli.SwitchAttr(["-e", "--environment"], str, default=DEF_OPT["simulator"],
+                               help="Simulator name : BLENDER")
+    path = cli.SwitchAttr(["-p", "--binpath"], str, default=DEF_OPT["simulator_path"],
+                          help="Path of Simulator binaries")
+    model = cli.SwitchAttr(["-m", "--model"], str, default=DEF_OPT["model"],
                            help="Model to simulation")
     config = cli.SwitchAttr(["-c", "--config"], str, default=DEF_OPT["config_name"],
                             help="The config class to be used for simulation")
@@ -70,9 +72,9 @@ class SimCli(cli.Application):
                           help="Enable fullscreen mode")
 
     def main(self):
-
-        self.opt["blender_path"] = self.root + "/bin/" + self.path
-        self.opt["blender_model"] = self.root + "/mdl/" + self.model
+        self.opt["simulator"] = self.simulator
+        self.opt["simulator_path"] = self.root + "/bin/" + self.path
+        self.opt["model"] = self.root + "/mdl/" + self.model
         self.opt["root_dir"] = self.root
         self.opt["save_path"] = self.root + "/save/default.qsm"
         self.opt["config_name"] = self.config
@@ -102,7 +104,7 @@ class SimCli(cli.Application):
 
         # Start a local simulation
         if self.opt["local"]:
-            s = Blender(self.opt, "BLENDERPLAYER")
+            s = Simulation(self.opt)
         elif self.opt["registry"]:
             s = Registry(self.opt)
         elif self.opt["service"]:

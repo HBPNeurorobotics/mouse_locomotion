@@ -1,3 +1,21 @@
+#!/usr/bin/python2
+
+##
+# Mouse Locomotion Simulation
+#
+# Human Brain Project SP10
+#
+# This project provides the user with a framework based on Blender allowing:
+#  - Edition of a 3D model
+#  - Edition of a physical controller model (torque-based or muscle-based)
+#  - Edition of a brain controller model (oscillator-based or neural network-based)
+#  - Simulation of the model
+#  - Optimization of the parameters in distributed cloud simulations
+#
+# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>. February 2016
+# Modified by: Dimitri Rodarie
+##
+
 import threading
 from threading import Thread, Lock
 from collections import deque
@@ -23,8 +41,8 @@ class Manager(Thread, Simulation):
             sim_list = [opt1 opt2]
             res_list = sm.simulate(sim_list)
 
-            # Wait to terminate all work and stop SimManager thread
-            sm.terminate()
+            # Wait to terminate all work and stop Manager thread
+            sm.stop()
     """
 
     def __init__(self, opt):
@@ -140,7 +158,7 @@ class Manager(Thread, Simulation):
                 cast = eval(str(cast))
             self.rsp.appendleft(cast)
         else:
-            logging.error('SimManager.response_sim() : The server return an exception\n')
+            logging.error('Manager.response_sim() : The server return an exception\n')
         self.mutex_rsp.release()
 
         self.mutex_conn_list.acquire()
@@ -249,7 +267,7 @@ class Manager(Thread, Simulation):
         """Run the managing loop. Check rqt stack for simulation request. Select the candidate \
         server for simulation. Start simulation."""
 
-        logging.info("Start Sim Manager main loop")
+        logging.info("Start Manager main loop")
 
         # Continue while not asked for termination or when there are candidates in the list
         # and a server to process them
