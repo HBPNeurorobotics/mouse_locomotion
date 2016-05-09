@@ -35,13 +35,15 @@ class Simulator:
         # Start batch process and quit
         logging.debug("Subprocess call: " + str(self.args))
         subprocess.call(self.args)
+        logging.debug("Subprocess end")
 
     def get_results(self):
         """This function reads the file saved in Blender at the end of the simulation to retrieve results"""
 
         # Retrieve filename
         if "save_path" not in self.opt:
-            results = "WARNING Simulator.get_results() : Nothing to show"
+            results = "Simulator.get_results() : Nothing to show"
+            logging.warning(results)
         elif os.path.isfile(self.opt["save_path"]):
             try:
                 f = open(self.opt["save_path"], 'rb')
@@ -51,6 +53,7 @@ class Simulator:
                 results = "Can't load save file : " + str(e)
                 logging.error(results)
         else:
-            results = "ERROR Simulator.get_results() : Can't open the file " + self.opt[
-                "save_path"] + ".\nThe file doesn't exist."
+            results = "Simulator.get_results() : Can't open the file " + self.opt[
+                "save_path"] + " -> The file doesn't exist."
+            logging.error(results)
         return results

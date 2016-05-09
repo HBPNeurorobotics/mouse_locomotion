@@ -60,7 +60,7 @@ class Genetic(Optimization):
 
     def __eval_fct(self, population):
         """Evaluation function of the genetic algorithm. For each population, it computes the
-+         score of every genomes and directly write it"""
+        score of every genomes and directly write it"""
 
         scores = []
         # Create a config for the genome
@@ -72,7 +72,10 @@ class Genetic(Optimization):
         # Simulate
         res_list = manager.run_sim(sim_list)
         for res in res_list:
-            scores.append(res["score"])
+            if "score" in res:
+                scores.append(res["score"])
+            else:
+                scores.append(0)
 
         # Update the score of each specimen
         i = 0

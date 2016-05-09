@@ -21,17 +21,13 @@ class Result:
     optimization algorithm). It takes a Config class as a initialization argument to determine which parameters shall be saved"""
 
     def __init__(self, scene_, config_):
+        return
 
-    	return
+    def save(self):
+        return
 
-  	def save(self):
+    def load(self, file_):
+        return
 
-  		return
-
-  	def load(self, file_):
-
-  		return
-
-  	def __str__(self):
-  		
+    def __str__(self):
         return "foo"
