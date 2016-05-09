@@ -367,3 +367,4 @@ def run_sim(opt):
         rs_ls += str(i) + " "
     logging.info("Results: " + str(rs_ls))
     logging.info("Simulation Finished!")
+    return res_list
