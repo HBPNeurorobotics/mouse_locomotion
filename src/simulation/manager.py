@@ -189,7 +189,10 @@ class Manager(Thread, Simulation):
                 item["conn"].close()
                 t = item["thread"]
                 self.conn_list.remove(item)
-                t.stop()
+                try:
+                    t.stop()
+                except Exception as e:
+                    logging.error(str(e))
         self.mutex_conn_list.release()
         # If no candidate in the list
         if not conn_found:
@@ -350,7 +353,10 @@ def run_sim(opt):
     manager = Manager(opt)
     manager.start()
     # Simulate
-    sim_list = [opt]
+    if type(opt) != list:
+        sim_list = [opt]
+    else:
+        sim_list = opt
     res_list = manager.simulate(sim_list)
 
     # Stop and display results

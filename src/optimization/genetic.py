@@ -43,7 +43,6 @@ class Genetic(Optimization):
 
         # Create a genome instance and parametrize it
         self.genome = G1DList.G1DList(self.genome_size)
-        self.genome.evaluator.set(self.__eval_fct)
         self.genome.initializator.set(self.initializator)
         self.genome.mutator.set(self.mutator)
         self.genome.setParams(rangemin=self.genome_min, rangemax=self.genome_max)
@@ -57,24 +56,31 @@ class Genetic(Optimization):
         self.ga.setCrossoverRate(self.cross_over_rate)
         self.ga.setInteractiveMode(self.interactive_mode)
         self.ga.terminationCriteria.set(self.__conv_fct)
+        self.ga.setEvaluator(self.__eval_fct)
 
-    def __eval_fct(self, genome):
-        """Evaluation function of the genetic algorithm. For each set of genome, it compute a
-        score and returns it"""
+    def __eval_fct(self, population):
+        """Evaluation function of the genetic algorithm. For each population, it computes the
++         score of every genomes and directly write it"""
 
-        score = 0.0
+        scores = []
         # Create a config for the genome
-        self.opt["genome"] = genome.getInternalList()
-        logging.info(" ---------------- DEBUT SIM -----------")
+        sim_list = []
+        for ind in population.internalPop:
+            self.opt["genome"] = ind.getInternalList()
+            sim_list.append(self.opt)
 
         # Simulate
-        res_list = manager.run_sim(self.opt)
+        res_list = manager.run_sim(sim_list)
+        for res in res_list:
+            scores.append(res["score"])
 
-        # In the result list, we look for the score
-        score = 1
-        logging.info(" ---------------- FIN SIM -----------")
-        # Return the score result
-        return score
+        # Update the score of each specimen
+        i = 0
+        for ind in population.internalPop:
+            ind.setRawScore(scores[i])
+            i += 1
+        # Return the population score result
+        return sum(scores)
 
     def __conv_fct(self, ga):
         """Convergence function of the genetic algorithm. It is called at each iteration step and
