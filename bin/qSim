@@ -22,12 +22,13 @@ import logging.config
 import os
 from os.path import dirname, realpath
 import sys
-from plumbum import cli
-from simulation import Simulation, SimService, Registry, Process
 
 root = dirname(dirname(realpath(__file__))).replace("\\", "/")
 src = root + "/src"
 sys.path.append(src)
+
+from plumbum import cli
+from simulation import Simulation, SimService, Registry, Process
 
 
 class SimCli(cli.Application):
@@ -73,7 +74,10 @@ class SimCli(cli.Application):
 
     def main(self):
         self.opt["simulator"] = self.simulator
-        self.opt["simulator_path"] = self.root + "/bin/" + self.path
+        if self.path == self.DEF_OPT["simulator_path"]:
+            self.opt["simulator_path"] = self.root + "/bin/" + self.path
+        else:
+            self.opt["simulator_path"] = self.path
         self.opt["model"] = self.root + "/mdl/" + self.model
         self.opt["root_dir"] = self.root
         self.opt["save_path"] = self.root + "/save/default.qsm"

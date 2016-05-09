@@ -16,11 +16,17 @@
 # Modified by: Dimitri Rodarie
 ##
 
-from simulation import Simulation
-from optimization import Genetic
-from simulation import manager
 import logging
 import time
+
+from simulation import Simulation
+from optimization import Genetic
+import sys
+
+if sys.version_info[:2] < (3, 4):
+    import manager as manager
+else:
+    from simulation import manager
 
 
 class Process(Simulation):
