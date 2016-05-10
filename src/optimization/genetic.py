@@ -23,7 +23,7 @@ import simulation.manager as manager
 
 
 class Genetic(Optimization):
-    def __init__(self, opt, genome_size=10, population_size=20, num_max_generation=50, mutation_rate=0.2,
+    def __init__(self, opt, genome_size=10, population_size=5, num_max_generation=4, mutation_rate=0.2,
                  cross_over_rate=0.9, genome_min=0, genome_max=1.0, interactive_mode=False, stop_num_av=10,
                  stop_thresh=0.01):
         """Creation and initialization function for the genome and the genetic algorithm. It fixes the
@@ -73,6 +73,7 @@ class Genetic(Optimization):
         res_list = manager.run_sim(sim_list)
         for res in res_list:
             if "score" in res:
+                print(res["score"])
                 scores.append(res["score"])
             else:
                 scores.append(0)

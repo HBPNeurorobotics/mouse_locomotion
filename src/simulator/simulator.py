@@ -20,6 +20,8 @@ import logging
 import os
 import subprocess
 
+from result import Result
+
 import pickle
 
 
@@ -41,19 +43,12 @@ class Simulator:
         """This function reads the file saved in Blender at the end of the simulation to retrieve results"""
 
         # Retrieve filename
+        results = ""
         if "save_path" not in self.opt:
             results = "Simulator.get_results() : Nothing to show"
             logging.warning(results)
         elif os.path.isfile(self.opt["save_path"]):
-            try:
-                f = open(self.opt["save_path"], 'rb')
-                results = pickle.load(f)
-                f.close()
-            except Exception as e:
-                results = "Can't load save file : " + str(e)
-                logging.error(results)
-        else:
-            results = "Simulator.get_results() : Can't open the file " + self.opt[
-                "save_path"] + " -> The file doesn't exist."
-            logging.error(results)
+            res = Result()
+            results = res.get_results(self.opt["save_path"])
+
         return results

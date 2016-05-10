@@ -53,7 +53,7 @@ else:
 
 # Create python controller
 global owner
-owner = {"n_iter": 0, "t_init": time.time()}
+owner = dict()
 
 # Create Logger and configuration
 if not os.path.exists(os.path.dirname(LOG_FILE)):
@@ -70,7 +70,9 @@ configuration.logger = logger
 configuration.save_path = SAVE_NAME
 
 owner["config"] = configuration
-owner["cheesy"] = Body(scene, configuration)
+owner["config"].n_iter = 0
+owner["config"].t_init = time.time()
+owner["body"] = Body(scene, configuration)
 
 # Advertise simulation has begun
 logger.info("####################################")

@@ -14,44 +14,46 @@
 # Modified by: Dimitri Rodarie
 ##
 
-
 import time
 import pickle
 import bge
+
+from result import Result
 
 # Get BGE handles
 controller = bge.logic.getCurrentController()
 exit_actuator = bge.logic.getCurrentController().actuators['quit_game']
 keyboard = bge.logic.keyboard
 
-
-def save():
-    global pickle
-    """Save te simulation results"""
-    del (owner["config"].logger)
-    owner["config"].time = time.time()
-    with open(owner["config"].save_path, 'wb') as f:
-        pickle.dump(owner["config"].__dict__, f, protocol=2)
-
-
+# TODO: Do something with the simulation even if there is no logger declared
 if hasattr(owner["config"], 'logger'):
     # Time-step update instructions
-    owner["cheesy"].update()
+    owner["body"].update()
 
     # DEBUG control and display
-    owner["n_iter"] += 1
-    owner["config"].logger.debug("Main iteration " + str(owner["n_iter"]) + ": stop state = " +
-                                 str(eval(owner["config"].exit_condition)))
-    owner["config"].logger.debug("[Interruption: exit = " + str(eval(owner["config"].exit_condition)) +
-                                 " sim time = " + str(time.time() - owner["t_init"]) + " timeout = " + str(
+    owner["config"].n_iter += 1
+    owner["config"].logger.debug("Main iteration " + str(owner["config"].n_iter) + ": stop state = " +
+        str(eval(owner["config"].exit_condition)))
+    owner["config"].logger.debug("Interruption: exit = " + str(eval(owner["config"].exit_condition)) +
+        " sim time = " + str(time.time() -  owner["config"].t_init) + " timeout = " + str(
         owner["config"].timeout))
 
     # Simulation interruption
     if eval(owner["config"].exit_condition) \
             or bge.logic.KX_INPUT_ACTIVE == keyboard.events[bge.events.SPACEKEY] \
-            or time.time() - owner["t_init"] > owner["config"].timeout:
-        # save config
-        save()
+            or time.time() - owner["config"].t_init > owner["config"].timeout:
+
+        # Get time of simulation
+        owner["config"].t_end = time.time()
+        
+        # Create a result instance and save
+        try:
+            results = Result(owner["body"])
+            owner["config"].logger.info(results)
+            results.save()
+        except Exception as e:
+            owner["config"].logger.error("Unable to create a result report. Caused by: " + str(e))
+            pass
 
         # exit
         controller.activate(exit_actuator)

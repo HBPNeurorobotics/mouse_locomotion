@@ -28,8 +28,11 @@ class Config:
         self.sim_speed = 1.0
         self.logger_name = "INFO"
         self.logger = logging.Logger(self.logger_name)
-        self.exit_condition = "owner['n_iter'] > 500"
+        self.exit_condition = "owner['config'].n_iter > 500"
         self.timeout = 10
+        self.t_init = 0
+        self.t_end = 0
+        self.n_iter = 0
         self.save_path = "default"
 
         # Physical parameters
@@ -153,9 +156,10 @@ class DogVertDefConfig(Config):
 
         # Simulation parameters
         Config.__init__(self)
+        self.timeout = 3
         self.muscle_type = "DampedSpringMuscle"
         self.name = "default_dog_vert_simulation_config"
-        self.exit_condition = "owner['n_iter'] > 2500"  # "bge.logic.getCurrentScene().objects['obj_body.B'].worldPosition.z < -1.8"
+        self.exit_condition = "owner['config'].n_iter > 2500"  # "bge.logic.getCurrentScene().objects['obj_body.B'].worldPosition.z < -1.8"
 
         # Back legs
         BL_biceps = {"name": "B_biceps.L", "logger": "INFO", "obj_1": "obj_body.B", "obj_2": "obj_shin.L",
