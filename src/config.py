@@ -265,6 +265,17 @@ class DogVertDefConfig(Config):
                         vert5_u, vert5_d, vert6_u, vert6_d, abdos]
         self.body = {"name": "Doggy Vertebrate", "obj" : "obj_body", "muscles": body_muscles}
 
+        self.n_sig_brain = self.brain["n_osc"]
+        self.n_sig_muscle = len(self.front_leg_L_muscles) + len(self.front_leg_R_muscles)
+            + len(self.back_leg_L_muscles) + len(self.back_leg_R_muscles)
+        for 
+        self.connection_matrix = 
+
+    def set_brain_connection(self, matrix):
+        """This method fills the connection matrix between the brain and the muscles with a given value"""
+
+        self.connection_matrix = matrix
+
 
 class MouseDefConfig(Config):
     """Default configuration file for cheesy.blend"""

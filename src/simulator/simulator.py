@@ -50,5 +50,9 @@ class Simulator:
         elif os.path.isfile(self.opt["save_path"]):
             res = Result()
             results = res.get_results(self.opt["save_path"])
+        else:
+            results = "Simulator.get_results() : Can't open the file " + self.opt[
+                "save_path"] + " -> The file doesn't exist."
+            logging.error(results)
 
         return results

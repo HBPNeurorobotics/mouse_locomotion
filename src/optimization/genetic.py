@@ -73,7 +73,6 @@ class Genetic(Optimization):
         res_list = manager.run_sim(sim_list)
         for res in res_list:
             if "score" in res:
-                print(res["score"])
                 scores.append(res["score"])
             else:
                 scores.append(0)
@@ -83,6 +82,7 @@ class Genetic(Optimization):
         for ind in population.internalPop:
             ind.setRawScore(scores[i])
             i += 1
+
         # Return the population score result
         return sum(scores)
 
