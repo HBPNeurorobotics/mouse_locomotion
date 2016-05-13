@@ -189,10 +189,7 @@ class Manager(Thread, Simulation):
                 item["conn"].close()
                 t = item["thread"]
                 self.conn_list.remove(item)
-                try:
-                    t.stop()
-                except Exception as e:
-                    logging.error(str(e))
+                t._active = False
         self.mutex_conn_list.release()
         # If no candidate in the list
         if not conn_found:
@@ -296,7 +293,6 @@ class Manager(Thread, Simulation):
 
                     except Exception as e:
                         logging.error("Exception when connecting:" + str(e))
-                        pass
 
                     # Update the cloud_state list
                     self.mutex_cloud_state.acquire()

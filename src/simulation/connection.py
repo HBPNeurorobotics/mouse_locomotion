@@ -17,19 +17,28 @@
 ##
 import logging
 
-from simulation import Simulation
+from simulator import *
 from rpyc import Service
 
 
 class SimConnection(Service):
     ALIASES = ["BLENDERSIM", "BLENDER", "BLENDERPLAYER"]
+    SIMULATORS = {"BLENDER": "Blender"}
+    DEFAULT_SIMULATOR = "BLENDER"
 
     def exposed_simulation(self, opt_):  # this is an exposed method
+        if type(opt_) == dict and "simulator" in opt_:
+            simulator_ = opt_["simulator"]
+            if simulator_ not in self.SIMULATORS:
+                simulator_ = self.DEFAULT_SIMULATOR
+        else:
+            simulator_ = self.DEFAULT_SIMULATOR
+        simulator_ = self.SIMULATORS[simulator_] + "(opt_)"
 
         # Perform simulation
         logging.info("Processing simulation request")
-        s = Simulation(opt_)
-        s.start()
+        simulator_ = eval(simulator_)
+        simulator_.launch_simulation()
         logging.info("Simulation request processed")
 
-        return s.get_results()
+        return simulator_.get_results()

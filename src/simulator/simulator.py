@@ -15,7 +15,7 @@
 # File created by: Gabriel Urbain <gabriel.urbain@ugent.be>. February 2016
 # Modified by: Dimitri Rodarie
 ##
-
+import datetime
 import logging
 import os
 import subprocess
@@ -30,6 +30,12 @@ class Simulator:
         self.dirname = self.opt["root_dir"] + "/save"
         if not os.path.exists(self.dirname):
             os.makedirs(self.dirname)
+        self.filename = ""
+        self.update_filename()
+
+    def update_filename(self):
+        self.filename = "sim_" + datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + ".qsm"
+        self.filename = self.dirname + "/" + self.filename
 
     def launch_simulation(self):
         # Start batch process and quit
@@ -44,16 +50,15 @@ class Simulator:
         if "save_path" not in self.opt:
             results = "Simulator.get_results() : Nothing to show"
             logging.warning(results)
-        elif os.path.isfile(self.opt["save_path"]):
+        elif os.path.isfile(self.filename):
             try:
-                f = open(self.opt["save_path"], 'rb')
+                f = open(self.filename, 'rb')
                 results = pickle.load(f)
                 f.close()
             except Exception as e:
                 results = "Can't load save file : " + str(e)
                 logging.error(results)
         else:
-            results = "Simulator.get_results() : Can't open the file " + self.opt[
-                "save_path"] + " -> The file doesn't exist."
+            results = "Simulator.get_results() : Can't open the file " + self.filename + " -> The file doesn't exist."
             logging.error(results)
         return results

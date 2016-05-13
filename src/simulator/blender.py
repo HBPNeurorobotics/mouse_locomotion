@@ -17,7 +17,6 @@
 ##
 
 import logging
-import datetime
 
 from simulator import Simulator
 
@@ -54,16 +53,14 @@ class Blender(Simulator):
             "-d",
         ])
 
-        filename = "sim_" + datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + ".qsm"
-        self.opt["save_path"] = self.dirname + "/" + filename
-
+        self.update_filename()
         if self.opt["fullscreen"]:
             self.args.extend(["-f"])
         self.args.extend([self.opt["model"]])
         self.args.extend(["-"])
         params = {'config_name': self.opt["config_name"] + "()",
                   'logfile': str(self.opt["logfile"]),
-                  'filename': str(self.opt["save_path"])}
+                  'filename': self.filename}
         self.args.extend([str(params)])
         self.args.extend(["FROM_START.PY"])
 

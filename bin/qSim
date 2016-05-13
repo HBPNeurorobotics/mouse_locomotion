@@ -80,7 +80,6 @@ class SimCli(cli.Application):
             self.opt["simulator_path"] = self.path
         self.opt["model"] = self.root + "/mdl/" + self.model
         self.opt["root_dir"] = self.root
-        self.opt["save_path"] = self.root + "/save/default.qsm"
         self.opt["config_name"] = self.config
         self.opt["sim_type"] = self.sim_type
         self.opt["registry"] = self.registry
