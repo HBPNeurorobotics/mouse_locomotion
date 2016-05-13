@@ -16,6 +16,7 @@
 # Modified by: Dimitri Rodarie
 ##
 
+
 class Optimization:
     def __init__(self, opt, population_size, stop_thresh, max_iteration):
         self.opt = opt

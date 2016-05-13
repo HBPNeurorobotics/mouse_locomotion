@@ -47,10 +47,7 @@ class Simulator:
         """This function reads the file saved in Blender at the end of the simulation to retrieve results"""
 
         # Retrieve filename
-        if "save_path" not in self.opt:
-            results = "Simulator.get_results() : Nothing to show"
-            logging.warning(results)
-        elif os.path.isfile(self.filename):
+        if os.path.isfile(self.filename):
             try:
                 f = open(self.filename, 'rb')
                 results = pickle.load(f)
