@@ -15,38 +15,30 @@
 # File created by: Gabriel Urbain <gabriel.urbain@ugent.be>. February 2016
 # Modified by: Dimitri Rodarie
 ##
-
-from simulation import Simulation
 import logging
-import sys
-from rpyc.utils.server import ThreadedServer
 
-if sys.version_info[:2] < (3, 4):
-    from connection import SimConnection
-else:
-    from simulation import SimConnection
+from simulator import *
+from rpyc import Service
 
 
-class SimService(Simulation):
-    """
-    SimService class provides a services server to listen to external requests and start a Simulator
-    simulation remotely and asynchronously.
-    Usage:
-            # Create and start SimService thread
-            s = ThreadedServer(SimService, port=18861, auto_register=True)
-            s.start()
-    """
+class SimService(Service):
+    ALIASES = ["BLENDERSIM", "BLENDER", "BLENDERPLAYER"]
+    SIMULATORS = {"BLENDER": "Blender"}
+    DEFAULT_SIMULATOR = "BLENDER"
 
-    def __init__(self, opt):
-        Simulation.__init__(self, opt)
+    def exposed_simulation(self, opt_):  # this is an exposed method
+        if type(opt_) == dict and "simulator" in opt_:
+            simulator_ = opt_["simulator"]
+            if simulator_ not in self.SIMULATORS:
+                simulator_ = self.DEFAULT_SIMULATOR
+        else:
+            simulator_ = self.DEFAULT_SIMULATOR
+        simulator_ = self.SIMULATORS[simulator_] + "(opt_)"
 
-    def start(self):
-        """Start a service server"""
-        logging.info("Start service server on address: " + str(self.ipaddr) + ":18861")
-        try:
-            t = ThreadedServer(SimConnection, port=18861, auto_register=True)
-            t.start()
-        except KeyboardInterrupt:
-            t.stop()
-            logging.warning("SINGINT caught from user keyboard interrupt")
-            sys.exit(1)
+        # Perform simulation
+        logging.info("Processing simulation request")
+        simulator_ = eval(simulator_)
+        simulator_.launch_simulation()
+        logging.info("Simulation request processed")
+
+        return simulator_.get_results()

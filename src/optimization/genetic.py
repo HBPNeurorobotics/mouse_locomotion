@@ -15,20 +15,20 @@
 # File created by: Gabriel Urbain <gabriel.urbain@ugent.be>. February 2016
 # Modified by: Dimitri Rodarie
 ##
+import time
 
 from pyevolve import *
 import logging
 from optimization import Optimization
-import simulation.manager as manager
 
 
 class Genetic(Optimization):
-    def __init__(self, opt, genome_size=10, population_size=20, num_max_generation=50, mutation_rate=0.2,
+    def __init__(self, opt, observable, genome_size=10, population_size=20, num_max_generation=50, mutation_rate=0.2,
                  cross_over_rate=0.9, genome_min=0, genome_max=1.0, interactive_mode=False, stop_num_av=10,
                  stop_thresh=0.01):
         """Creation and initialization function for the genome and the genetic algorithm. It fixes the
         parameters to use in the algorithm"""
-        Optimization.__init__(self, opt, population_size, stop_thresh, num_max_generation)
+        Optimization.__init__(self, opt, observable, population_size, stop_thresh, num_max_generation)
         # Algo parameters
         self.genome_size = genome_size
         self.mutation_rate = mutation_rate
@@ -69,9 +69,12 @@ class Genetic(Optimization):
             self.opt["genome"] = ind.getInternalList()
             sim_list.append(self.opt)
 
-        # Simulate
-        res_list = manager.run_sim(sim_list)
-        for res in res_list:
+        self.observable.run_sim(sim_list)
+        # Wait for simulation results
+        while len(self.res_list) < len(sim_list):
+            time.sleep(0.1)
+
+        for res in self.res_list:
             if "score" in res:
                 scores.append(res["score"])
             else:

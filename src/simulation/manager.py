@@ -23,11 +23,12 @@ import logging
 import time
 import rpyc
 from rpyc.utils.factory import DiscoveryError
+from observers import Observable
 
 from simulation import Simulation
 
 
-class Manager(Thread, Simulation):
+class Manager(Simulation, Observable):
     """
     Manager class provides a high level interface to distribute a large number of
     simulation requests in a variable size computation cloud using tools like asynchonous
@@ -48,6 +49,7 @@ class Manager(Thread, Simulation):
     def __init__(self, opt):
         """Create sim manager parameters and start registry server"""
         Simulation.__init__(self, opt)
+        Observable.__init__(self)
         # Simulation list stacks
         # NB: FIFO: append answer on the left and remove the right one
         self.rqt = deque([])  # Request FIFO
@@ -74,7 +76,8 @@ class Manager(Thread, Simulation):
         self.mutex_conn_list = Lock()
         self.mutex_rsp = Lock()
         self.mutex_rqt = Lock()
-        Thread.__init__(self)
+
+        self.thread = None
         logging.debug("Sim Manager initialization achieved. Number of active threads = " +
                       str(threading.active_count()))
 
@@ -145,6 +148,12 @@ class Manager(Thread, Simulation):
         self.mutex_cloud_state.release()
         return 0
 
+    def rpycCasting(self, rsp):
+        cast = rsp.value
+        if not type(rsp.value) == str:
+            cast = eval(str(cast))
+        return cast
+
     def response_sim(self, rsp):
         """Callback function called when a simulation has finished"""
 
@@ -153,10 +162,8 @@ class Manager(Thread, Simulation):
         if not rsp.error:
             # Since rpyc convert some basic types into its own
             # we have to cast back to be able to use the classical functions
-            cast = rsp.value
-            if not type(rsp.value) == str:
-                cast = eval(str(cast))
-            self.rsp.appendleft(cast)
+
+            self.rsp.appendleft(self.rpycCasting(rsp))
         else:
             logging.error('Manager.response_sim() : The server return an exception\n')
         self.mutex_rsp.release()
@@ -174,6 +181,8 @@ class Manager(Thread, Simulation):
                         logging.info("Response received from server " + str(self.cloud_state[server_hash]["address"]) +
                                      ":" + str(self.cloud_state[server_hash]["port"]) + " with " +
                                      str(self.cloud_state[server_hash]["n_threads"]) + " threads: " + str(rsp.value))
+                    kwargs = {"res": self.rpycCasting(rsp)}
+                    self.notify_observers(**kwargs)
                     self.mutex_cloud_state.acquire()
                     self.cloud_state[server_hash]["n_threads"] -= 1
                     self.mutex_cloud_state.release()
@@ -255,13 +264,18 @@ class Manager(Thread, Simulation):
         self.mng_stop = True
         time.sleep(1)
         self.sim_time = time.time() - self.t_sim_init
+        if self.thread.is_alive():
+            self.thread.join()
 
     def start(self):
         """Start a simulation manager"""
         self.t_sim_init = time.time()
         logging.info("Start sim manager server with PID " + str(self.pid))
         time.sleep(1)
-        Thread.start(self)
+        self.terminated = False
+        self.mng_stop = False
+        self.thread = Thread(target=self.run)
+        self.thread.start()
 
     def run(self):
         """Run the managing loop. Check rqt stack for simulation request. Select the candidate \
@@ -274,7 +288,6 @@ class Manager(Thread, Simulation):
         while (not self.mng_stop) or (self.rqt and self.server_dispo):
 
             if self.rqt:
-
                 # Select a candidate server
                 server_hash = self.__select_candidate()
 
@@ -340,27 +353,3 @@ class Manager(Thread, Simulation):
 
         logging.info("Simulation Manager has terminated properly!")
         self.terminated = True
-
-
-def run_sim(opt):
-    """Run a simple on shot simulation"""
-
-    # Start manager
-    manager = Manager(opt)
-    manager.start()
-    # Simulate
-    if type(opt) != list:
-        sim_list = [opt]
-    else:
-        sim_list = opt
-    res_list = manager.simulate(sim_list)
-
-    # Stop and display results
-    manager.stop()
-    time.sleep(1)
-    rs_ls = ""
-    for i in res_list:
-        rs_ls += str(i) + " "
-    logging.info("Results: " + str(rs_ls))
-    logging.info("Simulation Finished!")
-    return res_list

@@ -28,19 +28,19 @@ src = root + "/src"
 sys.path.append(src)
 
 from plumbum import cli
-from simulation import Simulation, SimService, Registry, Process
+from simulation import Simulation, SimServer, Registry, Process
 
 
 class SimCli(cli.Application):
     """This script provide a framework for quadruped locomotion driven by reservoir computing"""
 
     # Default CLI application options
-    DEF_OPT = {"simulator": "BLENDER", "simulator_path": "Blender2.77/", "model": "dog_vert.blend", "root_dir": root,
+    DEF_OPT = {"simulator": "BLENDER", "simulator_path": "/bin/Blender2.77/", "model": "dog_vert.blend",
+               "root_dir": root,
                "config_name": "DogVertDefConfig", "sim_type": "RUN", "registry": False, "service": False,
                "local": False, "logfile": os.path.expanduser("~").replace("\\", "/") + "/.log/qSim.log",
                "fullscreen": False,
                "save": False}
-    opt = dict()
 
     # Simulation parameters
     simulator = cli.SwitchAttr(["-e", "--environment"], str, default=DEF_OPT["simulator"],
@@ -73,24 +73,22 @@ class SimCli(cli.Application):
                           help="Enable fullscreen mode")
 
     def main(self):
-        self.opt["simulator"] = self.simulator
+        common_opt = {"root_dir": self.root,
+                      "verbose": self.verbose,
+                      "logfile": self.logfile}
+        opt = common_opt.copy()
+        opt["simulator"] = self.simulator
         if self.path == self.DEF_OPT["simulator_path"]:
-            self.opt["simulator_path"] = self.root + "/bin/" + self.path
+            opt["simulator_path"] = self.root + self.path
         else:
-            self.opt["simulator_path"] = self.path
-        self.opt["model"] = self.root + "/mdl/" + self.model
-        self.opt["root_dir"] = self.root
-        self.opt["config_name"] = self.config
-        self.opt["sim_type"] = self.sim_type
-        self.opt["registry"] = self.registry
-        self.opt["service"] = self.service
-        self.opt["local"] = self.local
-        self.opt["verbose"] = self.verbose
-        self.opt["logfile"] = self.logfile
-        self.opt["fullscreen"] = self.fullscreen
+            opt["simulator_path"] = self.path
+        opt["model"] = self.root + "/mdl/" + self.model
+        opt["config_name"] = self.config
+        opt["sim_type"] = self.sim_type
+        opt["fullscreen"] = self.fullscreen
 
         # Configure logging
-        log_file = self.opt["logfile"]
+        log_file = opt["logfile"]
         if not os.path.exists(os.path.dirname(log_file)):
             os.makedirs(os.path.dirname(log_file))
         if not os.path.exists(log_file):
@@ -106,15 +104,15 @@ class SimCli(cli.Application):
                                                 'simLevel': "INFO"})
 
         # Start a local simulation
-        if self.opt["local"]:
-            s = Simulation(self.opt)
-        elif self.opt["registry"]:
-            s = Registry(self.opt)
-        elif self.opt["service"]:
-            s = SimService(self.opt)
+        if self.local:
+            s = Simulation(opt)
+        elif self.registry:
+            s = Registry(common_opt)
+        elif self.service:
+            s = SimServer(common_opt)
         # Else, start chosen simulation
         else:
-            s = Process(self.opt)
+            s = Process(opt)
         s.start()
 
 

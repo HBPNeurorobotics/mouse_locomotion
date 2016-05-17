@@ -18,35 +18,33 @@
 
 import logging
 import time
-
-from simulation import Simulation
-from optimization import Genetic
 import sys
+from optimization import Genetic
 
 if sys.version_info[:2] < (3, 4):
-    import manager as manager
+    from manager import Manager
 else:
-    from simulation import manager
+    from simulation import Manager
 
 
-class Process(Simulation):
+class Process(Manager):
     def __init__(self, opt):
-        Simulation.__init__(self, opt)
+        Manager.__init__(self, opt)
 
     def start(self):
         if "sim_type" not in self.opt:
-            manager.run_sim(self.opt)
+            self.run_sim(self.opt)
         elif self.opt["sim_type"] == "BRAIN":
             self.brain_opti_sim()
         elif self.opt["sim_type"] == "MUSCLE":
             self.brain_opti_sim()
         else:
-            manager.run_sim(self.opt)
+            self.run_sim(self.opt)
 
     def brain_opti_sim(self):
         """Run an iterative simulation to optimize the muscles parameters"""
         # Create genetic algorithm
-        genetic = Genetic(self.opt)
+        genetic = Genetic(self.opt, self)
 
         # Run genetic algorithm until convergence or max iteration reached
         genetic.ga.evolve(freq_stats=10)
@@ -60,3 +58,22 @@ class Process(Simulation):
         """Run an iterative simulation to optimize the muscles parameters"""
 
         logging.error("This simulation is not implemented yet! Exiting...")
+
+    def run_sim(self, sim_list):
+        """Run a simple on shot simulation"""
+
+        # Start manager
+        Manager.start(self)
+        # Simulate
+        if type(sim_list) != list:
+            sim_list = [sim_list]
+        res_list = self.simulate(sim_list)
+
+        # Stop and display results
+        self.stop()
+        time.sleep(1)
+        rs_ls = ""
+        for i in res_list:
+            rs_ls += str(i) + " "
+        logging.info("Results: " + str(rs_ls))
+        logging.info("Simulation Finished!")
