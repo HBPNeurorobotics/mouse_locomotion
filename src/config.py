@@ -17,6 +17,7 @@
 
 import logging
 
+
 class Config:
     """Describe the configuration file to pass as an argument to a given simulation"""
 
@@ -31,6 +32,7 @@ class Config:
         self.exit_condition = "owner['n_iter'] > 500"
         self.timeout = 10
         self.save_path = "default"
+        self.simulator = "Simulator"
 
         # Physical parameters
         self.muscle_type = "DampedSpringReducedTorqueMuscle"
@@ -259,7 +261,7 @@ class DogVertDefConfig(Config):
                  "c": 200, "kc": 0, "kl0": 0.85}
         body_muscles = [neck1, neck2, vert1_u, vert1_d, vert2_u, vert2_d, vert3_u, vert3_d, vert4_u, vert4_d,
                         vert5_u, vert5_d, vert6_u, vert6_d, abdos]
-        self.body = {"name": "Doggy Vertebrate", "obj" : "obj_body", "muscles": body_muscles}
+        self.body = {"name": "Doggy Vertebrate", "obj": "obj_body", "muscles": body_muscles}
 
 
 class MouseDefConfig(Config):

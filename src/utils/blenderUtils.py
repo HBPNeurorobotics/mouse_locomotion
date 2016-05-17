@@ -15,6 +15,13 @@
 ##
 
 
-class Observer:
-    def update(self, **kwargs):
-        pass
+import bge
+from utils import SimulatorUtils
+
+
+class BlenderUtils(SimulatorUtils):
+    def get_time_scale(self):
+        return bge.logic.getLogicTicRate()
+
+    def draw_line(self, point1, point2, color):
+        bge.render.drawLine(point1, point2, color)

@@ -19,16 +19,17 @@ import logging
 import math
 from mathutils import Vector as vec
 
-import bge
 import numpy as np
+from utils import *
 
 
 class Muscle:
-    def __init__(self, scene_, params_):
+    def __init__(self, scene_, params_, simulator):
         """Class initialization"""
         self.n_iter = 0
         self.scene = scene_
         self.params = params_
+        self.simulator = eval(simulator + "Utils()")
         self.name = self.params["name"]
         self.active = True
 
@@ -71,8 +72,7 @@ class Muscle:
 
     def draw_muscle(self, color_=[256, 0, 0]):
         """Draw a line to represent the muscle in the blender simulation"""
-
-        bge.render.drawLine(self.app_point_1_world, self.app_point_2_world, color_)
+        self.simulator.draw_line(self.app_point_1_world, self.app_point_2_world, color_)
 
     def update(self, **kwargs):
         # Here, we update the muscle forces given geometry and control signal
@@ -82,11 +82,11 @@ class Muscle:
 class HillMuscle(Muscle):
     """This class implements Hill Model for muscle force """
 
-    def __init__(self, scene_, params_):
+    def __init__(self, scene_, params_, simulator):
         """Class initialization. Parameters can be found in D.F.B. Haeufle, M. Günther, A. Bayer, S. Schmitt (2014) \
         Hill-type muscle model with serial damping and eccentric force-velocity relation. Journal of Biomechanics"""
 
-        Muscle.__init__(self, scene_, params_)
+        Muscle.__init__(self, scene_, params_, simulator)
 
         # Contractile Element (CE)
         self.CE_F_max = 1420  # F_max in [N] for Extensor (Kistemaker et al., 2006)
@@ -244,10 +244,10 @@ class HillMuscle(Muscle):
 class DampedSpringMuscle(Muscle):
     """This class implements a simple muscle composed by a spring and a damping in parallel"""
 
-    def __init__(self, scene_, params_):
+    def __init__(self, scene_, params_, simulator):
         """Class initialization. Requires scene, controller as well as two object and the local point of application \
         of the spring forces"""
-        Muscle.__init__(self, scene_, params_)
+        Muscle.__init__(self, scene_, params_, simulator)
 
         # Model constants and variables
         self.k = self.params["k"]  # scalar in N/m??
@@ -318,7 +318,7 @@ class DampedSpringMuscle(Muscle):
 
             # compute total force
             self.force = force_s + force_d
-            impulse = self.force / bge.logic.getLogicTicRate()
+            impulse = self.force / self.simulator.get_time_scale()
 
             # apply impulse on an object point only in traction
             f_type = "Push"
@@ -343,18 +343,16 @@ class DampedSpringMuscle(Muscle):
             self.logger.warning("Muscle " + self.name + " has been deactivated.")
 
 
-
-
 class DampedSpringReducedTorqueMuscle(Muscle):
     """This class implements a simple muscle composed by a spring and a damper in parallel.\
     Forces and torques applied in the center of gravity are computed separately and a reduction\
     factor is added to torque to stabilise the process"""
 
-    def __init__(self, scene_, params_):
+    def __init__(self, scene_, params_, simulator):
         """Class initialization. Requires scene, controller as well as two object and the local point of application \
         of the spring forces"""
 
-        Muscle.__init__(self, scene_, params_)
+        Muscle.__init__(self, scene_, params_, simulator)
         # Model constants and variables
         if "k" in self.params:
             self.k = self.params["k"]  # scalar in N/m
@@ -457,11 +455,11 @@ class SimpleMuscle(Muscle):
     """This class implements a simple muscle which only apply torque on joints without
     taking care of anything else."""
 
-    def __init__(self, scene_, params_):
+    def __init__(self, scene_, params_, simulator):
         """Class initialization. Requires scene, controller as well as two object and the local point of application \
         of the spring forces"""
 
-        Muscle.__init__(self, scene_, params_)
+        Muscle.__init__(self, scene_, params_, simulator)
         # Model constants and variables
 
         if "maxF" not in self.params:

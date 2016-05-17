@@ -14,11 +14,6 @@
 # Modified by: Dimitri Rodarie
 ##
 
-
-import math
-import logging
-from mathutils import Vector as vec
-
 from brain import Brain
 from muscle import *
 
@@ -37,7 +32,7 @@ class Leg:
         # Create the muscles objects
         self.muscles = []
         self.brain_sig = []
-        self.muscle_type = self.config.muscle_type + "(self.scene, muscle_config)"
+        self.muscle_type = self.config.muscle_type + "(self.scene, muscle_config, self.config.simulator)"
 
     def get_power(self):
         """Return the time-step power developped by all the leg muscles"""
@@ -88,7 +83,7 @@ class Backleg(Leg):
 
         self.n_iter += 1
         self.logger.debug("Backleg " + self.orien + " iteration " + str(self.n_iter) + ": Control signal = " +
-            str(self.brain_sig))
+                          str(self.brain_sig))
 
 
 class Foreleg(Leg):
@@ -124,7 +119,7 @@ class Foreleg(Leg):
 
         self.n_iter += 1
         self.logger.debug("Foreleg " + self.orien + " iteration " + str(self.n_iter) + ": Control signal = " +
-            str(self.brain_sig))
+                          str(self.brain_sig))
 
 
 class Body:
@@ -137,7 +132,7 @@ class Body:
         self.scene = scene_
         self.config = config_
         self.logger = config_.logger
-        self.muscle_type = self.config.muscle_type + "(self.scene, muscle_config)"
+        self.muscle_type = self.config.muscle_type + "(self.scene, muscle_config, self.config.simulator)"
         self.name = self.config.body["name"]
 
         # Get body object

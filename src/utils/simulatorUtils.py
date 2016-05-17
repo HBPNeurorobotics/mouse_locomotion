@@ -15,6 +15,9 @@
 ##
 
 
-class Observer:
-    def update(self, **kwargs):
+class SimulatorUtils:
+    def get_time_scale(self):
+        pass
+
+    def draw_line(self, point1, point2, color):
         pass

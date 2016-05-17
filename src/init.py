@@ -62,12 +62,12 @@ if not os.path.exists(LOG_FILE):
     f = open(LOG_FILE, 'w')
     f.close()
 
-configuration = eval(CONFIG_NAME)
 logging.config.fileConfig(root + "/etc/logging.conf",
                           defaults={'logfilename': LOG_FILE, 'simLevel': "DEBUG"})
-logger = logging.getLogger(configuration.logger_name)
-configuration.logger = logger
+configuration = eval(CONFIG_NAME)
+logger = configuration.logger
 configuration.save_path = SAVE_NAME
+configuration.simulator = "Blender"
 
 owner["config"] = configuration
 owner["cheesy"] = Body(scene, configuration)
