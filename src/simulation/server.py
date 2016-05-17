@@ -33,7 +33,7 @@ class SimServer(Simulation):
     simulation remotely and asynchronously.
     Usage:
             # Create and start SimService thread
-            s = ThreadedServer(SimService, port=18861, auto_register=True)
+            s = ThreadedServer(SimService, auto_register=True)
             s.start()
     """
 
@@ -42,9 +42,9 @@ class SimServer(Simulation):
 
     def start(self):
         """Start a service server"""
-        logging.info("Start service server on address: " + str(self.ipaddr) + ":18861")
         try:
-            t = ThreadedServer(SimService, port=18861, auto_register=True)
+            t = ThreadedServer(SimService, auto_register=True)
+            logging.info("Start service server on address: " + str(self.ipaddr) + ":" + str(t.port))
             t.start()
         except KeyboardInterrupt:
             t.stop()
