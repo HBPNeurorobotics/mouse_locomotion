@@ -29,6 +29,7 @@ sys.path.append(src)
 
 from body import *
 from config import *
+from utils import BlenderUtils
 
 
 # Get BGE handles
@@ -67,10 +68,9 @@ logging.config.fileConfig(root + "/etc/logging.conf",
 configuration = eval(CONFIG_NAME)
 logger = configuration.logger
 configuration.save_path = SAVE_NAME
-configuration.simulator = "Blender"
 
 owner["config"] = configuration
-owner["cheesy"] = Body(scene, configuration)
+owner["cheesy"] = Body(configuration, BlenderUtils(scene))
 
 # Advertise simulation has begun
 logger.info("####################################")

@@ -22,10 +22,8 @@ import numpy as np
 class Matsuoka:
     """This class represents the mouse brain and its current behaviour in the control process"""
 
-    def __init__(self, scene_, config_):
+    def __init__(self, config_):
         """Class initialization"""
-
-        self.scene = scene_
         self.config = config_
         self.h = self.config.brain["h"]
         self.tau = self.config.brain["tau"]
@@ -58,16 +56,15 @@ class Matsuoka:
 class Brain:
     """This class represents the mouse brain and its current behaviour in the control process"""
 
-    def __init__(self, scene_, config_):
+    def __init__(self, config_):
         """Class initialization"""
 
         self.n_iter = 0
-        self.scene = scene_
         self.config = config_
         self.logger = config_.logger
         self.name = self.config.brain["name"]
         self.n_osc = self.config.brain["n_osc"]
-        self.osc = Matsuoka(self.scene, self.config)
+        self.osc = Matsuoka(self.config)
         self.state = np.zeros((self.n_osc, 1))
 
     def update(self):

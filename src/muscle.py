@@ -24,30 +24,28 @@ from utils import *
 
 
 class Muscle:
-    def __init__(self, scene_, params_, simulator):
+    def __init__(self, params_, simulator):
         """Class initialization"""
         self.n_iter = 0
-        self.scene = scene_
         self.params = params_
-        self.simulator = eval(simulator + "Utils()")
+        self.simulator = simulator
         self.name = self.params["name"]
         self.active = True
 
         self.logger = logging.getLogger(params_["logger"])
 
         # Check if object exists
-        if not self.params["obj_1"] in self.scene.objects:
+        self.obj1 = self.simulator.get_object(self.params["obj_1"])
+        if self.obj1 is None:
             self.logger.error("Muscle " + self.name + " deactivated: first extremity object doesn't exit." +
                               " Check your configuration file!")
             self.active = False
-        else:
-            self.obj1 = self.scene.objects[self.params["obj_1"]]
-        if not self.params["obj_2"] in self.scene.objects:
+
+        self.obj2 = self.simulator.get_object(self.params["obj_2"])
+        if self.obj2 is None:
             self.logger.error("Muscle " + self.name + " deactivated: second extremity object doesn't exit." +
                               " Check your configuration file!")
             self.active = False
-        else:
-            self.obj2 = self.scene.objects[self.params["obj_2"]]
 
         # Points of application in local coordinates
         if self.params["anch_1"] is None:
@@ -82,11 +80,11 @@ class Muscle:
 class HillMuscle(Muscle):
     """This class implements Hill Model for muscle force """
 
-    def __init__(self, scene_, params_, simulator):
+    def __init__(self, params_, simulator):
         """Class initialization. Parameters can be found in D.F.B. Haeufle, M. Günther, A. Bayer, S. Schmitt (2014) \
         Hill-type muscle model with serial damping and eccentric force-velocity relation. Journal of Biomechanics"""
 
-        Muscle.__init__(self, scene_, params_, simulator)
+        Muscle.__init__(self, params_, simulator)
 
         # Contractile Element (CE)
         self.CE_F_max = 1420  # F_max in [N] for Extensor (Kistemaker et al., 2006)
@@ -244,10 +242,10 @@ class HillMuscle(Muscle):
 class DampedSpringMuscle(Muscle):
     """This class implements a simple muscle composed by a spring and a damping in parallel"""
 
-    def __init__(self, scene_, params_, simulator):
-        """Class initialization. Requires scene, controller as well as two object and the local point of application \
+    def __init__(self, params_, simulator):
+        """Class initialization. Requires controller as well as two object and the local point of application \
         of the spring forces"""
-        Muscle.__init__(self, scene_, params_, simulator)
+        Muscle.__init__(self, params_, simulator)
 
         # Model constants and variables
         self.k = self.params["k"]  # scalar in N/m??
@@ -256,27 +254,27 @@ class DampedSpringMuscle(Muscle):
         self.ctrl_sig = None
         if self.active:
             self.l = self.app_point_2_world - self.app_point_1_world  # global coordinate vector between app points in m
-            self.v_1 = self.obj1.getVelocity(self.app_point_1) # vector in m/s??
-            self.v_2 = self.obj2.getVelocity(self.app_point_2) # vector in m/s??
-            v = self.v_2 - self.v_1 # vector in m/s??
+            self.v_1 = self.obj1.getVelocity(self.app_point_1)  # vector in m/s??
+            self.v_2 = self.obj2.getVelocity(self.app_point_2)  # vector in m/s??
+            v = self.v_2 - self.v_1  # vector in m/s??
             self.v_norm = v.dot(self.l.normalized()) * self.l.normalized()  # normal velocity vector in m/s??
             self.l0 = self.params["kl0"] * self.l.length  # scalar in m??
             self.l_cont = self.l0  # scalar in m??
-            self.force = vec((0, 0, 0)) # vector in N??
+            self.force = vec((0, 0, 0))  # vector in N??
 
     def get_power(self):
         """Return the time-step power developped by the muscle on the two extremity objects"""
 
         power = 0.0
-        if self.ctrl_sig != 0.0:# and float((self.force * self.l.normalized())) < 0.0:
+        if self.ctrl_sig != 0.0:  # and float((self.force * self.l.normalized())) < 0.0:
             power_1 = - self.force * self.v_1
             power_2 = self.force * self.v_2
             power = power_2 + power_1
 
-            self.logger.debug("v_1 = " + str(self.v_1.length) + " m/s; v_2 = " + str(self.v_2.length) + \
-                " m/s; F = " + str(self.force.length) + " N")
-            self.logger.debug("power obj1 = " + str(power_1) + " ; power obj2 = " + str(power_2) + \
-                " ; power tot = " + str(power))
+            self.logger.debug("v_1 = " + str(self.v_1.length) + " m/s; v_2 = " + str(self.v_2.length) +
+                              " m/s; F = " + str(self.force.length) + " N")
+            self.logger.debug("power obj1 = " + str(power_1) + " ; power obj2 = " + str(power_2) +
+                              " ; power tot = " + str(power))
 
         return power
 
@@ -331,13 +329,13 @@ class DampedSpringMuscle(Muscle):
             self.draw_muscle()
             self.n_iter += 1
 
-            #self.logger.debug("Muscle " + self.name + ":" + str(self.n_iter) + ": Ft = " + str(
+            # self.logger.debug("Muscle " + self.name + ":" + str(self.n_iter) + ": Ft = " + str(
             #    self.force) + " - " + str(self.force * self.l.normalized()) + "N")
-            #self.logger.debug("  Type = " + f_type)
-            #self.logger.debug("  Fs = " + str(force_s) + " ;  Fd = " + str(force_d))
-            #self.logger.debug("  l = " + str(self.l) + " ; l0 = " + str(self.l0))
-            #self.logger.debug("  L P1 = " + str(self.app_point_1) + " ; L P2 = " + str(self.app_point_2))
-            #self.logger.debug("  G P1 = " + str(self.app_point_1_world) + " ; G P2 = " + str(self.app_point_2_world))
+            # self.logger.debug("  Type = " + f_type)
+            # self.logger.debug("  Fs = " + str(force_s) + " ;  Fd = " + str(force_d))
+            # self.logger.debug("  l = " + str(self.l) + " ; l0 = " + str(self.l0))
+            # self.logger.debug("  L P1 = " + str(self.app_point_1) + " ; L P2 = " + str(self.app_point_2))
+            # self.logger.debug("  G P1 = " + str(self.app_point_1_world) + " ; G P2 = " + str(self.app_point_2_world))
 
         else:
             self.logger.warning("Muscle " + self.name + " has been deactivated.")
@@ -348,11 +346,11 @@ class DampedSpringReducedTorqueMuscle(Muscle):
     Forces and torques applied in the center of gravity are computed separately and a reduction\
     factor is added to torque to stabilise the process"""
 
-    def __init__(self, scene_, params_, simulator):
+    def __init__(self, params_, simulator):
         """Class initialization. Requires scene, controller as well as two object and the local point of application \
         of the spring forces"""
 
-        Muscle.__init__(self, scene_, params_, simulator)
+        Muscle.__init__(self, params_, simulator)
         # Model constants and variables
         if "k" in self.params:
             self.k = self.params["k"]  # scalar in N/m
@@ -390,7 +388,7 @@ class DampedSpringReducedTorqueMuscle(Muscle):
         # If muscle has not been deactivated
         if self.active:
             # get control length
-            if ctrl_sig == None:
+            if ctrl_sig is None:
                 self.l_cont = self.l0  # by default, control length is the spring reference length
             else:
                 self.l_cont = self.l0 * (1 + self.k_cont * ctrl_sig)
@@ -455,11 +453,11 @@ class SimpleMuscle(Muscle):
     """This class implements a simple muscle which only apply torque on joints without
     taking care of anything else."""
 
-    def __init__(self, scene_, params_, simulator):
+    def __init__(self, params_, simulator):
         """Class initialization. Requires scene, controller as well as two object and the local point of application \
         of the spring forces"""
 
-        Muscle.__init__(self, scene_, params_, simulator)
+        Muscle.__init__(self, params_, simulator)
         # Model constants and variables
 
         if "maxF" not in self.params:
@@ -470,11 +468,12 @@ class SimpleMuscle(Muscle):
             self.maxF = self.params["maxF"]
         self.orientation = np.array([1.0, 0.0, 0.0])
 
-    def newref(self, vec, mat):
+    @staticmethod
+    def newref(vec_, mat):
         return [
-            vec[0] * mat[0][0] + vec[1] * mat[0][1] + vec[2] * mat[0][2],
-            vec[0] * mat[1][0] + vec[1] * mat[1][1] + vec[2] * mat[1][2],
-            vec[0] * mat[2][0] + vec[1] * mat[2][1] + vec[2] * mat[2][2]
+            vec_[0] * mat[0][0] + vec_[1] * mat[0][1] + vec_[2] * mat[0][2],
+            vec_[0] * mat[1][0] + vec_[1] * mat[1][1] + vec_[2] * mat[1][2],
+            vec_[0] * mat[2][0] + vec_[1] * mat[2][1] + vec_[2] * mat[2][2]
         ]
 
     def update(self, **kwargs):

@@ -18,24 +18,33 @@ from brain import Brain
 from muscle import *
 
 
-class Leg:
-    """This class represents a generic leg and its current behaviour in the control process"""
-
-    def __init__(self, scene_, config_):
+class Part:
+    def __init__(self, config_, simulator, name):
         """Class initialization"""
-
         self.n_iter = 0
-        self.scene = scene_
-        self.config = config_
-        self.logger = config_.logger
-
+        self.logger = config_["logger"]
+        self.simulator = simulator
         # Create the muscles objects
         self.muscles = []
+        self.muscle_type = config_["muscle_type"] + "(muscle_config, self.simulator)"
+        self.name = name
+
+
+class Leg(Part):
+    """This class represents a generic leg and its current behaviour in the control process"""
+
+    def __init__(self, config_, orien_, simulator, name):
+        """Class initialization"""
+        Part.__init__(self, config_, simulator, name)
+        self.orien = orien_
+        # Create the muscles objects
         self.brain_sig = []
-        self.muscle_type = self.config.muscle_type + "(self.scene, muscle_config, self.config.simulator)"
+        for muscle_config in config_["muscles"]:
+            self.muscles.append(eval(self.muscle_type))
+            self.brain_sig.append(muscle_config["brain_sig"])
 
     def get_power(self):
-        """Return the time-step power developped by all the leg muscles"""
+        """Return the time-step power developed by all the leg muscles"""
 
         power = 0
         for m in self.muscles:
@@ -45,102 +54,63 @@ class Leg:
 
     def update(self, ctrl_sig_):
         """Update control signals and forces"""
+        for i in range(len(self.muscles)):
+            if self.brain_sig[i] is None:
+                ctrl_sig = 0
+            else:
+                ctrl_sig = ctrl_sig_[self.brain_sig[i]]
+            self.muscles[i].update(ctrl_sig=ctrl_sig)
 
         self.n_iter += 1
-        self.logger.debug("Leg iteration: " + str(self.n_iter))
+        self.logger.debug(self.name + " " + self.orien + " iteration " + str(self.n_iter) + ": Control signal = " +
+                          str(self.brain_sig))
 
 
 class Backleg(Leg):
     """This class represents a generic backleg and its current behaviour in the control process"""
 
-    def __init__(self, scene_, config_, orien_):
+    def __init__(self, config_, orien_, simulator):
         """Class initialization"""
-
-        Leg.__init__(self, scene_, config_)
-        self.orien = orien_
-
-        # Create the muscles objects following config
-        self.muscles = []
-        self.brain_sig = []
-        if self.orien == "L":
-            for muscle_config in self.config.back_leg_L_muscles:
-                self.muscles.append(eval(self.muscle_type))
-                self.brain_sig.append(muscle_config["brain_sig"])
-        else:  # R
-            for muscle_config in self.config.back_leg_R_muscles:
-                self.muscles.append(eval(self.muscle_type))
-                self.brain_sig.append(muscle_config["brain_sig"])
-
-    def update(self, ctrl_sig_):
-        """Update control signals and forces"""
-
-        for i in range(len(self.muscles)):
-            if self.brain_sig[i] is None:
-                ctrl_sig = 0
-            else:
-                ctrl_sig = ctrl_sig_[self.brain_sig[i]]
-            self.muscles[i].update(ctrl_sig=ctrl_sig)
-
-        self.n_iter += 1
-        self.logger.debug("Backleg " + self.orien + " iteration " + str(self.n_iter) + ": Control signal = " +
-                          str(self.brain_sig))
+        config = {"logger": config_.logger,
+                  "muscle_type": config_.muscle_type}
+        if orien_ == "L":
+            config["muscles"] = config_.back_leg_L_muscles
+        else:
+            config["muscles"] = config_.back_leg_R_muscles
+        Leg.__init__(self, config, orien_, simulator, type(self).__name__)
 
 
 class Foreleg(Leg):
     """This class represents a generic foreleg and its current behaviour in the control process"""
 
-    def __init__(self, scene_, config_, orien_):
+    def __init__(self, config_, orien_, simulator):
         """Class initialization"""
-
-        Leg.__init__(self, scene_, config_)
-        self.orien = orien_
+        config = {"logger": config_.logger,
+                  "muscle_type": config_.muscle_type}
+        if orien_ == "L":
+            config["muscles"] = config_.front_leg_L_muscles
+        else:
+            config["muscles"] = config_.front_leg_R_muscles
+        Leg.__init__(self, config, orien_, simulator, type(self).__name__)
 
         # Create the muscles objects following config
-        self.muscles = []
-        self.brain_sig = []
-        if self.orien == "L":
-            for muscle_config in self.config.front_leg_L_muscles:
-                self.muscles.append(eval(self.muscle_type))
-                self.brain_sig.append(muscle_config["brain_sig"])
-        else:  # R
-            for muscle_config in self.config.front_leg_R_muscles:
-                self.muscles.append(eval(self.muscle_type))
-                self.brain_sig.append(muscle_config["brain_sig"])
-
-    def update(self, ctrl_sig_):
-        """Update control signals and forces"""
-
-        for i in range(len(self.muscles)):
-            if self.brain_sig[i] is None:
-                ctrl_sig = 0
-            else:
-                ctrl_sig = ctrl_sig_[self.brain_sig[i]]
-            self.muscles[i].update(ctrl_sig=ctrl_sig)
-
-        self.n_iter += 1
-        self.logger.debug("Foreleg " + self.orien + " iteration " + str(self.n_iter) + ": Control signal = " +
-                          str(self.brain_sig))
 
 
-class Body:
+class Body(Part):
     """This class represents the mouse body and its current behaviour in the control process"""
 
-    def __init__(self, scene_, config_):
+    def __init__(self, config_, simulator):
         """Class initialization"""
-
-        self.n_iter = 0
-        self.scene = scene_
-        self.config = config_
-        self.logger = config_.logger
-        self.muscle_type = self.config.muscle_type + "(self.scene, muscle_config, self.config.simulator)"
-        self.name = self.config.body["name"]
+        Part.__init__(self,
+                      {"logger": config_.logger, "muscle_type": config_.muscle_type},
+                      simulator,
+                      config_.body["name"])
 
         # Get body object
-        if not self.config.body["obj"] in self.scene.objects:
+        self.body_obj = self.simulator.get_object(config_.body["obj"])
+        if self.body_obj is None:
             self.logger.error("Body " + self.name + " doesn't exit. Check your configuration file!")
             self.active = False
-        else:
-            self.body_obj = self.scene.objects[self.config.body["obj"]]
 
         # Create and init variables for loss function
         self.origin = self.body_obj.worldTransform * vec((0, 0, 0))
@@ -151,17 +121,16 @@ class Body:
         self.loss_fct = 0.0
 
         # Create 4 legs
-        self.l_fo_leg = Foreleg(scene_, config_, "L")
-        self.r_fo_leg = Foreleg(scene_, config_, "R")
-        self.l_ba_leg = Backleg(scene_, config_, "L")
-        self.r_ba_leg = Backleg(scene_, config_, "R")
+        self.l_fo_leg = Foreleg(config_, "L", simulator)
+        self.r_fo_leg = Foreleg(config_, "R", simulator)
+        self.l_ba_leg = Backleg(config_, "L", simulator)
+        self.r_ba_leg = Backleg(config_, "R", simulator)
 
         # Create the brain object
-        self.brain = Brain(scene_, config_)
+        self.brain = Brain(config_)
 
         # Create the muscles objects following config
-        self.muscles = []
-        for muscle_config in self.config.body["muscles"]:
+        for muscle_config in config_.body["muscles"]:
             self.muscles.append(eval(self.muscle_type))
 
     def compute_traveled_dist(self):

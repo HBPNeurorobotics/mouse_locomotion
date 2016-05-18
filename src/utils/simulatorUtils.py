@@ -21,3 +21,9 @@ class SimulatorUtils:
 
     def draw_line(self, point1, point2, color):
         pass
+
+    def exists_Object(self, name):
+        pass
+
+    def get_object(self, name):
+        pass
