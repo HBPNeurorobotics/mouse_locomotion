@@ -55,13 +55,15 @@ class Genetic(Optimization):
         self.ga.setPopulationSize(self.population_size)
         self.ga.setCrossoverRate(self.cross_over_rate)
         self.ga.setInteractiveMode(self.interactive_mode)
-        self.ga.terminationCriteria.set(self.__conv_fct)
-        self.ga.setEvaluator(self.__eval_fct)
+        self.ga.terminationCriteria.set(self.conv_fct)
+        self.ga.setEvaluator(self.eval_fct)
 
-    def __eval_fct(self, population):
+    def eval_fct(self, population):
         """Evaluation function of the genetic algorithm. For each population, it computes the
         score of every genomes and directly write it"""
-
+        super_score = Optimization.eval_fct(self, population)
+        if super_score is not None:
+            return super_score
         scores = []
         # Create a config for the genome
         sim_list = []
@@ -71,7 +73,7 @@ class Genetic(Optimization):
 
         self.observable.run_sim(sim_list)
         # Wait for simulation results
-        while len(self.res_list) < len(sim_list):
+        while len(self.res_list) < len(sim_list) and not self.interruption:
             time.sleep(0.1)
 
         for res in self.res_list:
@@ -83,15 +85,19 @@ class Genetic(Optimization):
         # Update the score of each specimen
         i = 0
         for ind in population.internalPop:
-            ind.setRawScore(scores[i])
+            if i < len(scores):
+                ind.setRawScore(scores[i])
+            else:
+                ind.setRawScore(0)
             i += 1
         # Return the population score result
         return sum(scores)
 
-    def __conv_fct(self, ga):
+    def conv_fct(self, ga):
         """Convergence function of the genetic algorithm. It is called at each iteration step and
         return True of False depending on a convergence criteria"""
-
+        if Optimization.conv_fct(self, ga):
+            return True
         # Get the best specimens
         pop = ga.getPopulation()
         bi = pop.bestFitness()

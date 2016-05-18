@@ -136,15 +136,9 @@ class Manager(Simulation, Observable):
         # We select an available server on the cloud_state list minimizing thread numbers
         self.mutex_cloud_state.acquire()
         for key in self.cloud_state:
-            if self.cloud_state[key]["n_threads"] == 0:
+            if 0 <= self.cloud_state[key]["n_threads"] < 2:
                 self.mutex_cloud_state.release()
                 return key
-
-        for key in self.cloud_state:
-            if self.cloud_state[key]["n_threads"] == 1:
-                self.mutex_cloud_state.release()
-                return key
-
         self.mutex_cloud_state.release()
         return 0
 
@@ -231,6 +225,8 @@ class Manager(Simulation, Observable):
                 except KeyboardInterrupt:
                     logging.warning("Simulation interrupted by user! Please clean up " +
                                     "remote computers.")
+                    kwargs = {"interruption": True}
+                    self.notify_observers(**kwargs)
                     self.stop()
                     to_init = time.time()
                     self.interrupted = True
