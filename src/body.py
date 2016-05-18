@@ -18,6 +18,7 @@
 import math
 import logging
 from mathutils import Vector as vec
+import sys
 
 from brain import Brain
 from muscle import *
@@ -36,7 +37,7 @@ class Leg:
 
         # Create the muscles objects
         self.muscles = []
-        self.brain_sig = []
+        self.connection_matrix = self.config.connection_matrix
         self.muscle_type = self.config.muscle_type + "(self.scene, muscle_config)"
 
     def get_power(self):
@@ -65,30 +66,36 @@ class Backleg(Leg):
         self.orien = orien_
 
         # Create the muscles objects following config
-        self.muscles = []
-        self.brain_sig = []
         if self.orien == "L":
             for muscle_config in self.config.back_leg_L_muscles:
                 self.muscles.append(eval(self.muscle_type))
-                self.brain_sig.append(muscle_config["brain_sig"])
         else:  # R
             for muscle_config in self.config.back_leg_R_muscles:
                 self.muscles.append(eval(self.muscle_type))
-                self.brain_sig.append(muscle_config["brain_sig"])
 
-    def update(self, ctrl_sig_):
+    def update(self, brain_output):
         """Update control signals and forces"""
 
+        # Update each muscle separately
         for i in range(len(self.muscles)):
-            if self.brain_sig[i] is None:
-                ctrl_sig = 0
+            # Assertion
+            if len(self.connection_matrix[self.muscles[i].name]) != len(brain_output):
+                self.logger.error("The brain outputs number (" + len(brain_output) + 
+                    ") should match the number in the connection matrix (" +
+                    len(self.connection_matrix[self.muscles[i].name]) + "). Please verify config!") 
+            # Send linear combination of brain outputs
             else:
-                ctrl_sig = ctrl_sig_[self.brain_sig[i]]
-            self.muscles[i].update(ctrl_sig=ctrl_sig)
+                ctrl_sig = 0
+                j = 0
+                for output in brain_output:
+                    ctrl_sig += self.connection_matrix[self.muscles[i].name][j] * output
+                    j += 1
+                    
+                self.muscles[i].update(ctrl_sig=ctrl_sig)
 
-        self.n_iter += 1
-        self.logger.debug("Backleg " + self.orien + " iteration " + str(self.n_iter) + ": Control signal = " +
-            str(self.brain_sig))
+                self.n_iter += 1
+                self.logger.debug("Backleg " + self.orien + " iteration " + str(self.n_iter) + ": Control signal = " +
+                    str(ctrl_sig))
 
 
 class Foreleg(Leg):
@@ -101,30 +108,36 @@ class Foreleg(Leg):
         self.orien = orien_
 
         # Create the muscles objects following config
-        self.muscles = []
-        self.brain_sig = []
         if self.orien == "L":
             for muscle_config in self.config.front_leg_L_muscles:
                 self.muscles.append(eval(self.muscle_type))
-                self.brain_sig.append(muscle_config["brain_sig"])
         else:  # R
             for muscle_config in self.config.front_leg_R_muscles:
                 self.muscles.append(eval(self.muscle_type))
-                self.brain_sig.append(muscle_config["brain_sig"])
 
-    def update(self, ctrl_sig_):
+    def update(self, brain_output):
         """Update control signals and forces"""
 
+        # Update each muscle separately
         for i in range(len(self.muscles)):
-            if self.brain_sig[i] is None:
-                ctrl_sig = 0
+            # Assertion
+            if len(self.connection_matrix[self.muscles[i].name]) != len(brain_output):
+                self.logger.error("The brain outputs number (" + len(brain_output) + 
+                    ") should match the number in the connection matrix (" +
+                    len(self.connection_matrix[self.muscles[i].name]) + "). Please verify config!") 
+            # Send linear combination of brain outputs
             else:
-                ctrl_sig = ctrl_sig_[self.brain_sig[i]]
-            self.muscles[i].update(ctrl_sig=ctrl_sig)
+                ctrl_sig = 0
+                j = 0
+                for output in brain_output:
+                    ctrl_sig += self.connection_matrix[self.muscles[i].name][j] * output
+                    j += 1
 
-        self.n_iter += 1
-        self.logger.debug("Foreleg " + self.orien + " iteration " + str(self.n_iter) + ": Control signal = " +
-            str(self.brain_sig))
+                self.muscles[i].update(ctrl_sig=ctrl_sig)
+
+                self.n_iter += 1
+                self.logger.debug("Foreleg " + self.orien + " iteration " + str(self.n_iter) + ": Control signal = " +
+                  str(ctrl_sig))
 
 
 class Body:
@@ -217,14 +230,14 @@ class Body:
 
         # Update brain
         self.brain.update()
-        ctrl_sig = [float(self.brain.state[0]), float(self.brain.state[1]), float(self.brain.state[2]),
+        brain_output = [float(self.brain.state[0]), float(self.brain.state[1]), float(self.brain.state[2]),
                     float(self.brain.state[3])]
 
-        # Update the four legs
-        self.l_ba_leg.update(ctrl_sig)
-        self.r_ba_leg.update(ctrl_sig)
-        self.l_fo_leg.update(ctrl_sig)
-        self.r_fo_leg.update(ctrl_sig)
+        # Update the four leg
+        self.l_ba_leg.update(brain_output)
+        self.r_ba_leg.update(brain_output)
+        self.l_fo_leg.update(brain_output)
+        self.r_fo_leg.update(brain_output)
 
         # Update other muscles
         for muscle in self.muscles:
