@@ -22,8 +22,6 @@ import subprocess
 
 from result import Result
 
-import pickle
-
 
 class Simulator:
     def __init__(self, opt):

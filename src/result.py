@@ -18,6 +18,7 @@ import logging
 import os
 import pickle
 
+
 class Result:
     """This class is called at the end of a Blender simulation. It collects the simulation results from Blender, and from the
     different classes of this project. It also provides method to save, display and load the results (usefull inside an
@@ -48,12 +49,12 @@ class Result:
         # Time features
         self.result_dict["t_end"] = self.config.t_end
         self.result_dict["t_init"] = self.config.t_init
-        self.result_dict["t_sim"] = self.result_dict["t_end"]- self.result_dict["t_init"]
+        self.result_dict["t_sim"] = self.result_dict["t_end"] - self.result_dict["t_init"]
         self.result_dict["t_out"] = self.config.timeout
 
         if self.result_dict["t_sim"] > self.result_dict["t_out"]:
             self.result_dict["stop"] = "Timeout"
-        elif eval(owner["config"].exit_condition):
+        elif eval(self.config.exit_condition):
             self.result_dict["stop"] = "Config exit condition"
         else:
             self.result_dict["stop"] = "User interruption"
@@ -67,8 +68,8 @@ class Result:
 
         # Config  features
         self.result_dict["config_name"] = self.config.name
-        self.result_dict["config_opt"] = None # TODO: fill here!
-        self.result_dict["config_muscles"] =  self.config.muscle_type
+        self.result_dict["config_opt"] = None  # TODO: fill here!
+        self.result_dict["config_muscles"] = self.config.muscle_type
 
         return
 
