@@ -306,15 +306,17 @@ class DogVertDefConfig(Config):
     def set_conn_matrix(self, vector):
         """Fills the connection matrix between the brain and the muscles with a vector of values"""
 
-        if len(vector) != (len(self.connection_matrix) + len(self.brain["n_osc"])):
-            self.logger.error("Vector size should match with connection matrix size. "\
-                "Please use the self.get_matrix_size method to determine it!")
+        conn_size = len(self.connection_matrix) * self.brain["n_osc"]
+        if len(vector) != conn_size:
+            self.logger.error("Vector size (" + str(len(vector)) + ") should match with connection matrix " +
+                "size (" + str(conn_size) + "). Please use the self.get_matrix_size method to determine it!")
         else:
             i = 0
             for line in self.connection_matrix:
-                for item in line:
-                    item = vector[i]
-                    i += 0
+                for j in range(len(self.connection_matrix[line])):
+                    self.connection_matrix[line][j] = vector[i]
+                    i += 1
+
             self.logger.debug("Connection matrix updated: " + str(self.connection_matrix))
 
     def get_conn_matrix_vector(self):
@@ -334,10 +336,10 @@ class DogVertDefConfig(Config):
 
         return
 
-    def get_conn_matrix_len():
+    def get_conn_matrix_len(self):
         """Return the total size (lines x columns) of the connection matrix"""
 
-        return len(self.connection_matrix)
+        return (len(self.connection_matrix) * self.brain["n_osc"])
 
 
 class MouseDefConfig(Config):

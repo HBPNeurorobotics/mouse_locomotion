@@ -41,8 +41,6 @@ class Blender(Simulator):
     def start_blenderplayer(self):
         """Call blenderplayer via command line subprocess"""
 
-        # Fetch blender game engine standalone path
-
         # Add arguments to command line
         self.args.extend([
             "-w", "1080", "600", "2000", "200",
@@ -61,6 +59,8 @@ class Blender(Simulator):
         params = {'config_name': self.opt["config_name"] + "()",
                   'logfile': str(self.opt["logfile"]),
                   'filename': self.filename}
+        if self.opt["genome"]:
+            params["genome"] = str(self.opt["genome"])
         self.args.extend([str(params)])
         self.args.extend(["FROM_START.PY"])
 
@@ -74,7 +74,9 @@ class Blender(Simulator):
 
     def create_pop(self):
         """Call blender via command line subprocess and create a population out of a model"""
+
         self.args = [self.opt["simulator_path"] + "blender"]
+        
         # Add arguments to command line
         self.args.extend(["-b"])
         self.args.extend([self.opt["model"]])

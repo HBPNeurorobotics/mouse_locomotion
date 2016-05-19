@@ -42,6 +42,7 @@ if sys.argv[len(sys.argv) - 1] == "FROM_START.PY":
     CONFIG_NAME = argv["config_name"]
     LOG_FILE = argv["logfile"]
     SAVE_NAME = argv["filename"]
+    GENOME = eval(argv["genome"])
 else:
     # Default config when started directly from Blender
     CONFIG_NAME = "DogVertDefConfig()"
@@ -63,15 +64,19 @@ if not os.path.exists(LOG_FILE):
     f = open(LOG_FILE, 'w')
     f.close()
 
+# Init configuration
 logging.config.fileConfig(root + "/etc/logging.conf",
                           defaults={'logfilename': LOG_FILE, 'simLevel': "DEBUG"})
 configuration = eval(CONFIG_NAME)
 logger = configuration.logger
 configuration.save_path = SAVE_NAME
+configuration.n_iter = 0
+configuration.t_init = time.time()
+if GENOME:
+    configuration.set_conn_matrix(GENOME)
 
+# Init owner variables
 owner["config"] = configuration
-owner["config"].n_iter = 0
-owner["config"].t_init = time.time()
 owner["body"] = Body(configuration, BlenderUtils(scene))
 
 # Advertise simulation has begun

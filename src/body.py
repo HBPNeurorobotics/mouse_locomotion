@@ -75,9 +75,9 @@ class Leg(Part):
 
                 self.muscles[i].update(ctrl_sig=ctrl_sig)
 
-                self.n_iter += 1
-                self.logger.debug(self.name + " " + self.orien + " iteration " + str(self.n_iter) + ": Control signal = " +
-                                  str(ctrl_sig))
+        self.n_iter += 1
+        self.logger.debug(self.name + " " + self.orien + " iteration " + str(self.n_iter) + ": Control signal = " +
+            str(ctrl_sig))
 
 
 class Backleg(Leg):

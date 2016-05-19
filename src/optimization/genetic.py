@@ -17,6 +17,7 @@
 ##
 import time
 
+from config import *
 from pyevolve import *
 import logging
 from optimization import Optimization
@@ -28,9 +29,14 @@ class Genetic(Optimization):
                  stop_thresh=0.01):
         """Creation and initialization function for the genome and the genetic algorithm. It fixes the
         parameters to use in the algorithm"""
+
         Optimization.__init__(self, opt, observable, population_size, stop_thresh, num_max_generation)
+
         # Algo parameters
         self.genome_size = genome_size
+        if opt["sim_type"] == "BRAIN":
+            config = eval(opt["config_name"] + "()")
+            self.genome_size = config.get_conn_matrix_len()
         self.mutation_rate = mutation_rate
         self.cross_over_rate = cross_over_rate
         self.genome_min = genome_min
@@ -61,7 +67,9 @@ class Genetic(Optimization):
     def eval_fct(self, population):
         """Evaluation function of the genetic algorithm. For each population, it computes the
         score of every genomes and directly write it"""
+
         super_score = Optimization.eval_fct(self, population)
+
         if super_score is not None:
             return super_score
         scores = []
@@ -96,8 +104,10 @@ class Genetic(Optimization):
     def conv_fct(self, ga):
         """Convergence function of the genetic algorithm. It is called at each iteration step and
         return True of False depending on a convergence criteria"""
+
         if Optimization.conv_fct(self, ga):
             return True
+            
         # Get the best specimens
         pop = ga.getPopulation()
         bi = pop.bestFitness()
