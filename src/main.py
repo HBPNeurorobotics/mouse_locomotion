@@ -15,7 +15,6 @@
 ##
 
 import time
-import pickle
 import bge
 
 from result import Result
@@ -33,9 +32,9 @@ if hasattr(owner["config"], 'logger'):
     # DEBUG control and display
     owner["config"].n_iter += 1
     owner["config"].logger.debug("Main iteration " + str(owner["config"].n_iter) + ": stop state = " +
-        str(eval(owner["config"].exit_condition)))
+                                 str(eval(owner["config"].exit_condition)))
     owner["config"].logger.debug("Interruption: exit = " + str(eval(owner["config"].exit_condition)) +
-        " sim time = " + str(time.time() -  owner["config"].t_init) + " timeout = " + str(
+                                 " sim time = " + str(time.time() - owner["config"].t_init) + " timeout = " + str(
         owner["config"].timeout))
 
     # Simulation interruption
@@ -45,7 +44,7 @@ if hasattr(owner["config"], 'logger'):
 
         # Get time of simulation
         owner["config"].t_end = time.time()
-        
+
         # Create a result instance and save
         try:
             results = Result(owner["body"])

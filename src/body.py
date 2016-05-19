@@ -15,10 +15,7 @@
 ##
 
 
-import math
-import logging
 from mathutils import Vector as vec
-import sys
 
 from brain import Brain
 from muscle import *
@@ -35,6 +32,7 @@ class Part:
         self.muscles = []
         self.muscle_type = config_["muscle_type"] + "(muscle_config, self.simulator)"
         self.name = name
+
 
 class Leg(Part):
     """This class represents a generic leg and its current behaviour in the control process"""
@@ -62,9 +60,9 @@ class Leg(Part):
         for i in range(len(self.muscles)):
             # Assertion
             if len(self.connection_matrix[self.muscles[i].name]) != len(brain_output):
-                self.logger.error("The brain outputs number (" + len(brain_output) +
-                    ") should match the number in the connection matrix (" +
-                    len(self.connection_matrix[self.muscles[i].name]) + "). Please verify config!")
+                self.logger.error("The brain outputs number (" + str(len(brain_output)) +
+                                  ") should match the number in the connection matrix (" +
+                                  str(len(self.connection_matrix[self.muscles[i].name])) + "). Please verify config!")
             # Send linear combination of brain outputs
             else:
                 ctrl_sig = 0
@@ -76,8 +74,9 @@ class Leg(Part):
                 self.muscles[i].update(ctrl_sig=ctrl_sig)
 
         self.n_iter += 1
-        self.logger.debug(self.name + " " + self.orien + " iteration " + str(self.n_iter) + ": Control signal = " +
-            str(ctrl_sig))
+                self.logger.debug(
+                    self.name + " " + self.orien + " iteration " + str(self.n_iter) + ": Control signal = " +
+                    str(ctrl_sig))
 
 
 class Backleg(Leg):
@@ -185,10 +184,9 @@ class Body(Part):
         self.compute_traveled_dist()
         self.av_power = sum(self.powers) / float(len(self.powers))
 
-        self.loss_fct = math.tanh(self.dist / self.config.dist_ref) * \
-            math.tanh(self.config.power_ref / self.av_power)
+        self.loss_fct = math.tanh(self.dist / self.config.dist_ref) * math.tanh(self.config.power_ref / self.av_power)
 
-        return self.loss_fct
+        return self.loss_fct + 1
 
     def update(self):
         """Update control signals and forces"""
@@ -196,7 +194,7 @@ class Body(Part):
         # Update brain
         self.brain.update()
         brain_output = [float(self.brain.state[0]), float(self.brain.state[1]), float(self.brain.state[2]),
-                    float(self.brain.state[3])]
+                        float(self.brain.state[3])]
 
         # Update the four legs
         self.l_ba_leg.update(brain_output)

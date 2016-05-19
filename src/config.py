@@ -266,9 +266,8 @@ class DogVertDefConfig(Config):
                  "anch_1": [-0.1977, 0, -0.61], "anch_2": [0.45, 0, -0.61], "k": 2000,
                  "c": 200, "kc": 0, "kl0": 0.85}
         self.body_muscles = [neck1, neck2, vert1_u, vert1_d, vert2_u, vert2_d, vert3_u, vert3_d, vert4_u, vert4_d,
-                        vert5_u, vert5_d, vert6_u, vert6_d, abdos]
+                             vert5_u, vert5_d, vert6_u, vert6_d, abdos]
         self.body = {"name": "Doggy Vertebrate", "obj": "obj_body", "muscles": self.body_muscles}
-
 
         # Fill default connection matrix
         self.connection_matrix = dict()
@@ -280,28 +279,38 @@ class DogVertDefConfig(Config):
         for m in self.front_leg_L_muscles:
             self.connection_matrix[m["name"]] = []
             for i in range(self.brain["n_osc"]):
-                if m["name"] == "F_biceps.L" and i == 1 : self.connection_matrix[m["name"]].append(1)
-                else : self.connection_matrix[m["name"]].append(0)
+                if m["name"] == "F_biceps.L" and i == 1:
+                    self.connection_matrix[m["name"]].append(1)
+                else:
+                    self.connection_matrix[m["name"]].append(0)
 
         for m in self.front_leg_R_muscles:
             self.connection_matrix[m["name"]] = []
             for i in range(self.brain["n_osc"]):
-                if m["name"] == "F_biceps.R" and i == 1 : self.connection_matrix[m["name"]].append(1)
-                else : self.connection_matrix[m["name"]].append(0)
+                if m["name"] == "F_biceps.R" and i == 1:
+                    self.connection_matrix[m["name"]].append(1)
+                else:
+                    self.connection_matrix[m["name"]].append(0)
 
         for m in self.back_leg_L_muscles:
             self.connection_matrix[m["name"]] = []
             for i in range(self.brain["n_osc"]):
-                if m["name"] == "B_biceps.L" and i == 2 : self.connection_matrix[m["name"]].append(1)
-                elif m["name"] == "B_gastro.L" and i == 2 : self.connection_matrix[m["name"]].append(1)
-                else : self.connection_matrix[m["name"]].append(0)
+                if m["name"] == "B_biceps.L" and i == 2:
+                    self.connection_matrix[m["name"]].append(1)
+                elif m["name"] == "B_gastro.L" and i == 2:
+                    self.connection_matrix[m["name"]].append(1)
+                else:
+                    self.connection_matrix[m["name"]].append(0)
 
         for m in self.back_leg_R_muscles:
             self.connection_matrix[m["name"]] = []
             for i in range(self.brain["n_osc"]):
-                if m["name"] == "B_biceps.R" and i == 2 : self.connection_matrix[m["name"]].append(1)
-                elif m["name"] == "B_gastro.R" and i == 2 : self.connection_matrix[m["name"]].append(1)
-                else : self.connection_matrix[m["name"]].append(0)
+                if m["name"] == "B_biceps.R" and i == 2:
+                    self.connection_matrix[m["name"]].append(1)
+                elif m["name"] == "B_gastro.R" and i == 2:
+                    self.connection_matrix[m["name"]].append(1)
+                else:
+                    self.connection_matrix[m["name"]].append(0)
 
     def set_conn_matrix(self, vector):
         """Fills the connection matrix between the brain and the muscles with a vector of values"""

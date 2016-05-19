@@ -74,6 +74,6 @@ class Process(Manager):
         time.sleep(1)
         rs_ls = ""
         for i in res_list:
-            rs_ls += str(i) + " "
-        logging.info("Results: " + str(rs_ls))
+            rs_ls += str(i) + "\n"
+        logging.info("Results:\n" + str(rs_ls))
         logging.info("Simulation Finished!")
