@@ -54,7 +54,7 @@ else:
 
 # Create python controller
 global owner
-owner = {"n_iter": 0, "t_init": time.time()}
+owner = dict()
 
 # Create Logger and configuration
 if not os.path.exists(os.path.dirname(LOG_FILE)):
@@ -70,7 +70,9 @@ logger = configuration.logger
 configuration.save_path = SAVE_NAME
 
 owner["config"] = configuration
-owner["cheesy"] = Body(configuration, BlenderUtils(scene))
+owner["config"].n_iter = 0
+owner["config"].t_init = time.time()
+owner["body"] = Body(configuration, BlenderUtils(scene))
 
 # Advertise simulation has begun
 logger.info("####################################")

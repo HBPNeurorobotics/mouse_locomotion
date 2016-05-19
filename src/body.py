@@ -14,6 +14,12 @@
 # Modified by: Dimitri Rodarie
 ##
 
+
+import math
+import logging
+from mathutils import Vector as vec
+import sys
+
 from brain import Brain
 from muscle import *
 
@@ -22,13 +28,13 @@ class Part:
     def __init__(self, config_, simulator, name):
         """Class initialization"""
         self.n_iter = 0
+        self.config = config_
         self.logger = config_["logger"]
         self.simulator = simulator
         # Create the muscles objects
         self.muscles = []
         self.muscle_type = config_["muscle_type"] + "(muscle_config, self.simulator)"
         self.name = name
-
 
 class Leg(Part):
     """This class represents a generic leg and its current behaviour in the control process"""
@@ -38,10 +44,9 @@ class Leg(Part):
         Part.__init__(self, config_, simulator, name)
         self.orien = orien_
         # Create the muscles objects
-        self.brain_sig = []
         for muscle_config in config_["muscles"]:
             self.muscles.append(eval(self.muscle_type))
-            self.brain_sig.append(muscle_config["brain_sig"])
+        self.connection_matrix = config_["connection_matrix"]
 
     def get_power(self):
         """Return the time-step power developed by all the leg muscles"""
@@ -52,18 +57,27 @@ class Leg(Part):
 
         return power
 
-    def update(self, ctrl_sig_):
+    def update(self, brain_output):
         """Update control signals and forces"""
         for i in range(len(self.muscles)):
-            if self.brain_sig[i] is None:
-                ctrl_sig = 0
+            # Assertion
+            if len(self.connection_matrix[self.muscles[i].name]) != len(brain_output):
+                self.logger.error("The brain outputs number (" + len(brain_output) +
+                    ") should match the number in the connection matrix (" +
+                    len(self.connection_matrix[self.muscles[i].name]) + "). Please verify config!")
+            # Send linear combination of brain outputs
             else:
-                ctrl_sig = ctrl_sig_[self.brain_sig[i]]
-            self.muscles[i].update(ctrl_sig=ctrl_sig)
+                ctrl_sig = 0
+                j = 0
+                for output in brain_output:
+                    ctrl_sig += self.connection_matrix[self.muscles[i].name][j] * output
+                    j += 1
 
-        self.n_iter += 1
-        self.logger.debug(self.name + " " + self.orien + " iteration " + str(self.n_iter) + ": Control signal = " +
-                          str(self.brain_sig))
+                self.muscles[i].update(ctrl_sig=ctrl_sig)
+
+                self.n_iter += 1
+                self.logger.debug(self.name + " " + self.orien + " iteration " + str(self.n_iter) + ": Control signal = " +
+                                  str(ctrl_sig))
 
 
 class Backleg(Leg):
@@ -72,7 +86,8 @@ class Backleg(Leg):
     def __init__(self, config_, orien_, simulator):
         """Class initialization"""
         config = {"logger": config_.logger,
-                  "muscle_type": config_.muscle_type}
+                  "muscle_type": config_.muscle_type,
+                  "connection_matrix": config_.connection_matrix}
         if orien_ == "L":
             config["muscles"] = config_.back_leg_L_muscles
         else:
@@ -86,14 +101,13 @@ class Foreleg(Leg):
     def __init__(self, config_, orien_, simulator):
         """Class initialization"""
         config = {"logger": config_.logger,
-                  "muscle_type": config_.muscle_type}
+                  "muscle_type": config_.muscle_type,
+                  "connection_matrix": config_.connection_matrix}
         if orien_ == "L":
             config["muscles"] = config_.front_leg_L_muscles
         else:
             config["muscles"] = config_.front_leg_R_muscles
         Leg.__init__(self, config, orien_, simulator, type(self).__name__)
-
-        # Create the muscles objects following config
 
 
 class Body(Part):
@@ -105,7 +119,7 @@ class Body(Part):
                       {"logger": config_.logger, "muscle_type": config_.muscle_type},
                       simulator,
                       config_.body["name"])
-
+        self.config = config_
         # Get body object
         self.body_obj = self.simulator.get_object(config_.body["obj"])
         if self.body_obj is None:
@@ -181,14 +195,14 @@ class Body(Part):
 
         # Update brain
         self.brain.update()
-        ctrl_sig = [float(self.brain.state[0]), float(self.brain.state[1]), float(self.brain.state[2]),
+        brain_output = [float(self.brain.state[0]), float(self.brain.state[1]), float(self.brain.state[2]),
                     float(self.brain.state[3])]
 
         # Update the four legs
-        self.l_ba_leg.update(ctrl_sig)
-        self.r_ba_leg.update(ctrl_sig)
-        self.l_fo_leg.update(ctrl_sig)
-        self.r_fo_leg.update(ctrl_sig)
+        self.l_ba_leg.update(brain_output)
+        self.r_ba_leg.update(brain_output)
+        self.l_fo_leg.update(brain_output)
+        self.r_fo_leg.update(brain_output)
 
         # Update other muscles
         for muscle in self.muscles:

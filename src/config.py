@@ -29,8 +29,11 @@ class Config:
         self.sim_speed = 1.0
         self.logger_name = "INFO"
         self.logger = logging.Logger(self.logger_name)
-        self.exit_condition = "owner['n_iter'] > 500"
+        self.exit_condition = "owner['config'].n_iter > 500"
         self.timeout = 10
+        self.t_init = 0
+        self.t_end = 0
+        self.n_iter = 0
         self.save_path = "default"
         self.simulator = "Simulator"
 
@@ -155,9 +158,12 @@ class DogVertDefConfig(Config):
 
         # Simulation parameters
         Config.__init__(self)
+        self.timeout = 20
+        self.logger_name = "INFO"
+        self.logger = logging.Logger(self.logger_name)
         self.muscle_type = "DampedSpringMuscle"
         self.name = "default_dog_vert_simulation_config"
-        self.exit_condition = "owner['n_iter'] > 2500"  # "bge.logic.getCurrentScene().objects['obj_body.B'].worldPosition.z < -1.8"
+        self.exit_condition = "owner['config'].n_iter > 2500"  # "bge.logic.getCurrentScene().objects['obj_body.B'].worldPosition.z < -1.8"
 
         # Back legs
         BL_biceps = {"name": "B_biceps.L", "logger": "INFO", "obj_1": "obj_body.B", "obj_2": "obj_shin.L",
@@ -259,9 +265,79 @@ class DogVertDefConfig(Config):
         abdos = {"name": "muscle_abdos", "logger": "INFO", "obj_1": "obj_body", "obj_2": "obj_body.B",
                  "anch_1": [-0.1977, 0, -0.61], "anch_2": [0.45, 0, -0.61], "k": 2000,
                  "c": 200, "kc": 0, "kl0": 0.85}
-        body_muscles = [neck1, neck2, vert1_u, vert1_d, vert2_u, vert2_d, vert3_u, vert3_d, vert4_u, vert4_d,
+        self.body_muscles = [neck1, neck2, vert1_u, vert1_d, vert2_u, vert2_d, vert3_u, vert3_d, vert4_u, vert4_d,
                         vert5_u, vert5_d, vert6_u, vert6_d, abdos]
-        self.body = {"name": "Doggy Vertebrate", "obj": "obj_body", "muscles": body_muscles}
+        self.body = {"name": "Doggy Vertebrate", "obj": "obj_body", "muscles": self.body_muscles}
+
+
+        # Fill default connection matrix
+        self.connection_matrix = dict()
+        for m in self.body_muscles:
+            self.connection_matrix[m["name"]] = []
+            for i in range(self.brain["n_osc"]):
+                self.connection_matrix[m["name"]].append(0)
+
+        for m in self.front_leg_L_muscles:
+            self.connection_matrix[m["name"]] = []
+            for i in range(self.brain["n_osc"]):
+                if m["name"] == "F_biceps.L" and i == 1 : self.connection_matrix[m["name"]].append(1)
+                else : self.connection_matrix[m["name"]].append(0)
+
+        for m in self.front_leg_R_muscles:
+            self.connection_matrix[m["name"]] = []
+            for i in range(self.brain["n_osc"]):
+                if m["name"] == "F_biceps.R" and i == 1 : self.connection_matrix[m["name"]].append(1)
+                else : self.connection_matrix[m["name"]].append(0)
+
+        for m in self.back_leg_L_muscles:
+            self.connection_matrix[m["name"]] = []
+            for i in range(self.brain["n_osc"]):
+                if m["name"] == "B_biceps.L" and i == 2 : self.connection_matrix[m["name"]].append(1)
+                elif m["name"] == "B_gastro.L" and i == 2 : self.connection_matrix[m["name"]].append(1)
+                else : self.connection_matrix[m["name"]].append(0)
+
+        for m in self.back_leg_R_muscles:
+            self.connection_matrix[m["name"]] = []
+            for i in range(self.brain["n_osc"]):
+                if m["name"] == "B_biceps.R" and i == 2 : self.connection_matrix[m["name"]].append(1)
+                elif m["name"] == "B_gastro.R" and i == 2 : self.connection_matrix[m["name"]].append(1)
+                else : self.connection_matrix[m["name"]].append(0)
+
+    def set_conn_matrix(self, vector):
+        """Fills the connection matrix between the brain and the muscles with a vector of values"""
+
+        if len(vector) != (len(self.connection_matrix) + len(self.brain["n_osc"])):
+            self.logger.error("Vector size should match with connection matrix size. "\
+                "Please use the self.get_matrix_size method to determine it!")
+        else:
+            i = 0
+            for line in self.connection_matrix:
+                for item in line:
+                    item = vector[i]
+                    i += 0
+            self.logger.debug("Connection matrix updated: " + str(self.connection_matrix))
+
+    def get_conn_matrix_vector(self):
+        """Return the matrix in form of a vector"""
+
+        vect = []
+        for line in self.connection_matrix:
+            for item in self.connection_matrix[line]:
+                vect.append(item)
+
+        return vect
+
+    def print_conn_matrix(self):
+        """Print the connection matrix"""
+
+        print("TO IMPLEMENT")
+
+        return
+
+    def get_conn_matrix_len():
+        """Return the total size (lines x columns) of the connection matrix"""
+
+        return len(self.connection_matrix)
 
 
 class MouseDefConfig(Config):
