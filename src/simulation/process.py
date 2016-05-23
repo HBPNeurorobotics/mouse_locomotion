@@ -22,6 +22,11 @@ import sys
 from optimization import Genetic
 
 if sys.version_info[:2] < (3, 4):
+    import common
+else:
+    from simulation import common
+
+if sys.version_info[:2] < (3, 4):
     from manager import Manager
 else:
     from simulation import Manager
@@ -61,17 +66,19 @@ class Process(Manager):
 
     def run_sim(self, sim_list):
         """Run a simple on shot simulation"""
+        if "local" in sim_list and sim_list["local"]:
+            res_list = [common.launch_simulator(sim_list)]
+        else:
+            # Start manager
+            Manager.start(self)
+            # Simulate
+            if type(sim_list) != list:
+                sim_list = [sim_list]
+            res_list = self.simulate(sim_list)
 
-        # Start manager
-        Manager.start(self)
-        # Simulate
-        if type(sim_list) != list:
-            sim_list = [sim_list]
-        res_list = self.simulate(sim_list)
-
-        # Stop and display results
-        self.stop()
-        time.sleep(1)
+            # Stop and display results
+            self.stop()
+            time.sleep(1)
         rs_ls = ""
         for i in res_list:
             rs_ls += str(i) + "\n"

@@ -59,7 +59,7 @@ class Blender(Simulator):
         params = {'config_name': self.opt["config_name"] + "()",
                   'logfile': str(self.opt["logfile"]),
                   'filename': self.filename}
-        if self.opt["genome"]:
+        if "genome" in self.opt:
             params["genome"] = str(self.opt["genome"])
         self.args.extend([str(params)])
         self.args.extend(["FROM_START.PY"])
@@ -76,7 +76,7 @@ class Blender(Simulator):
         """Call blender via command line subprocess and create a population out of a model"""
 
         self.args = [self.opt["simulator_path"] + "blender"]
-        
+
         # Add arguments to command line
         self.args.extend(["-b"])
         self.args.extend([self.opt["model"]])

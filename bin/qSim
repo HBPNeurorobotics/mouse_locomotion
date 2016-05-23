@@ -86,6 +86,7 @@ class SimCli(cli.Application):
         opt["config_name"] = self.config
         opt["sim_type"] = self.sim_type
         opt["fullscreen"] = self.fullscreen
+        opt["local"] = self.local
 
         # Configure logging
         log_file = opt["logfile"]

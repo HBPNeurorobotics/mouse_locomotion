@@ -15,30 +15,17 @@
 # File created by: Gabriel Urbain <gabriel.urbain@ugent.be>. February 2016
 # Modified by: Dimitri Rodarie
 ##
-import logging
-
-from simulator import *
+import sys
 from rpyc import Service
+
+if sys.version_info[:2] < (3, 4):
+    import common
+else:
+    from simulation import common
 
 
 class SimService(Service):
-    ALIASES = ["BLENDERSIM", "BLENDER", "BLENDERPLAYER"]
-    SIMULATORS = {"BLENDER": "Blender"}
-    DEFAULT_SIMULATOR = "BLENDER"
+    ALIASES = common.ALIASES
 
     def exposed_simulation(self, opt_):  # this is an exposed method
-        if type(opt_) == dict and "simulator" in opt_:
-            simulator_ = opt_["simulator"]
-            if simulator_ not in self.SIMULATORS:
-                simulator_ = self.DEFAULT_SIMULATOR
-        else:
-            simulator_ = self.DEFAULT_SIMULATOR
-        simulator_ = self.SIMULATORS[simulator_] + "(opt_)"
-
-        # Perform simulation
-        logging.info("Processing simulation request")
-        simulator_ = eval(simulator_)
-        simulator_.launch_simulation()
-        logging.info("Simulation request processed")
-
-        return simulator_.get_results()
+        return common.launch_simulator(opt_)

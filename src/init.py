@@ -35,6 +35,8 @@ from utils import BlenderUtils
 # Get BGE handles
 scene = bge.logic.getCurrentScene()
 
+GENOME = False
+
 if sys.argv[len(sys.argv) - 1] == "FROM_START.PY":
     # Catch command-line config when started from another script
     argv = sys.argv
@@ -42,7 +44,8 @@ if sys.argv[len(sys.argv) - 1] == "FROM_START.PY":
     CONFIG_NAME = argv["config_name"]
     LOG_FILE = argv["logfile"]
     SAVE_NAME = argv["filename"]
-    GENOME = eval(argv["genome"])
+    if "genome" in argv:
+        GENOME = eval(argv["genome"])
 else:
     # Default config when started directly from Blender
     CONFIG_NAME = "DogVertDefConfig()"
