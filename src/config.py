@@ -43,7 +43,9 @@ class Config:
         self.back_leg_R_muscles = []
         self.front_leg_L_muscles = []
         self.front_leg_R_muscles = []
+        self.body_muscles = []
         self.brain = dict()
+        self.connection_matrix = dict()
         self.body = dict()
         self.dist_ref = 20
         self.power_ref = 1000
@@ -76,6 +78,88 @@ class Config:
                   self.brain["b"], self.brain["c"], self.brain["aa"], self.brain["time_interval"]]
 
         return liste
+
+    def set_conn_matrix(self, vector):
+        """Fills the connection matrix between the brain and the muscles with a vector of values"""
+
+        conn_size = len(self.connection_matrix) * self.brain["n_osc"]
+        if len(vector) != conn_size:
+            self.logger.error("Vector size (" + str(len(vector)) + ") should match with connection matrix " +
+                              "size (" + str(
+                conn_size) + "). Please use the self.get_matrix_size method to determine it!")
+        else:
+            i = 0
+            for line in self.connection_matrix:
+                for j in range(len(self.connection_matrix[line])):
+                    self.connection_matrix[line][j] = vector[i]
+                    i += 1
+
+            self.logger.debug("Connection matrix updated: " + str(self.connection_matrix))
+
+    def get_conn_matrix_vector(self):
+        """Return the matrix in form of a vector"""
+
+        vect = []
+        for line in self.connection_matrix:
+            for item in self.connection_matrix[line]:
+                vect.append(item)
+
+        return vect
+
+    def print_conn_matrix(self):
+        """Print the connection matrix"""
+
+        print("TO IMPLEMENT")
+
+        return
+
+    def get_conn_matrix_len(self):
+        """Return the total size (lines x columns) of the connection matrix"""
+
+        return len(self.connection_matrix) * self.brain["n_osc"]
+
+    def config_connection_matrix(self):
+        # Fill default connection matrix
+        for m in self.body_muscles:
+            self.connection_matrix[m["name"]] = []
+            for i in range(self.brain["n_osc"]):
+                self.connection_matrix[m["name"]].append(0)
+
+        for m in self.front_leg_L_muscles:
+            self.connection_matrix[m["name"]] = []
+            for i in range(self.brain["n_osc"]):
+                if m["name"] == "F_biceps.L" and i == 1:
+                    self.connection_matrix[m["name"]].append(1)
+                else:
+                    self.connection_matrix[m["name"]].append(0)
+
+        for m in self.front_leg_R_muscles:
+            self.connection_matrix[m["name"]] = []
+            for i in range(self.brain["n_osc"]):
+                if m["name"] == "F_biceps.R" and i == 1:
+                    self.connection_matrix[m["name"]].append(1)
+                else:
+                    self.connection_matrix[m["name"]].append(0)
+
+        for m in self.back_leg_L_muscles:
+            self.connection_matrix[m["name"]] = []
+            for i in range(self.brain["n_osc"]):
+                if m["name"] == "B_biceps.L" and i == 2:
+                    self.connection_matrix[m["name"]].append(1)
+                elif m["name"] == "B_gastro.L" and i == 2:
+                    self.connection_matrix[m["name"]].append(1)
+                else:
+                    self.connection_matrix[m["name"]].append(0)
+
+        for m in self.back_leg_R_muscles:
+            self.connection_matrix[m["name"]] = []
+            for i in range(self.brain["n_osc"]):
+                if m["name"] == "B_biceps.R" and i == 2:
+                    self.connection_matrix[m["name"]].append(1)
+                elif m["name"] == "B_gastro.R" and i == 2:
+                    self.connection_matrix[m["name"]].append(1)
+                else:
+                    self.connection_matrix[m["name"]].append(0)
 
 
 class DogDefConfig(Config):
@@ -146,8 +230,8 @@ class DogDefConfig(Config):
         neck2 = {"name": "muscle_neck2", "logger": "INFO", "obj_1": "obj_body", "obj_2": "obj_head",
                  "anch_1": [-0.59, 0, 1.4], "anch_2": [0.117, 0, -0.26], "k": 2000,
                  "c": 100, "kc": 0, "kl0": 0.8}
-        body_muscles = [neck1, neck2]
-        self.body = {"name": "Doggy", "obj" : "obj_body", "muscles": body_muscles}
+        self.body_muscles = [neck1, neck2]
+        self.body = {"name": "Doggy", "obj": "obj_body", "muscles": self.body_muscles}
 
 
 class DogVertDefConfig(Config):
@@ -171,41 +255,41 @@ class DogVertDefConfig(Config):
                      "c": 50, "kc": -40, "kl0": 1, "brain_sig": 2}
         BR_biceps = {"name": "B_biceps.R", "logger": "INFO", "obj_1": "obj_body.B", "obj_2": "obj_shin.R",
                      "anch_1": [0.91, 1, -0.3], "anch_2": [0.066, 0, 0.3], "k": 500,
-                     "c": 50, "kc": -40, "kl0": 1, "brain_sig": 2}
+                     "c": 50, "kc": -40, "kl0": 1, "brain_sig": 4}
         BL_triceps = {"name": "B_triceps.L", "logger": "INFO", "obj_1": "obj_body.B", "obj_2": "obj_shin.L",
                       "anch_1": [0.72, -1, 0.23], "anch_2": [-0.102, 0, 0.55], "k": 1000,
-                      "c": 50, "kc": -40, "kl0": 0.6, "brain_sig": None}
+                      "c": 50, "kc": -40, "kl0": 0.6, "brain_sig": 2}
         BR_triceps = {"name": "B_triceps.R", "logger": "INFO", "obj_1": "obj_body.B", "obj_2": "obj_shin.R",
                       "anch_1": [0.72, 1, 0.23], "anch_2": [-0.102, 0, 0.55], "k": 1000,
-                      "c": 50, "kc": -40, "kl0": 0.6, "brain_sig": None}
+                      "c": 50, "kc": -40, "kl0": 0.6, "brain_sig": 4}
         BL_gastro = {"name": "B_gastro.L", "logger": "INFO", "obj_1": "obj_thigh.L", "obj_2": "obj_shin_lower.L",
                      "anch_1": [-0.053, 0, -0.77], "anch_2": [0.09, 0, 0.14], "k": 200,
                      "c": 20, "kc": -10, "kl0": 1, "brain_sig": 2}
         BR_gastro = {"name": "B_gastro.R", "logger": "INFO", "obj_1": "obj_thigh.R", "obj_2": "obj_shin_lower.R",
                      "anch_1": [-0.053, 0, -0.77], "anch_2": [0.09, 0, 0.14], "k": 200,
-                     "c": 20, "kc": -10, "kl0": 1, "brain_sig": 2}
+                     "c": 20, "kc": -10, "kl0": 1, "brain_sig": 4}
         self.back_leg_L_muscles = [BL_biceps, BL_triceps, BL_gastro]
         self.back_leg_R_muscles = [BR_biceps, BR_triceps, BR_gastro]
 
         # Front Legs
         FL_biceps = {"name": "F_biceps.L", "logger": "INFO", "obj_1": "obj_body", "obj_2": "obj_upper_arm.L",
                      "anch_1": [-0.93, -1, 0.48], "anch_2": [-0.01, 0, 0.33], "k": 400,
-                     "c": 40, "kc": -7, "kl0": 1, "brain_sig": 1}
+                     "c": 40, "kc": -7, "kl0": 1, "brain_sig": 3}
         FR_biceps = {"name": "F_biceps.R", "logger": "INFO", "obj_1": "obj_body", "obj_2": "obj_upper_arm.R",
                      "anch_1": [-0.93, 1, 0.48], "anch_2": [-0.01, 0, 0.33], "k": 400,
                      "c": 40, "kc": -7, "kl0": 1, "brain_sig": 1}
         FL_triceps = {"name": "F_triceps.L", "logger": "INFO", "obj_1": "obj_body", "obj_2": "obj_upper_arm.L",
                       "anch_1": [-0.61, -1, 0.5], "anch_2": [0.13, 0, 0.978], "k": 1000,
-                      "c": 100, "kc": 30, "kl0": 0.4, "brain_sig": None}
+                      "c": 100, "kc": 30, "kl0": 0.4, "brain_sig": 3}
         FR_triceps = {"name": "F_triceps.R", "logger": "INFO", "obj_1": "obj_body", "obj_2": "obj_upper_arm.R",
                       "anch_1": [-0.61, 1, 0.5], "anch_2": [0.13, 0, 0.978], "k": 1000,
-                      "c": 100, "kc": 30, "kl0": 0.4, "brain_sig": None}
+                      "c": 100, "kc": 30, "kl0": 0.4, "brain_sig": 1}
         FL_gastro = {"name": "F_gastro.L", "logger": "INFO", "obj_1": "obj_upper_arm.L", "obj_2": "obj_wrist.L",
                      "anch_1": [0.175, 0, 0.752], "anch_2": [0.085, 0, 0], "k": 10,
-                     "c": 2, "kc": 0, "kl0": 1, "brain_sig": None}
+                     "c": 2, "kc": 0, "kl0": 1, "brain_sig": 3}
         FR_gastro = {"name": "F_gastro.R", "logger": "INFO", "obj_1": "obj_upper_arm.R", "obj_2": "obj_wrist.R",
                      "anch_1": [0.175, 0, 0.752], "anch_2": [0.085, 0, 0], "k": 10,
-                     "c": 2, "kc": 0, "kl0": 1, "brain_sig": None}
+                     "c": 2, "kc": 0, "kl0": 1, "brain_sig": 1}
         self.front_leg_L_muscles = [FL_biceps, FL_triceps, FL_gastro]
         self.front_leg_R_muscles = [FR_biceps, FR_triceps, FR_gastro]
 
@@ -263,92 +347,12 @@ class DogVertDefConfig(Config):
                    "anch_1": [0.01, 0, -0.1], "anch_2": [0.425, 0, 0.65], "k": 2000,
                    "c": 100, "kc": 0, "kl0": 0.8}
         abdos = {"name": "muscle_abdos", "logger": "INFO", "obj_1": "obj_body", "obj_2": "obj_body.B",
-                 "anch_1": [-0.1977, 0, -0.61], "anch_2": [0.45, 0, -0.61], "k": 2000,
+                 "anch_1": [-0.1977, 0, -0.61], "anch_2": [0.45, 0, -0.61], "k": 4000,
                  "c": 200, "kc": 0, "kl0": 0.85}
         self.body_muscles = [neck1, neck2, vert1_u, vert1_d, vert2_u, vert2_d, vert3_u, vert3_d, vert4_u, vert4_d,
                              vert5_u, vert5_d, vert6_u, vert6_d, abdos]
         self.body = {"name": "Doggy Vertebrate", "obj": "obj_body", "muscles": self.body_muscles}
-
-        # Fill default connection matrix
-        self.connection_matrix = dict()
-        for m in self.body_muscles:
-            self.connection_matrix[m["name"]] = []
-            for i in range(self.brain["n_osc"]):
-                self.connection_matrix[m["name"]].append(0)
-
-        for m in self.front_leg_L_muscles:
-            self.connection_matrix[m["name"]] = []
-            for i in range(self.brain["n_osc"]):
-                if m["name"] == "F_biceps.L" and i == 1:
-                    self.connection_matrix[m["name"]].append(1)
-                else:
-                    self.connection_matrix[m["name"]].append(0)
-
-        for m in self.front_leg_R_muscles:
-            self.connection_matrix[m["name"]] = []
-            for i in range(self.brain["n_osc"]):
-                if m["name"] == "F_biceps.R" and i == 1:
-                    self.connection_matrix[m["name"]].append(1)
-                else:
-                    self.connection_matrix[m["name"]].append(0)
-
-        for m in self.back_leg_L_muscles:
-            self.connection_matrix[m["name"]] = []
-            for i in range(self.brain["n_osc"]):
-                if m["name"] == "B_biceps.L" and i == 2:
-                    self.connection_matrix[m["name"]].append(1)
-                elif m["name"] == "B_gastro.L" and i == 2:
-                    self.connection_matrix[m["name"]].append(1)
-                else:
-                    self.connection_matrix[m["name"]].append(0)
-
-        for m in self.back_leg_R_muscles:
-            self.connection_matrix[m["name"]] = []
-            for i in range(self.brain["n_osc"]):
-                if m["name"] == "B_biceps.R" and i == 2:
-                    self.connection_matrix[m["name"]].append(1)
-                elif m["name"] == "B_gastro.R" and i == 2:
-                    self.connection_matrix[m["name"]].append(1)
-                else:
-                    self.connection_matrix[m["name"]].append(0)
-
-    def set_conn_matrix(self, vector):
-        """Fills the connection matrix between the brain and the muscles with a vector of values"""
-
-        conn_size = len(self.connection_matrix) * self.brain["n_osc"]
-        if len(vector) != conn_size:
-            self.logger.error("Vector size (" + str(len(vector)) + ") should match with connection matrix " +
-                "size (" + str(conn_size) + "). Please use the self.get_matrix_size method to determine it!")
-        else:
-            i = 0
-            for line in self.connection_matrix:
-                for j in range(len(self.connection_matrix[line])):
-                    self.connection_matrix[line][j] = vector[i]
-                    i += 1
-
-            self.logger.debug("Connection matrix updated: " + str(self.connection_matrix))
-
-    def get_conn_matrix_vector(self):
-        """Return the matrix in form of a vector"""
-
-        vect = []
-        for line in self.connection_matrix:
-            for item in self.connection_matrix[line]:
-                vect.append(item)
-
-        return vect
-
-    def print_conn_matrix(self):
-        """Print the connection matrix"""
-
-        print("TO IMPLEMENT")
-
-        return
-
-    def get_conn_matrix_len(self):
-        """Return the total size (lines x columns) of the connection matrix"""
-
-        return (len(self.connection_matrix) * self.brain["n_osc"])
+        self.config_connection_matrix()
 
 
 class MouseDefConfig(Config):
@@ -413,7 +417,7 @@ class MouseDefConfig(Config):
         self.front_leg_R_muscles = []  # FR_biceps, FR_triceps, FR_gastro]
 
         # Brain
-        self.brain = {"name": "default_dog_matsuoka_brain", "n_osc": 4, "h": 1e-3, "tau": 1e-2,
+        self.brain = {"name": "default_mouse_brain", "n_osc": 4, "h": 1e-3, "tau": 1e-2,
                       "T": 5e-2, "a": 10.5, "b": 20.5, "c": 0.08, "aa": 3, "time_interval": 1e-3}
 
         # Body
@@ -423,8 +427,9 @@ class MouseDefConfig(Config):
         neck2 = {"name": "muscle_neck2", "logger": "INFO", "obj_1": "obj_body", "obj_2": "obj_head",
                  "anch_1": [-0.59, 0, 1.4], "anch_2": [0.117, 0, -0.26], "k": 2000,
                  "c": 100, "kc": 0, "kl0": 0.8}
-        body_muscles = []  # neck1, neck2]
-        self.body = {"name": "Cheesy", "obj": "obj_body", "muscles": body_muscles}
+        self.body_muscles = []  # neck1, neck2]
+        self.body = {"name": "Cheesy", "obj": "obj_body", "muscles": self.body_muscles}
+        self.config_connection_matrix()
 
 
 class MouseSimpleConfig(Config):
@@ -487,5 +492,6 @@ class MouseSimpleConfig(Config):
         neck = {"name": "muscle_neck2", "logger": "INFO", "obj_1": "joint_1_obj_neck", "obj_2": "obj_neck",
                 "anch_1": [-0.59, 0, 1.4], "anch_2": [0.117, 0, -0.26],
                 "brain_sig": None, "maxF": -0.465}
-        body_muscles = [neck]
-        self.body = {"name": "Mouse", "obj": "obj_body", "muscles": body_muscles}
+        self.body_muscles = [neck]
+        self.body = {"name": "Mouse", "obj": "obj_body", "muscles": self.body_muscles}
+        self.config_connection_matrix()

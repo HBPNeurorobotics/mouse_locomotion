@@ -74,7 +74,7 @@ class Result:
         return
 
     def save(self):
-        """Save the results dictionnary"""
+        """Save the results dictionary"""
         global pickle
 
         # Compute report if initialized with body and config
@@ -93,7 +93,7 @@ class Result:
         return
 
     def load(self, file):
-        """Load the result dictionnary from file"""
+        """Load the result dictionary from file"""
 
         if os.path.isfile(file):
             try:
@@ -110,12 +110,12 @@ class Result:
         return
 
     def get_results(self, file=None):
-        """Return the results dictionnary"""
+        """Return the results dictionary"""
 
         if file:
             self.load(file)
 
-        return self.result_dict
+        return self.__str__()
 
     def __str__(self):
         """Overload the string method to print a clear report"""

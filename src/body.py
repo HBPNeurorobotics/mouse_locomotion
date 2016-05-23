@@ -72,10 +72,9 @@ class Leg(Part):
                     j += 1
 
                 self.muscles[i].update(ctrl_sig=ctrl_sig)
-
+                self.logger.debug(self.name + " " + self.orien + " iteration " + str(self.n_iter) +
+                                  ": Control signal = " + str(ctrl_sig))
         self.n_iter += 1
-        self.logger.debug(self.name + " " + self.orien + " iteration " + str(self.n_iter) + ": Control signal = " +
-            str(ctrl_sig))
 
 
 class Backleg(Leg):
@@ -127,7 +126,7 @@ class Body(Part):
         # Create and init variables for loss function
         self.origin = self.body_obj.worldTransform * vec((0, 0, 0))
         self.position = self.origin
-        self.dist = vec(self.position - self.origin).length
+        self.dist = vec(self.position - self.origin).y
         self.powers = []
         self.av_power = 0.0
         self.loss_fct = 0.0
@@ -152,8 +151,7 @@ class Body(Part):
         self.position = self.body_obj.worldTransform * vec((0, 0, 0))
 
         # Get distance
-        self.dist = vec(self.position - self.origin).length
-
+        self.dist = math.fabs(vec(self.position - self.origin).y)
         return
 
     def compute_power(self):

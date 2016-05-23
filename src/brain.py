@@ -15,7 +15,6 @@
 ##
 
 
-import logging
 import numpy as np
 
 
@@ -25,19 +24,19 @@ class Matsuoka:
     def __init__(self, config_):
         """Class initialization"""
         self.config = config_
-        self.h = self.config.brain["h"]
-        self.tau = self.config.brain["tau"]
-        self.T = self.config.brain["T"]
+        self.h = self.config.brain["h"]  # Constant for Euler's approximation method
+        self.tau = self.config.brain["tau"]  # Time constant tau = RC
+        self.T = self.config.brain["T"]  # Time constant for adaptation
         self.a = self.config.brain["a"]
-        self.b = self.config.brain["b"]
-        self.c = self.config.brain["c"]
+        self.b = self.config.brain["b"]  # Adaptation parameter
+        self.c = self.config.brain["c"]  # Default membrane potential
         self.aa = self.config.brain["aa"]
-        self.A = self.aa * np.array([[0, -1, -1, 1], [-1, 0, 1, -1], [-1, 1, 0, -1], [1, -1, -1, 0]])
-        self.n_osc = self.config.brain["n_osc"]
+        self.A = self.aa * np.array([[0, -1, 1, -1], [-1, 0, -1, 1], [-1, 1, 0, -1], [1, -1, -1, 0]])  # Gate matrix
+        self.n_osc = self.config.brain["n_osc"]  # Number of oscillators
         self.x = np.zeros((self.n_osc, 1)) + np.array([[0.1], [0.1], [0.2], [0.2]])
         self.v = np.zeros((self.n_osc, 1)) + np.array([[0.1], [0.1], [0.2], [0.2]])
         self.y = np.zeros((self.n_osc, 1)) + np.array([[0.1], [0.1], [0.2], [0.2]])
-        self.g = lambda x: max(0., x)
+        self.g = lambda x: max(0., x)  # Spiking threshold equals 0
         self.Record = 0
         self.time = []
         self.time_interval = self.config.brain["time_interval"]
@@ -76,4 +75,4 @@ class Brain:
 
         self.n_iter += 1
         self.logger.debug("Brain " + self.name + " iteration " + str(self.n_iter) + ": State vector: " +
-            str(np.transpose(self.state)))
+                          str(np.transpose(self.state)))
