@@ -96,6 +96,28 @@ class Config:
 
             self.logger.debug("Connection matrix updated: " + str(self.connection_matrix))
 
+    def set_leg_conn_matrix(self, vector):
+        """Fills the connection matrix between the brain and the muscles of the leg with a vector of values"""
+
+        if len(vector) != self.get_conn_matrix_leg_len():
+            self.logger.error("Vector size (" + str(len(vector)) + ") should match with connection matrix " +
+                              "size (" + str(self.get_conn_matrix_leg_len()) + 
+                              "). Please use the self.get_matrix_size method to determine it!")
+        else:
+            i = 0
+            for line in self.connection_matrix:
+                if line == "B_biceps.L" or line == "B_biceps.R" \
+                    or line == "F_biceps.L" or line == "F_biceps.R" \
+                    or line == "B_triceps.L" or line == "B_triceps.R" \
+                    or line == "F_triceps.L" or line == "F_triceps.R" \
+                    or line == "B_gastro.L" or line == "B_gastro.R" \
+                    or line == "F_gastro.L" or line == "F_gastro.R":
+                        for j in range(len(self.connection_matrix[line])):
+                            self.connection_matrix[line][j] = vector[i]
+                            i += 1
+
+            self.logger.debug("Connection matrix updated for leg: " + str(self.connection_matrix))
+
     def get_conn_matrix_vector(self):
         """Return the matrix in form of a vector"""
 
@@ -117,6 +139,11 @@ class Config:
         """Return the total size (lines x columns) of the connection matrix"""
 
         return len(self.connection_matrix) * self.brain["n_osc"]
+
+    def get_conn_matrix_leg_len(self):
+        """Return the size (lines x columns) of the connection matrix for legs"""
+
+        return 12 * self.brain["n_osc"]
 
     def config_connection_matrix(self):
         # Fill default connection matrix
@@ -247,7 +274,7 @@ class DogVertDefConfig(Config):
         self.logger = logging.Logger(self.logger_name)
         self.muscle_type = "DampedSpringMuscle"
         self.name = "default_dog_vert_simulation_config"
-        self.exit_condition = "owner['config'].n_iter > 2500"  # "bge.logic.getCurrentScene().objects['obj_body.B'].worldPosition.z < -1.8"
+        self.exit_condition = "owner['config'].n_iter > 3500"  # "bge.logic.getCurrentScene().objects['obj_body.B'].worldPosition.z < -1.8"
 
         # Back legs
         BL_biceps = {"name": "B_biceps.L", "logger": "INFO", "obj_1": "obj_body.B", "obj_2": "obj_shin.L",

@@ -82,5 +82,4 @@ class Process(Manager):
         rs_ls = ""
         for i in res_list:
             rs_ls += str(i) + "\n"
-        logging.info("Results:\n" + rs_ls)
         logging.info("Simulation Finished!")

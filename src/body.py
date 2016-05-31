@@ -130,6 +130,8 @@ class Body(Part):
         self.powers = []
         self.av_power = 0.0
         self.loss_fct = 0.0
+        self.penalty = False
+        self.count = 0
 
         # Create 4 legs
         self.l_fo_leg = Foreleg(config_, "L", simulator)
@@ -151,7 +153,7 @@ class Body(Part):
         self.position = self.body_obj.worldTransform * vec((0, 0, 0))
 
         # Get distance
-        self.dist = math.fabs(vec(self.position - self.origin).y)
+        self.dist = math.fabs(vec(self.position - self.origin).x)
         return
 
     def compute_power(self):
@@ -174,6 +176,23 @@ class Body(Part):
 
         return
 
+    def monitor_fall(self):
+        """Add a fall penalty if head stay under the stand-up level for more than 20 iterations"""
+
+        # Do it here
+        head_pos = self.simulator.get_object("obj_head").worldPosition.z
+        if head_pos < -1.8:
+            if self.count > 20:
+                self.penalty = True
+            self.count += 1
+        else:
+            self.count = 0
+
+        #a = self.body_obj.worldTransform * vec((0, 0, 0))
+        # Get distance
+        #print("Pos X : " + str(math.fabs(vec(a - self.origin).x)) + " Y : " + str(math.fabs(vec(a - self.origin).y)) + " Z : " + str(math.fabs(vec(a - self.origin).z)))
+
+
     def get_loss_fct(self):
         """Compute the body loss function. This should be called only at the end of the simulation
         in order to avoid useless computation at each iteration"""
@@ -181,9 +200,11 @@ class Body(Part):
         self.compute_traveled_dist()
         self.av_power = sum(self.powers) / float(len(self.powers))
 
-        self.loss_fct = math.tanh(self.dist / self.config.dist_ref) * math.tanh(self.config.power_ref / self.av_power)
+        if self.penalty:
+            self.dist = 0
+        self.loss_fct = self.dist#math.tanh(self.dist / self.config.dist_ref) * math.tanh(self.config.power_ref / self.av_power)
 
-        return self.loss_fct + 1
+        return self.loss_fct# + 1
 
     def update(self):
         """Update control signals and forces"""
@@ -205,6 +226,9 @@ class Body(Part):
 
         # Update powers list
         self.compute_power()
+
+        # Monitor fall
+        self.monitor_fall()
 
         self.n_iter += 1
         self.logger.debug("Body " + self.name + " iteration " + str(self.n_iter))

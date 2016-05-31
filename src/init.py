@@ -76,7 +76,7 @@ configuration.save_path = SAVE_NAME
 configuration.n_iter = 0
 configuration.t_init = time.time()
 if GENOME:
-    configuration.set_conn_matrix(GENOME)
+    configuration.set_leg_conn_matrix(GENOME)
 
 # Init owner variables
 owner["config"] = configuration
