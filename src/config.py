@@ -89,7 +89,7 @@ class Config:
                 conn_size) + "). Please use the self.get_matrix_size method to determine it!")
         else:
             i = 0
-            for line in self.connection_matrix:
+            for line in sorted(self.connection_matrix):
                 for j in range(len(self.connection_matrix[line])):
                     self.connection_matrix[line][j] = vector[i]
                     i += 1
@@ -105,7 +105,7 @@ class Config:
                               "). Please use the self.get_matrix_size method to determine it!")
         else:
             i = 0
-            for line in self.connection_matrix:
+            for line in sorted(self.connection_matrix):
                 if line == "B_biceps.L" or line == "B_biceps.R" \
                     or line == "F_biceps.L" or line == "F_biceps.R" \
                     or line == "B_triceps.L" or line == "B_triceps.R" \
@@ -122,18 +122,24 @@ class Config:
         """Return the matrix in form of a vector"""
 
         vect = []
-        for line in self.connection_matrix:
+        for line in sorted(self.connection_matrix):
             for item in self.connection_matrix[line]:
                 vect.append(item)
 
         return vect
 
-    def print_conn_matrix(self):
+    def str_conn_matrix(self):
         """Print the connection matrix"""
 
-        print("TO IMPLEMENT")
+        st = 'Connection Matrix:\n'
+        for line in self.connection_matrix:
+            st += line + "= [ "
+            for j in range(len(self.connection_matrix[line])):
+                st += str(self.connection_matrix[line][j]) + " "
 
-        return
+            st += "],  "
+
+        return st
 
     def get_conn_matrix_len(self):
         """Return the total size (lines x columns) of the connection matrix"""
