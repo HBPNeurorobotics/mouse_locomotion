@@ -97,7 +97,8 @@ class Genetic(Optimization):
                 scores.append(0)
 
         logging.info("Population scores: " + str(scores))
-        logging.info("Population mean score: " + str(sum(scores)/len(scores)))
+        if len(scores) > 0:
+            logging.info("Population mean score: " + str(sum(scores) / len(scores)))
 
         # Update the score of each specimen
         i = 0

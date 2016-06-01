@@ -52,9 +52,14 @@ class Result:
         self.result_dict["t_sim"] = self.result_dict["t_end"] - self.result_dict["t_init"]
         self.result_dict["t_out"] = self.config.timeout
 
+        try:
+            test = eval(self.config.exit_condition)
+        except Exception:
+            test = False
+
         if self.result_dict["t_sim"] > self.result_dict["t_out"]:
             self.result_dict["stop"] = "Timeout"
-        elif eval(self.config.exit_condition):
+        elif test:
             self.result_dict["stop"] = "Config exit condition"
         else:
             self.result_dict["stop"] = "User interruption"
@@ -70,12 +75,16 @@ class Result:
         self.result_dict["config_name"] = self.config.name
         self.result_dict["config_opt"] = None  # TODO: fill here!
         self.result_dict["config_muscles"] = self.config.muscle_type
-
         return
 
-    def save(self):
-        """Save the results dictionary"""
+    @staticmethod
+    def save(filename, element):
         global pickle
+        with open(filename, 'wb') as f:
+            pickle.dump(element, f, protocol=2)
+
+    def save_results(self):
+        """Save the results dictionary"""
 
         # Compute report if initialized with body and config
         if self.body:
@@ -83,12 +92,11 @@ class Result:
 
         # Save when not empty
         if self.result_dict:
-            with open(self.config.save_path, 'wb') as f:
-                pickle.dump(self.result_dict, f, protocol=2)
-                self.void = True
+            self.save(self.config.save_path, self.result_dict)
+            self.void = True
 
         else:
-            self.logger.error("This result dictionnary is currently empty. First load some results before saving.")
+            self.logger.error("This result dictionary is currently empty. First load some results before saving.")
 
         return
 

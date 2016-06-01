@@ -18,10 +18,10 @@
 
 import datetime
 import logging
-import pickle
 import time
 import sys
 from optimization import Genetic
+from result import Result
 
 if sys.version_info[:2] < (3, 4):
     import common
@@ -63,9 +63,8 @@ class Process(Manager):
 
         # Save best individu parameters
         if self.opt["save"]:
-            save_name = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + ".gabi"
-            with open(save_name, 'wb') as f:
-                pickle.dump(genetic.ga.bestIndividual().getInternalList(), f, protocol=2)
+            Result.save(datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + ".gabi",
+                        genetic.ga.bestIndividual().getInternalList())
 
     def muscle_opti_sim(self):
         """Run an iterative simulation to optimize the muscles parameters"""
@@ -77,10 +76,10 @@ class Process(Manager):
 
         if "local" in sim_list and sim_list["local"]:
             res_list = [common.launch_simulator(sim_list)]
-        if "load_file" in sim_list and sim_list["load_file"]:
-            with open(sim_list["load_file"], 'rb') as f:
-                sim_list["genome"] = pickle.load(f)
-                res_list = [common.launch_simulator(sim_list)]
+        elif "load_file" in sim_list and sim_list["load_file"]:
+            res = Result()
+            sim_list["genome"] = res.get_results(sim_list["load_file"])
+            res_list = [common.launch_simulator(sim_list)]
 
         else:
             # Start manager

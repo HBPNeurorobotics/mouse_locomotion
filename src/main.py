@@ -27,7 +27,7 @@ keyboard = bge.logic.keyboard
 # TODO: Do something with the simulation even if there is no logger declared
 if hasattr(owner["config"], 'logger'):
     # Time-step update instructions
-    owner["body"].update()
+    penalty = owner["body"].update()
 
     # DEBUG control and display
     owner["config"].n_iter += 1
@@ -40,7 +40,7 @@ if hasattr(owner["config"], 'logger'):
     # Simulation interruption
     if eval(owner["config"].exit_condition) \
             or bge.logic.KX_INPUT_ACTIVE == keyboard.events[bge.events.SPACEKEY] \
-            or time.time() - owner["config"].t_init > owner["config"].timeout:
+            or time.time() - owner["config"].t_init > owner["config"].timeout or penalty:
 
         # Get time of simulation
         owner["config"].t_end = time.time()
@@ -49,7 +49,7 @@ if hasattr(owner["config"], 'logger'):
         try:
             results = Result(owner["body"])
             owner["config"].logger.info(results)
-            results.save()
+            results.save_results()
         except Exception as e:
             owner["config"].logger.error("Unable to create a result report. Caused by: " + str(e))
             pass

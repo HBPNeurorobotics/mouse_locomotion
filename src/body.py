@@ -187,11 +187,9 @@ class Body(Part):
             self.count += 1
         else:
             self.count = 0
-
-        #a = self.body_obj.worldTransform * vec((0, 0, 0))
+            # a = self.body_obj.worldTransform * vec((0, 0, 0))
         # Get distance
-        #print("Pos X : " + str(math.fabs(vec(a - self.origin).x)) + " Y : " + str(math.fabs(vec(a - self.origin).y)) + " Z : " + str(math.fabs(vec(a - self.origin).z)))
-
+            # print("Pos X : " + str(math.fabs(vec(a - self.origin).x)) + " Y : " + str(math.fabs(vec(a - self.origin).y)) + " Z : " + str(math.fabs(vec(a - self.origin).z)))
 
     def get_loss_fct(self):
         """Compute the body loss function. This should be called only at the end of the simulation
@@ -202,9 +200,9 @@ class Body(Part):
 
         if self.penalty:
             self.dist = 0
-        self.loss_fct = self.dist#math.tanh(self.dist / self.config.dist_ref) * math.tanh(self.config.power_ref / self.av_power)
+        self.loss_fct = self.dist  # math.tanh(self.dist / self.config.dist_ref) * math.tanh(self.config.power_ref / self.av_power)
 
-        return self.loss_fct# + 1
+        return self.loss_fct  # + 1
 
     def update(self):
         """Update control signals and forces"""
@@ -233,3 +231,4 @@ class Body(Part):
         self.n_iter += 1
         self.logger.debug("Body " + self.name + " iteration " + str(self.n_iter))
         self.logger.debug("Average power: " + "{0:0.2f}".format(self.av_power))
+        return self.penalty
