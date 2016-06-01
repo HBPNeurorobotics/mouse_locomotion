@@ -17,6 +17,7 @@
 ##
 import time
 
+import copy
 from config import *
 from pyevolve import *
 import logging
@@ -24,7 +25,7 @@ from optimization import Optimization
 
 
 class Genetic(Optimization):
-    def __init__(self, opt, observable, genome_size=10, population_size=25, num_max_generation=50, mutation_rate=0.2,
+    def __init__(self, opt, observable, genome_size=10, population_size=10, num_max_generation=50, mutation_rate=0.2,
                  cross_over_rate=0.65, genome_min=-2, genome_max=2.0, interactive_mode=False, stop_num_av=10,
                  stop_thresh=0.01):
         """Creation and initialization function for the genome and the genetic algorithm. It fixes the
@@ -79,7 +80,9 @@ class Genetic(Optimization):
         sim_list = []
         for ind in population.internalPop:
             self.opt["genome"] = ind.getInternalList()
-            sim_list.append(self.opt)
+            sim_list.append(copy.copy(self.opt))
+            #print("GENOME: " + str(ind.getInternalList()))
+            #print("SIMLUIST: " + str(sim_list) + "\n\n")
 
         self.observable.run_sim(sim_list)
 
