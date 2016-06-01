@@ -62,6 +62,7 @@ case "$1" in
 	# Start X buffer server
 	echo "[RPYC SERVER] Start X frame buffer "
  	#eval "${REMOTE_CMD} cd ${REMOTE_LOG_FOLDER}; screen -dmLS ${XVFB_NAME} Xvfb :99 -screen 0 640x480x24'"
+ 	#export DISPLAY=:99
 
 	# Start RPYC server
 	#echo "[RPYC SERVER] Start RPYC server on port 18812 "
