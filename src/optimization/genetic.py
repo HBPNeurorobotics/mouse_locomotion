@@ -17,6 +17,7 @@
 ##
 import time
 
+import copy
 from config import *
 from pyevolve import *
 import logging
@@ -24,8 +25,8 @@ from optimization import Optimization
 
 
 class Genetic(Optimization):
-    def __init__(self, opt, observable, genome_size=10, population_size=5, num_max_generation=4, mutation_rate=0.2,
-                 cross_over_rate=0.9, genome_min=0, genome_max=1.0, interactive_mode=False, stop_num_av=10,
+    def __init__(self, opt, observable, genome_size=10, population_size=10, num_max_generation=50, mutation_rate=0.2,
+                 cross_over_rate=0.65, genome_min=-2, genome_max=2.0, interactive_mode=False, stop_num_av=10,
                  stop_thresh=0.01):
         """Creation and initialization function for the genome and the genetic algorithm. It fixes the
         parameters to use in the algorithm"""
@@ -36,7 +37,7 @@ class Genetic(Optimization):
         self.genome_size = genome_size
         if opt["sim_type"] == "BRAIN":
             config = eval(opt["config_name"] + "()")
-            self.genome_size = config.get_conn_matrix_len()
+            self.genome_size = config.get_conn_matrix_leg_len()
         self.mutation_rate = mutation_rate
         self.cross_over_rate = cross_over_rate
         self.genome_min = genome_min
@@ -44,7 +45,7 @@ class Genetic(Optimization):
         self.interactive_mode = interactive_mode
         self.initializator = Initializators.G1DListInitializatorReal
         self.mutator = Mutators.G1DListMutatorRealGaussian
-        self.selector = Selectors.GTournamentSelector
+        self.selector = Selectors.GRankSelector
         self.stop_num_av = stop_num_av
 
         # Create a genome instance and parametrize it
@@ -63,6 +64,7 @@ class Genetic(Optimization):
         self.ga.setInteractiveMode(self.interactive_mode)
         self.ga.terminationCriteria.set(self.conv_fct)
         self.ga.setEvaluator(self.eval_fct)
+        self.ga.setMinimax(Consts.minimaxType["maximize"])
 
     def eval_fct(self, population):
         """Evaluation function of the genetic algorithm. For each population, it computes the
@@ -73,13 +75,17 @@ class Genetic(Optimization):
         if super_score is not None:
             return super_score
         scores = []
+
         # Create a config for the genome
         sim_list = []
         for ind in population.internalPop:
             self.opt["genome"] = ind.getInternalList()
-            sim_list.append(self.opt)
+            sim_list.append(copy.copy(self.opt))
+            #print("GENOME: " + str(ind.getInternalList()))
+            #print("SIMLUIST: " + str(sim_list) + "\n\n")
 
         self.observable.run_sim(sim_list)
+
         # Wait for simulation results
         while len(self.res_list) < len(sim_list) and not self.interruption:
             time.sleep(0.1)
@@ -89,6 +95,9 @@ class Genetic(Optimization):
                 scores.append(res["score"])
             else:
                 scores.append(0)
+
+        logging.info("Population scores: " + str(scores))
+        logging.info("Population mean score: " + str(sum(scores)/len(scores)))
 
         # Update the score of each specimen
         i = 0

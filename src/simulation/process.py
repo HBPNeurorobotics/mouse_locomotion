@@ -16,7 +16,9 @@
 # Modified by: Dimitri Rodarie
 ##
 
+import datetime
 import logging
+import pickle
 import time
 import sys
 from optimization import Genetic
@@ -59,6 +61,12 @@ class Process(Manager):
         time.sleep(1)
         logging.info(genetic.ga.bestIndividual())
 
+        # Save best individu parameters
+        if self.opt["save"]:
+            save_name = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + ".gabi"
+            with open(save_name, 'wb') as f:
+                pickle.dump(genetic.ga.bestIndividual().getInternalList(), f, protocol=2)
+
     def muscle_opti_sim(self):
         """Run an iterative simulation to optimize the muscles parameters"""
 
@@ -66,8 +74,14 @@ class Process(Manager):
 
     def run_sim(self, sim_list):
         """Run a simple on shot simulation"""
+
         if "local" in sim_list and sim_list["local"]:
             res_list = [common.launch_simulator(sim_list)]
+        if "load_file" in sim_list and sim_list["load_file"]:
+            with open(sim_list["load_file"], 'rb') as f:
+                sim_list["genome"] = pickle.load(f)
+                res_list = [common.launch_simulator(sim_list)]
+
         else:
             # Start manager
             Manager.start(self)
@@ -82,5 +96,4 @@ class Process(Manager):
         rs_ls = ""
         for i in res_list:
             rs_ls += str(i) + "\n"
-        logging.info("Results:\n" + rs_ls)
         logging.info("Simulation Finished!")

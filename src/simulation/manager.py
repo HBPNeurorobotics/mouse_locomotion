@@ -173,8 +173,7 @@ class Manager(Simulation, Observable):
                 if server_hash in self.cloud_state:
                     if not rsp.error:
                         logging.info("Response received from server " + str(self.cloud_state[server_hash]["address"]) +
-                                     ":" + str(self.cloud_state[server_hash]["port"]) + " with " +
-                                     str(self.cloud_state[server_hash]["n_threads"]) + " threads: " + str(rsp.value))
+                                     ":" + str(self.cloud_state[server_hash]["port"]))
                     kwargs = {"res": self.rpycCasting(rsp)}
                     self.notify_observers(**kwargs)
                     self.mutex_cloud_state.acquire()

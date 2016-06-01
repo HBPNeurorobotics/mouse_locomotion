@@ -115,7 +115,7 @@ class Result:
         if file:
             self.load(file)
 
-        return self.__str__()
+        return self.result_dict
 
     def __str__(self):
         """Overload the string method to print a clear report"""
