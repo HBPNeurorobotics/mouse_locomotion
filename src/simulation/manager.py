@@ -70,12 +70,15 @@ class Manager(Simulation, Observable):
         self.server_dispo = False
         self.t_sim_init = 0
         self.sim_time = 0
+        self.sim_timeout = self.opt["timeout"]
+        self.results = {}
         # Threading
         self.mutex_cloud_state = Lock()
         self.mutex_server_list = Lock()
         self.mutex_conn_list = Lock()
         self.mutex_rsp = Lock()
         self.mutex_rqt = Lock()
+        self.mutex_res = Lock()
 
         self.thread = None
         logging.debug("Sim Manager initialization achieved. Number of active threads = " +
@@ -93,6 +96,7 @@ class Manager(Simulation, Observable):
             if self.reg_found:
                 logging.info("Simulation servers not found on the network!")
                 self.reg_found = False
+                self.server_list = []
             pass
         self.mutex_server_list.release()
 
@@ -117,6 +121,7 @@ class Manager(Simulation, Observable):
         # Compare and update cloud_state set if needed
         for elem in keys_serv_dict.difference(keys_cloud_state):
             self.cloud_state[elem] = serv_dict[elem]
+            self.cloud_state[elem]["status"] = True
         for elem in keys_cloud_state.difference(keys_serv_dict):
             self.cloud_state.pop(elem)
 
@@ -134,9 +139,10 @@ class Manager(Simulation, Observable):
         logging.debug("List of registered simulation computers: " + str(self.server_list))
 
         # We select an available server on the cloud_state list minimizing thread numbers
+        self.check_sim()
         self.mutex_cloud_state.acquire()
         for key in self.cloud_state:
-            if 0 <= self.cloud_state[key]["n_threads"] < 2:
+            if 0 <= self.cloud_state[key]["n_threads"] < 2 and self.cloud_state[key]["status"]:
                 self.mutex_cloud_state.release()
                 return key
         self.mutex_cloud_state.release()
@@ -174,11 +180,11 @@ class Manager(Simulation, Observable):
                     if not rsp.error:
                         logging.info("Response received from server " + str(self.cloud_state[server_hash]["address"]) +
                                      ":" + str(self.cloud_state[server_hash]["port"]))
-                    kwargs = {"res": self.rpycCasting(rsp)}
-                    self.notify_observers(**kwargs)
-                    self.mutex_cloud_state.acquire()
-                    self.cloud_state[server_hash]["n_threads"] -= 1
-                    self.mutex_cloud_state.release()
+                        self.notify_observers(**{"res": self.rpycCasting(rsp)})
+                        self.mutex_cloud_state.acquire()
+                        self.cloud_state[server_hash]["n_threads"] -= 1
+                        self.mutex_cloud_state.release()
+                        self.del_clean_simulation(server_hash, rsp)
                 else:
                     logging.error("Server " + str(self.cloud_state[server_hash]["address"]) +
                                   ":" + str(self.cloud_state[server_hash]["address"]) +
@@ -325,14 +331,17 @@ class Manager(Simulation, Observable):
 
                         try:
                             # Call asynchronous service
-                            res = async_simulation(self.rqt[-1])
-
+                            rqt = self.rqt[-1]
+                            res = async_simulation(rqt)
+                            res.set_expiry(self.sim_timeout)
                             # Assign asynchronous callback
                             res.add_callback(self.response_sim)
+                            if server_hash not in self.results:
+                                self.results[server_hash] = []
+                            self.results[server_hash].append([rqt, res])
 
                         except Exception as e:
                             logging.error("Exception from server:" + str(e))
-                            pass
 
                         # Clear request from list: TODO: check if async_simulation don't need it anymore!
                         self.mutex_rqt.acquire()
@@ -348,3 +357,39 @@ class Manager(Simulation, Observable):
 
         logging.info("Simulation Manager has terminated properly!")
         self.terminated = True
+
+    def del_clean_simulation(self, server_hash, res):
+        if server_hash in self.results:
+            server = self.results[server_hash]
+            for simulation in server:
+                if res == simulation[1] and res.ready:
+                    self.mutex_res.acquire()
+                    del self.results[server_hash][server.index(simulation)]
+                    self.mutex_res.release()
+                    break
+
+    def check_sim(self):
+        for server_hash, simulations in self.results.items():
+            clean = True
+            for simulation in simulations:
+                result = simulation[1]
+                if result.expired or result.error:
+                    clean = False
+                    break
+            if not clean:
+                self.mutex_rqt.acquire()
+                for simulation in simulations:
+                    rqt = simulation[0]
+                    self.rqt.append(rqt)
+                self.mutex_rqt.release()
+
+                self.mutex_cloud_state.acquire()
+                logging.error("Timeout from server: " +
+                              str(self.cloud_state[server_hash]["address"]) + ":" +
+                              str(self.cloud_state[server_hash]["port"]))
+                self.cloud_state[server_hash]["status"] = False
+                self.mutex_cloud_state.release()
+
+                self.mutex_res.acquire()
+                del self.results[server_hash]
+                self.mutex_res.release()

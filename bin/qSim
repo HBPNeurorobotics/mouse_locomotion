@@ -28,7 +28,7 @@ src = root + "/src"
 sys.path.append(src)
 
 from plumbum import cli
-from simulation import Simulation, SimServer, Registry, Process
+from simulation import SimServer, Registry, Process
 
 
 class SimCli(cli.Application):
@@ -39,7 +39,7 @@ class SimCli(cli.Application):
                "root_dir": root,
                "config_name": "DogVertDefConfig", "sim_type": "RUN", "registry": False, "service": False,
                "local": False, "logfile": os.path.expanduser("~").replace("\\", "/") + "/.log/qSim.log",
-               "fullscreen": False, "save": False, "load_file": False}
+               "fullscreen": False, "save": False, "load_file": False, "timeout": 120}
 
     # Simulation parameters
     simulator = cli.SwitchAttr(["-e", "--environment"], str, default=DEF_OPT["simulator"],
@@ -52,6 +52,8 @@ class SimCli(cli.Application):
                             help="The config class to be used for simulation")
     sim_type = cli.SwitchAttr(["-t", "--type"], str, default=DEF_OPT["sim_type"],
                               help="Specify the type of simulation: RUN, BRAIN or MUSCLE")
+    sim_timeout = cli.SwitchAttr(["-d", "--timeout"], str, default=DEF_OPT["timeout"],
+                                 help="Maximum duration for the simulation")
 
     # Server modes
     registry = cli.Flag(["-r"], default=DEF_OPT["registry"],
@@ -94,6 +96,7 @@ class SimCli(cli.Application):
         opt["local"] = self.local
         opt["load_file"] = self.load_file
         opt["save"] = self.save
+        opt["timeout"] = self.sim_timeout
 
         # Configure logging
         log_file = opt["logfile"]
