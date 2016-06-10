@@ -81,8 +81,6 @@ class Genetic(Optimization):
         for ind in population.internalPop:
             self.opt["genome"] = ind.getInternalList()
             sim_list.append(copy.copy(self.opt))
-            #print("GENOME: " + str(ind.getInternalList()))
-            #print("SIMLUIST: " + str(sim_list) + "\n\n")
 
         self.observable.run_sim(sim_list)
 
@@ -95,11 +93,7 @@ class Genetic(Optimization):
                 scores.append(res["score"])
             else:
                 scores.append(0)
-
-        logging.info("Population scores: " + str(scores))
-        if len(scores) > 0:
-            logging.info("Population mean score: " + str(sum(scores) / len(scores)))
-
+        self.ga.printStats()
         # Update the score of each specimen
         i = 0
         for ind in population.internalPop:

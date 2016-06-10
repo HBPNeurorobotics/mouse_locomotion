@@ -724,8 +724,6 @@ class GSimpleGA:
       percent = self.currentGeneration * 100 / float(self.nGenerations)
       message = "Gen. %d (%.2f%%):" % (self.currentGeneration, percent)
       logging.info(message)
-      print message,
-      sys_stdout.flush()
       self.internalPop.statistics()
       stat_ret = self.internalPop.printStats()
       return message + stat_ret

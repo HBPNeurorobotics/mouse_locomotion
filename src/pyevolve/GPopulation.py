@@ -421,13 +421,11 @@ class GPopulation:
 
    def printStats(self):
       """ Print statistics of the current population """
-      message = ""
       if self.sortType == Consts.sortType["scaled"]:
          message = "Max/Min/Avg Fitness(Raw) [%(fitMax).2f(%(rawMax).2f)/%(fitMin).2f(%(rawMin).2f)/%(fitAve).2f(%(rawAve).2f)]" % self.stats
       else:
          message = "Max/Min/Avg Raw [%(rawMax).2f/%(rawMin).2f/%(rawAve).2f]" % self.stats
       logging.info(message)
-      print message
       return message
 
    def copy(self, pop):
