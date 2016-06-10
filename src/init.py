@@ -28,15 +28,14 @@ src = root + "/src/"
 sys.path.append(src)
 
 from body import *
-from config import *
-from utils import BlenderUtils
+from config import Config
+from utils.simulators import BlenderUtils
 
 
 # Get BGE handles
 scene = bge.logic.getCurrentScene()
 
 GENOME = False
-
 if sys.argv[len(sys.argv) - 1] == "FROM_START.PY":
     # Catch command-line config when started from another script
     argv = sys.argv
@@ -48,7 +47,7 @@ if sys.argv[len(sys.argv) - 1] == "FROM_START.PY":
         GENOME = eval(argv["genome"])
 else:
     # Default config when started directly from Blender
-    CONFIG_NAME = "DogVertDefConfig()"
+    CONFIG_NAME = root + "/configs/default_dog_vert_simulation_config.json"
     LOG_FILE = os.path.expanduser("~").replace("\\", "/") + "/.log/qSim.log"
     dirname = root + "/save"
     filename = "sim_" + datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + ".qsm"
@@ -70,7 +69,7 @@ if not os.path.exists(LOG_FILE):
 # Init configuration
 logging.config.fileConfig(root + "/etc/logging.conf",
                           defaults={'logfilename': LOG_FILE, 'simLevel': "DEBUG"})
-configuration = eval(CONFIG_NAME)
+configuration = Config(CONFIG_NAME)
 logger = configuration.logger
 configuration.save_path = SAVE_NAME
 configuration.n_iter = 0

@@ -56,7 +56,7 @@ class Blender(Simulator):
             self.args.extend(["-f"])
         self.args.extend([self.opt["model"]])
         self.args.extend(["-"])
-        params = {'config_name': self.opt["config_name"] + "()",
+        params = {'config_name': self.opt["config_name"],
                   'logfile': str(self.opt["logfile"]),
                   'filename': self.filename}
         if "genome" in self.opt:

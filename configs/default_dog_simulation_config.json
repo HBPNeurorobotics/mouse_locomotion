@@ -1,0 +1,331 @@
+{
+  "body": {
+    "muscles": [
+      {
+        "kc": 0,
+        "c": 100,
+        "k": 2000,
+        "kl0": 0.8,
+        "name": "muscle_neck1",
+        "obj_2": "obj_head",
+        "logger": "INFO",
+        "obj_1": "obj_body",
+        "anch_1": [
+          -0.95,
+          0,
+          0.47
+        ],
+        "anch_2": [
+          -0.06,
+          0,
+          -0.71
+        ]
+      },
+      {
+        "kc": 0,
+        "c": 100,
+        "k": 2000,
+        "kl0": 0.8,
+        "name": "muscle_neck2",
+        "obj_2": "obj_head",
+        "logger": "INFO",
+        "obj_1": "obj_body",
+        "anch_1": [
+          -0.59,
+          0,
+          1.4
+        ],
+        "anch_2": [
+          0.117,
+          0,
+          -0.26
+        ]
+      }
+    ],
+    "obj": "obj_body",
+    "name": "Doggy"
+  },
+  "back_leg_L_muscles": [
+    {
+      "obj_2": "obj_shin.L",
+      "obj_1": "obj_body",
+      "brain_sig": 2,
+      "kc": -15,
+      "c": 50,
+      "name": "B_biceps.L",
+      "k": 500,
+      "anch_2": [
+        -0.055,
+        0,
+        0.6
+      ],
+      "anch_1": [
+        0.95,
+        -1,
+        -0.54
+      ],
+      "kl0": 1,
+      "logger": "INFO"
+    },
+    {
+      "obj_2": "obj_shin.L",
+      "obj_1": "obj_body",
+      "brain_sig": 0,
+      "kc": -40,
+      "c": 150,
+      "name": "B_triceps.L",
+      "k": 1500,
+      "anch_2": [
+        -0.126,
+        0,
+        0.84
+      ],
+      "anch_1": [
+        0.686,
+        -1,
+        0.094
+      ],
+      "kl0": 0.8,
+      "logger": "INFO"
+    },
+    {
+      "obj_2": "obj_shin_lower.L",
+      "obj_1": "obj_shin.L",
+      "brain_sig": null,
+      "kc": 0,
+      "c": 2,
+      "name": "B_gastro.L",
+      "k": 10,
+      "anch_2": [
+        0.125,
+        0,
+        -0.08
+      ],
+      "anch_1": [
+        -0.126,
+        0,
+        0.84
+      ],
+      "kl0": 1,
+      "logger": "INFO"
+    }
+  ],
+  "muscle_type": "DampedSpringMuscle",
+  "name": "default_dog_simulation_config",
+  "simulator": "Simulator",
+  "back_leg_R_muscles": [
+    {
+      "obj_2": "obj_shin.R",
+      "obj_1": "obj_body",
+      "brain_sig": 2,
+      "kc": -15,
+      "c": 50,
+      "name": "B_biceps.R",
+      "k": 500,
+      "anch_2": [
+        -0.055,
+        0,
+        0.6
+      ],
+      "anch_1": [
+        0.95,
+        1,
+        -0.54
+      ],
+      "kl0": 1,
+      "logger": "INFO"
+    },
+    {
+      "obj_2": "obj_shin.R",
+      "obj_1": "obj_body",
+      "brain_sig": 0,
+      "kc": -40,
+      "c": 150,
+      "name": "B_triceps.R",
+      "k": 1500,
+      "anch_2": [
+        -0.126,
+        0,
+        0.84
+      ],
+      "anch_1": [
+        0.686,
+        1,
+        0.094
+      ],
+      "kl0": 0.8,
+      "logger": "INFO"
+    },
+    {
+      "obj_2": "obj_shin_lower.L",
+      "obj_1": "obj_shin.L",
+      "brain_sig": null,
+      "kc": 0,
+      "c": 2,
+      "name": "B_gastro.L",
+      "k": 10,
+      "anch_2": [
+        0.125,
+        0,
+        -0.08
+      ],
+      "anch_1": [
+        -0.126,
+        0,
+        0.84
+      ],
+      "kl0": 1,
+      "logger": "INFO"
+    }
+  ],
+  "timeout": 10,
+  "dist_ref": 20,
+  "front_leg_L_muscles": [
+    {
+      "obj_2": "obj_upper_arm.L",
+      "obj_1": "obj_body",
+      "brain_sig": 1,
+      "kc": -5,
+      "c": 40,
+      "name": "F_biceps.L",
+      "k": 400,
+      "anch_2": [
+        -0.01,
+        0,
+        0.33
+      ],
+      "anch_1": [
+        -0.93,
+        -1,
+        0.48
+      ],
+      "kl0": 1,
+      "logger": "INFO"
+    },
+    {
+      "obj_2": "obj_upper_arm.L",
+      "obj_1": "obj_body",
+      "brain_sig": 0,
+      "kc": 30,
+      "c": 100,
+      "name": "F_triceps.L",
+      "k": 1000,
+      "anch_2": [
+        0.13,
+        0,
+        0.978
+      ],
+      "anch_1": [
+        -0.61,
+        -1,
+        0.5
+      ],
+      "kl0": 0.4,
+      "logger": "INFO"
+    },
+    {
+      "obj_2": "obj_wrist.L",
+      "obj_1": "obj_upper_arm.L",
+      "brain_sig": null,
+      "kc": 0,
+      "c": 2,
+      "name": "F_gastro.L",
+      "k": 10,
+      "anch_2": [
+        0.085,
+        0,
+        0
+      ],
+      "anch_1": [
+        0.175,
+        0,
+        0.752
+      ],
+      "kl0": 1,
+      "logger": "INFO"
+    }
+  ],
+  "power_ref": 1000,
+  "front_leg_R_muscles": [
+    {
+      "obj_2": "obj_upper_arm.R",
+      "obj_1": "obj_body",
+      "brain_sig": 1,
+      "kc": -5,
+      "c": 40,
+      "name": "F_biceps.R",
+      "k": 400,
+      "anch_2": [
+        -0.01,
+        0,
+        0.33
+      ],
+      "anch_1": [
+        -0.93,
+        1,
+        0.48
+      ],
+      "kl0": 1,
+      "logger": "INFO"
+    },
+    {
+      "obj_2": "obj_upper_arm.R",
+      "obj_1": "obj_body",
+      "brain_sig": 0,
+      "kc": 30,
+      "c": 100,
+      "name": "F_triceps.R",
+      "k": 1000,
+      "anch_2": [
+        0.13,
+        0,
+        0.978
+      ],
+      "anch_1": [
+        -0.61,
+        1,
+        0.5
+      ],
+      "kl0": 0.4,
+      "logger": "INFO"
+    },
+    {
+      "obj_2": "obj_wrist.R",
+      "obj_1": "obj_upper_arm.R",
+      "brain_sig": null,
+      "kc": 0,
+      "c": 2,
+      "name": "F_gastro.R",
+      "k": 10,
+      "anch_2": [
+        0.085,
+        0,
+        0
+      ],
+      "anch_1": [
+        0.175,
+        0,
+        0.752
+      ],
+      "kl0": 1,
+      "logger": "INFO"
+    }
+  ],
+  "brain": {
+    "a": 10.5,
+    "tau": 0.01,
+    "c": 0.08,
+    "b": 20.5,
+    "name": "default_dog_matsuoka_brain",
+    "time_interval": 0.001,
+    "aa": 3,
+    "h": 0.001,
+    "T": 0.05,
+    "n_osc": 4
+  },
+  "logger_name": "INFO",
+  "save_path": "default",
+  "sim_speed": 1.0,
+  "exit_condition": "bge.logic.getCurrentScene().objects['obj_body'].worldPosition.z < -1.8",
+  "connection_matrix": {}
+}

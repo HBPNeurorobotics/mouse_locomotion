@@ -37,8 +37,9 @@ class SimCli(cli.Application):
     # Default CLI application options
     DEF_OPT = {"simulator": "BLENDER", "simulator_path": "/bin/Blender2.77/", "model": "dog_vert.blend",
                "root_dir": root,
-               "config_name": "DogVertDefConfig", "sim_type": "RUN", "registry": False, "service": False,
-               "local": False, "logfile": os.path.expanduser("~").replace("\\", "/") + "/.log/qSim.log",
+               "config_name": "default_dog_vert_simulation_config",
+               "sim_type": "RUN", "registry": False, "service": False, "local": False,
+               "logfile": os.path.expanduser("~").replace("\\", "/") + "/.log/qSim.log",
                "fullscreen": False, "save": False, "load_file": False, "timeout": 120}
 
     # Simulation parameters
@@ -90,7 +91,7 @@ class SimCli(cli.Application):
         else:
             opt["simulator_path"] = self.path
         opt["model"] = self.root + "/mdl/" + self.model
-        opt["config_name"] = self.config
+        opt["config_name"] = self.root + "/configs/" + self.config + ".json"
         opt["sim_type"] = self.sim_type
         opt["fullscreen"] = self.fullscreen
         opt["local"] = self.local

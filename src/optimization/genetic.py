@@ -18,7 +18,7 @@
 import time
 
 import copy
-from config import *
+from config import Config
 from pyevolve import *
 import logging
 from optimization import Optimization
@@ -36,7 +36,7 @@ class Genetic(Optimization):
         # Algo parameters
         self.genome_size = genome_size
         if opt["sim_type"] == "BRAIN":
-            config = eval(opt["config_name"] + "()")
+            config = Config(opt["config_name"])
             self.genome_size = config.get_conn_matrix_leg_len()
         self.mutation_rate = mutation_rate
         self.cross_over_rate = cross_over_rate

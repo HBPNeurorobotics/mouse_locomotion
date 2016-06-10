@@ -1,0 +1,302 @@
+{
+  "body": {
+    "muscles": [
+      {
+        "name": "muscle_neck2",
+        "obj_2": "obj_neck",
+        "logger": "INFO",
+        "brain_sig": null,
+        "maxF": -0.465,
+        "obj_1": "joint_1_obj_neck",
+        "anch_1": [
+          -0.59,
+          0,
+          1.4
+        ],
+        "anch_2": [
+          0.117,
+          0,
+          -0.26
+        ]
+      }
+    ],
+    "obj": "obj_body",
+    "name": "Mouse"
+  },
+  "back_leg_L_muscles": [
+    {
+      "name": "B_tibialis.L",
+      "obj_2": "obj_shin_lower.L",
+      "logger": "INFO",
+      "brain_sig": null,
+      "maxF": -0.0,
+      "obj_1": "obj_shin.L",
+      "anch_1": [
+        -0.23857,
+        -0.6465,
+        -0.01011
+      ],
+      "anch_2": [
+        -0.27435,
+        -0.754,
+        -0.1395
+      ]
+    },
+    {
+      "name": "B_gastro.L",
+      "obj_2": "obj_shin.L",
+      "logger": "INFO",
+      "brain_sig": null,
+      "maxF": 0.0,
+      "obj_1": "obj_thigh.L",
+      "anch_1": [
+        -0.19195,
+        -0.69294,
+        0.20698
+      ],
+      "anch_2": [
+        -0.23857,
+        -0.6465,
+        -0.01011
+      ]
+    },
+    {
+      "name": "B_HFL.L",
+      "obj_2": "obj_shin.L",
+      "obj_1": "obj_hip.L",
+      "anch_2": [
+        0.017,
+        -0.13,
+        0.1
+      ],
+      "anch_1": [
+        0.14,
+        -0.01,
+        0.06
+      ],
+      "logger": "INFO",
+      "brain_sig": null
+    }
+  ],
+  "muscle_type": "SimpleMuscle",
+  "name": "simple_mouse_simulation_config",
+  "simulator": "Simulator",
+  "back_leg_R_muscles": [
+    {
+      "name": "B_tibialis.R",
+      "obj_2": "obj_shin_lower.R",
+      "logger": "INFO",
+      "brain_sig": null,
+      "maxF": -0.0,
+      "obj_1": "obj_shin.R",
+      "anch_1": [
+        0.23937,
+        -0.64779,
+        -0.01044
+      ],
+      "anch_2": [
+        0.27433,
+        -0.75355,
+        -0.1396
+      ]
+    },
+    {
+      "name": "B_gastro.R",
+      "obj_2": "obj_shin.R",
+      "logger": "INFO",
+      "brain_sig": null,
+      "maxF": 0.0,
+      "obj_1": "obj_thigh.R",
+      "anch_1": [
+        0.1941,
+        -0.69016,
+        0.20814
+      ],
+      "anch_2": [
+        0.23857,
+        -0.6465,
+        -0.01011
+      ]
+    },
+    {
+      "name": "B_HFL.R",
+      "obj_2": "obj_shin.R",
+      "obj_1": "obj_hip.R",
+      "anch_2": [
+        -0.017,
+        -0.13,
+        0.1
+      ],
+      "anch_1": [
+        -0.14,
+        -0.01,
+        0.06
+      ],
+      "logger": "INFO",
+      "brain_sig": null
+    }
+  ],
+  "timeout": 10,
+  "dist_ref": 20,
+  "front_leg_L_muscles": [
+    {
+      "name": "F_biceps.L",
+      "obj_2": "obj_forearm.L",
+      "logger": "INFO",
+      "brain_sig": null,
+      "maxF": 1.1,
+      "obj_1": "obj_upper_arm.L",
+      "anch_1": [
+        -0.21322,
+        0.28541,
+        -0.04615
+      ],
+      "anch_2": [
+        -0.27499,
+        0.32622,
+        -0.22265
+      ]
+    },
+    {
+      "name": "F_gastro.L",
+      "obj_2": "obj_wrist.L",
+      "logger": "INFO",
+      "brain_sig": null,
+      "maxF": -0.01,
+      "obj_1": "obj_forearm.L",
+      "anch_1": [
+        -0.27499,
+        0.32622,
+        -0.22265
+      ],
+      "anch_2": [
+        -0.2919,
+        0.51747,
+        -0.28179
+      ]
+    }
+  ],
+  "power_ref": 1000,
+  "front_leg_R_muscles": [
+    {
+      "name": "F_biceps.R",
+      "obj_2": "obj_forearm.R",
+      "logger": "INFO",
+      "brain_sig": null,
+      "maxF": 1.1,
+      "obj_1": "obj_upper_arm.R",
+      "anch_1": [
+        0.21242,
+        0.29976,
+        -0.04857
+      ],
+      "anch_2": [
+        0.2744,
+        0.32456,
+        -0.22214
+      ]
+    },
+    {
+      "name": "F_gastro.R",
+      "obj_2": "obj_wrist.R",
+      "logger": "INFO",
+      "brain_sig": null,
+      "maxF": -0.01,
+      "obj_1": "obj_forearm.R",
+      "anch_1": [
+        0.2744,
+        0.32456,
+        -0.22214
+      ],
+      "anch_2": [
+        0.29257,
+        0.51605,
+        -0.28135
+      ]
+    }
+  ],
+  "brain": {
+    "a": 10.5,
+    "tau": 0.01,
+    "c": 0.08,
+    "b": 20.5,
+    "name": "default_robot_matsuoka_brain",
+    "time_interval": 0.001,
+    "aa": 3,
+    "h": 0.001,
+    "T": 0.05,
+    "n_osc": 4
+  },
+  "logger_name": "INFO",
+  "save_path": "default",
+  "sim_speed": 1.0,
+  "exit_condition": "bge.logic.getCurrentScene().objects['obj_spine'].worldPosition.z < -1.8",
+  "connection_matrix": {
+    "muscle_neck2": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "B_gastro.L": [
+      0,
+      0,
+      1,
+      0
+    ],
+    "F_gastro.R": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "B_HFL.L": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "B_tibialis.L": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "B_tibialis.R": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "B_HFL.R": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "F_gastro.L": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "B_gastro.R": [
+      0,
+      0,
+      1,
+      0
+    ],
+    "F_biceps.R": [
+      0,
+      1,
+      0,
+      0
+    ],
+    "F_biceps.L": [
+      0,
+      1,
+      0,
+      0
+    ]
+  }
+}
