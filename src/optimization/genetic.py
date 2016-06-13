@@ -25,7 +25,7 @@ from optimization import Optimization
 
 
 class Genetic(Optimization):
-    def __init__(self, opt, observable, genome_size=10, population_size=10, num_max_generation=50, mutation_rate=0.2,
+    def __init__(self, opt, observable, genome_size=10, population_size=2, num_max_generation=2, mutation_rate=0.2,
                  cross_over_rate=0.65, genome_min=-2, genome_max=2.0, interactive_mode=False, stop_num_av=10,
                  stop_thresh=0.01):
         """Creation and initialization function for the genome and the genetic algorithm. It fixes the
@@ -66,6 +66,9 @@ class Genetic(Optimization):
         self.ga.setEvaluator(self.eval_fct)
         self.ga.setMinimax(Consts.minimaxType["maximize"])
 
+        self.results = []
+        self.configs = []
+
     def eval_fct(self, population):
         """Evaluation function of the genetic algorithm. For each population, it computes the
         score of every genomes and directly write it"""
@@ -78,8 +81,10 @@ class Genetic(Optimization):
 
         # Create a config for the genome
         sim_list = []
+        gen_list = []
         for ind in population.internalPop:
             self.opt["genome"] = ind.getInternalList()
+            gen_list.append(ind.getInternalList())
             sim_list.append(copy.copy(self.opt))
             #print("GENOME: " + str(ind.getInternalList()))
             #print("SIMLUIST: " + str(sim_list) + "\n\n")
@@ -96,8 +101,10 @@ class Genetic(Optimization):
             else:
                 scores.append(0)
 
-        logging.info("Population scores: " + str(scores))
-        logging.info("Population mean score: " + str(sum(scores)/len(scores)))
+        logging.info("Population gen " + str(self.ga.getCurrentGeneration() + 1) +
+            " scores: " + str(scores))
+        logging.info("Population gen " + str(self.ga.getCurrentGeneration() + 1) +
+            " mean score: " + str(sum(scores)/len(scores)))
 
         # Update the score of each specimen
         i = 0
@@ -107,7 +114,10 @@ class Genetic(Optimization):
             else:
                 ind.setRawScore(0)
             i += 1
+
         # Return the population score result
+        self.results.append(scores)
+        self.configs.append(gen_list)
         return sum(scores)
 
     def conv_fct(self, ga):

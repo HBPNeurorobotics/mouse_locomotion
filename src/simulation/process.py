@@ -21,7 +21,7 @@ import logging
 import pickle
 import time
 import sys
-from optimization import Genetic
+from optimization import Genetic, GeneticMetaOptimization
 
 if sys.version_info[:2] < (3, 4):
     import common
@@ -41,15 +41,16 @@ class Process(Manager):
     def start(self):
         if "sim_type" not in self.opt:
             self.run_sim(self.opt)
-        elif self.opt["sim_type"] == "BRAIN":
-            self.brain_opti_sim()
-        elif self.opt["sim_type"] == "MUSCLE":
-            self.brain_opti_sim()
+        elif self.opt["sim_type"] == "CM":
+            self.connection_matrix_opti_sim()
+        elif self.opt["sim_type"] == "META_GA":
+            self.meta_ga_sim()
         else:
             self.run_sim(self.opt)
 
-    def brain_opti_sim(self):
-        """Run an iterative simulation to optimize the muscles parameters"""
+    def connection_matrix_opti_sim(self):
+        """Run an iterative simulation to optimize the connection matrix parameters"""
+
         # Create genetic algorithm
         genetic = Genetic(self.opt, self)
 
@@ -67,10 +68,20 @@ class Process(Manager):
             with open(save_name, 'wb') as f:
                 pickle.dump(genetic.ga.bestIndividual().getInternalList(), f, protocol=2)
 
-    def muscle_opti_sim(self):
-        """Run an iterative simulation to optimize the muscles parameters"""
+    def meta_ga_sim(self):
+        """Run an meta simulation to benchmark genetic algorithm parameters"""
+        
+        # Create meta optimization
+        mga = GeneticMetaOptimization(opt=self.opt, obs=self)
 
-        logging.error("This simulation is not implemented yet! Exiting...")
+        # Run cross-over benchmark
+        mga.co_bench(step_=0.5)
+
+        # Save, diplay and plot results
+        mga.save()
+        mga.display()
+        mga.plot()
+
 
     def run_sim(self, sim_list):
         """Run a simple on shot simulation"""

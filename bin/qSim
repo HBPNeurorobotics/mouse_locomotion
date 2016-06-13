@@ -51,7 +51,7 @@ class SimCli(cli.Application):
     config = cli.SwitchAttr(["-c", "--config"], str, default=DEF_OPT["config_name"],
                             help="The config class to be used for simulation")
     sim_type = cli.SwitchAttr(["-t", "--type"], str, default=DEF_OPT["sim_type"],
-                              help="Specify the type of simulation: RUN, BRAIN or MUSCLE")
+                              help="Specify the type of simulation: RUN, META_GA or CM")
 
     # Server modes
     registry = cli.Flag(["-r"], default=DEF_OPT["registry"],
