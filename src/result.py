@@ -15,8 +15,7 @@
 ##
 
 import logging
-import os
-import pickle
+from utils import PickleUtils
 
 
 class Result:
@@ -77,12 +76,6 @@ class Result:
         self.result_dict["config_muscles"] = self.config.muscle_type
         return
 
-    @staticmethod
-    def save(filename, element):
-        global pickle
-        with open(filename, 'wb') as f:
-            pickle.dump(element, f, protocol=2)
-
     def save_results(self):
         """Save the results dictionary"""
 
@@ -92,7 +85,7 @@ class Result:
 
         # Save when not empty
         if self.result_dict:
-            self.save(self.config.save_path, self.result_dict)
+            PickleUtils.save(self.config.save_path, self.result_dict)
             self.void = True
 
         else:
@@ -100,29 +93,10 @@ class Result:
 
         return
 
-    def load(self, file):
-        """Load the result dictionary from file"""
-
-        if os.path.isfile(file):
-            try:
-                f = open(file, 'rb')
-                self.result_dict = pickle.load(f)
-                f.close()
-
-            except Exception as e:
-                self.logger.error("Can't load save file: " + str(e))
-
-        else:
-            self.logger.error("Can't open the file " + str(file) + ". The file doesn't exist.")
-
-        return
-
     def get_results(self, file=None):
         """Return the results dictionary"""
-
         if file:
-            self.load(file)
-
+            self.result_dict = PickleUtils.load(file, self.logger)
         return self.result_dict
 
     def __str__(self):

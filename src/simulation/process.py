@@ -22,28 +22,27 @@ import time
 import sys
 from optimization import Genetic
 from result import Result
-
-if sys.version_info[:2] < (3, 4):
-    import common
-else:
-    from simulation import common
+from utils import PickleUtils
 
 if sys.version_info[:2] < (3, 4):
     from manager import Manager
+    import common
 else:
-    from simulation import Manager
+    from simulation import Manager, common
 
 
 class Process(Manager):
     def __init__(self, opt):
         Manager.__init__(self, opt)
+        self.sim_type = opt["sim_type"] if "sim_type" in opt else None
+        self.save = opt["save"] if "save" in opt else True
 
     def start(self):
-        if "sim_type" not in self.opt:
+        if self.sim_type is None:
             self.run_sim(self.opt)
-        elif self.opt["sim_type"] == "BRAIN":
+        elif self.sim_type == "BRAIN":
             self.brain_opti_sim()
-        elif self.opt["sim_type"] == "MUSCLE":
+        elif self.sim_type == "MUSCLE":
             self.brain_opti_sim()
         else:
             self.run_sim(self.opt)
@@ -62,8 +61,8 @@ class Process(Manager):
         logging.info(genetic.ga.bestIndividual())
 
         # Save best individu parameters
-        if self.opt["save"]:
-            Result.save(datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + ".gabi",
+        if self.save:
+            PickleUtils.save(datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + ".gabi",
                         genetic.ga.bestIndividual().getInternalList())
 
     def muscle_opti_sim(self):

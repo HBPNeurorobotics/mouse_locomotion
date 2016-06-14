@@ -43,6 +43,10 @@ class SimCli(cli.Application):
                "fullscreen": False, "save": False, "load_file": False, "timeout": 120}
 
     # Simulation parameters
+    max_cpu_percentage = cli.SwitchAttr(["-cpu", "--cpu_use"], str, default=None,
+                                        help="Max CPU usage for the simulation servers")
+    max_memory_percentage = cli.SwitchAttr(["-mem", "--mem_use"], str, default=None,
+                                           help="Max memory usage for the simulation servers")
     simulator = cli.SwitchAttr(["-e", "--environment"], str, default=DEF_OPT["simulator"],
                                help="Simulator name : BLENDER")
     path = cli.SwitchAttr(["-p", "--binpath"], str, default=DEF_OPT["simulator_path"],
@@ -65,10 +69,10 @@ class SimCli(cli.Application):
                      help="Start a single local simulation. Used to bypass simulation distributed architecture")
 
     # Save and load config
-    save = cli.Flag(["-S"],  default=False,
-                     help="Save the best individu at the end of sim (currently only for opti_brain)")
-    load_file = cli.SwitchAttr(["-L"], str,  default=False,
-                     help="Start a single local simulation using result file")
+    save = cli.Flag(["-S"], default=False,
+                    help="Save the best individu at the end of sim (currently only for opti_brain)")
+    load_file = cli.SwitchAttr(["-L"], str, default=False,
+                               help="Start a single local simulation using result file")
 
     # Display modes
     root = cli.Flag(["--root"], default=DEF_OPT["root_dir"],
@@ -86,10 +90,9 @@ class SimCli(cli.Application):
                       "logfile": self.logfile}
         opt = common_opt.copy()
         opt["simulator"] = self.simulator
-        if self.path == self.DEF_OPT["simulator_path"]:
-            opt["simulator_path"] = self.root + self.path
-        else:
-            opt["simulator_path"] = self.path
+        opt["simulator_path"] = (self.root + self.path) if self.path == self.DEF_OPT["simulator_path"] else self.path
+        opt["cpu_use"] = self.max_cpu_percentage if self.max_cpu_percentage is not None else 50
+        opt["memory_use"] = self.max_memory_percentage if self.max_memory_percentage is not None else 90
         opt["model"] = self.root + "/mdl/" + self.model
         opt["config_name"] = self.root + "/configs/" + self.config + ".json"
         opt["sim_type"] = self.sim_type
