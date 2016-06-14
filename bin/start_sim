@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+# Mouse Locomotion Simulation
+# Human Brain Project SP10
+#
+# This script facilitates the start of a simulation process on a remote computer behind a screen interface
+#
+# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>. June 2016
+
+WIPEP="screen -wipe"
+QSIMP="screen -dmLS qsimm qSim -S -m dog_vert.blend -t META_GA -p '/bin/Blender2.77/';"
+
+##################################
+
+echo "[START MANAGER] ======== Check screen processes ======== "
+
+qsimmtmp=($(screen -ls | grep qsimm))
+if [ ! ${qsimmtmp} ]; then
+	qsimmprocess="No process";
+else
+	qsimmprocess=${qsimmtmp[-1]};
+fi
+echo "[START MANAGER] qSim registry status:  ${qsimmprocess} "
+
+##################################
+
+printf "\n[START MANAGER] ======== Start screen processes ======== \n"
+
+if [ "${qsimmprocess}" == "(Detached)" ] || [ "${qsimmprocess}" == "(Attached)" ]; then
+	echo "[START MANAGER] qSim registry: nothing to do!";
+elif [ "${qsimmprocess}" == "???)" ]; then
+	eval "${WIPEP}";
+	eval "${QSIMP}";
+else
+	eval "${QSIMP}";
+fi
+
+##################################
+
+printf "\n[START MANAGER] ======== Check screen processes ======== \n"
+
+qsimmtmp=($(screen -ls | grep qsimm))
+if [ ! ${qsimmtmp} ]; then
+	qsimmprocess="No process";
+else
+	qsimmprocess=${qsimmtmp[-1]};
+fi
+
+echo "[START MANAGER] qSim registry status:  ${qsimmprocess} "

@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+# Mouse Locomotion Simulation
+# Human Brain Project SP10
+#
+# This script facilitates the stop of a registry server on a remote computer behind a screen interface
+#
+# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>. June 2016
+
+WIPEP="screen -wipe"
+QSIMP="screen -S qsimr -p 0 -X stuff $'\003'"
+
+##################################
+
+echo "[STOP REGISTRY] ======== Check screen processes ======== "
+
+qsimrtmp=($(screen -ls | grep qsimr))
+if [ ! ${qsimrtmp} ]; then
+	qsimrprocess="No process";
+else
+	qsimrprocess=${qsimrtmp[-1]};
+fi
+echo "[STOP REGISTRY] qSim registry status:  ${qsimrprocess} "
+
+##################################
+
+printf "\n[STOP REGISTRY] ======== Stop screen processes ======== \n"
+
+if [ "${qsimrprocess}" == "???)" ]; then
+	eval "${WIPEP}";
+elif [ "${qsimrprocess}" == "No process" ]; then
+	echo "[STOP REGISTRY] qSim registry: Nothing to do!";
+else
+	echo "[STOP REGISTRY] qSim registry: Stop the screen process!";
+	eval "${QSIMP}";
+fi
+sleep 1
+
+##################################
+
+printf "\n[STOP REGISTRY] ======== Check screen processes ======== \n"
+
+qsimrtmp=($(screen -ls | grep qsimr))
+if [ ! ${qsimrtmp} ]; then
+	qsimrprocess="No process";
+else
+	qsimrprocess=${qsimrtmp[-1]};
+fi
+echo "[STOP REGISTRY] qSim registry status:  ${qsimrprocess} "

@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+# Mouse Locomotion Simulation
+# Human Brain Project SP10
+#
+# This script facilitates the start of a registery server on a remote computer behind a screen interface
+#
+# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>. June 2016
+
+WIPEP="screen -wipe"
+QSIMP="screen -dmLS qsimr qSim -r;"
+
+##################################
+
+echo "[START REGISTRY] ======== Check screen processes ======== "
+
+qsimrtmp=($(screen -ls | grep qsimr))
+if [ ! ${qsimrtmp} ]; then
+	qsimrprocess="No process";
+else
+	qsimrprocess=${qsimrtmp[-1]};
+fi
+echo "[START REGISTRY] qSim registry status:  ${qsimrprocess} "
+
+##################################
+
+printf "\n[START REGISTRY] ======== Start screen processes ======== \n"
+
+if [ "${qsimrprocess}" == "(Detached)" ] || [ "${qsimrprocess}" == "(Attached)" ]; then
+	echo "[START REGISTRY] qSim registry: nothing to do!";
+elif [ "${qsimrprocess}" == "???)" ]; then
+	eval "${WIPEP}";
+	eval "${QSIMP}";
+else
+	eval "${QSIMP}";
+fi
+
+##################################
+
+printf "\n[START REGISTRY] ======== Check screen processes ======== \n"
+
+qsimrtmp=($(screen -ls | grep qsimr))
+if [ ! ${qsimrtmp} ]; then
+	qsimrprocess="No process";
+else
+	qsimrprocess=${qsimrtmp[-1]};
+fi
+
+echo "[START REGISTRY] qSim registry status:  ${qsimrprocess} "

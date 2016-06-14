@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+
+# Mouse Locomotion Simulation
+# Human Brain Project SP10
+#
+# This script facilitates the start of a qSim server on a remote computer behind a screen interface
+#
+# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>. June 2016
+
+XVFBP="screen -dmLS xvfb Xvfb :99 -screen 0 640x480x24;"
+WIPEP="screen -wipe"
+QSIMP="screen -dmLS qsims qSim -s;"
+
+##################################
+
+echo "[START SERVER] ======== Check screen processes ======== "
+
+xvfbtmp=($(screen -ls | grep xvfb))
+if [ ! ${xvfbtmp} ]; then
+	xvfbprocess="No process";
+else
+	xvfbprocess=${xvfbtmp[-1]};
+fi
+qsimstmp=($(screen -ls | grep qsims))
+if [ ! ${qsimstmp} ]; then
+	qsimsprocess="No process";
+else
+	qsimsprocess=${qsimstmp[-1]};
+fi
+echo "[START SERVER] XVFB status:  ${xvfbprocess} "
+echo "[START SERVER] qSim server status:  ${qsimsprocess} "
+
+##################################
+
+printf "\n[START SERVER] ======== Start screen processes ======== \n"
+
+if [ "${xvfbprocess}" == "(Detached)" ] || [ "${xvfbprocess}" == "(Attached)" ]; then
+	echo "[START SERVER] XVFB: nothing to do!";
+elif [ "${xvfbprocess}" == "???)" ]; then
+	eval "${WIPEP}";
+	eval "${XVFBP}";
+else
+	eval "${XVFBP}";
+fi
+
+if [ "${qsimsprocess}" == "(Detached)" ] || [ "${qsimsprocess}" == "(Attached)" ]; then
+	echo "[START SERVER] qSim server: nothing to do!";
+elif [ "${qsimsprocess}" == "???)" ]; then
+	eval "${WIPEP}";
+	export DISPLAY=:99;
+	eval "${QSIMP}";
+else
+	export DISPLAY=:99;
+	eval "${QSIMP}";
+fi
+
+##################################
+
+printf "\n[START SERVER] ======== Check screen processes ======== \n"
+
+xvfbtmp=($(screen -ls | grep xvfb))
+if [ ! ${xvfbtmp} ]; then
+	xvfbprocess="No process";
+else
+	xvfbprocess=${xvfbtmp[-1]};
+fi
+qsimstmp=($(screen -ls | grep qsims))
+if [ ! ${qsimstmp} ]; then
+	qsimsprocess="No process";
+else
+	qsimsprocess=${qsimstmp[-1]};
+fi
+
+echo "[START SERVER] XVFB status:  ${xvfbprocess} "
+echo "[START SERVER] qSim server status:  ${qsimsprocess} "
+ 
