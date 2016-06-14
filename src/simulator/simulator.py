@@ -88,6 +88,8 @@ class Simulator:
         logging.info("Test Simulator " + self.__class__.__name__ +
                      ": \nCPU = " + str(cpu_consumption) +
                      "\nMemory = " + str(memory_consumption))
+
+        res = Result()
         return {"CPU": 0. if len(cpu_consumption) <= 0 else sum(cpu_consumption) / float(len(cpu_consumption)),
                 "memory": 0. if len(memory_consumption) <= 0 else sum(memory_consumption) / float(
-                    len(memory_consumption))}
+                    len(memory_consumption)), "result": res.get_results(self.filename)}

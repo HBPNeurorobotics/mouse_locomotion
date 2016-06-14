@@ -93,10 +93,11 @@ class Result:
 
         return
 
-    def get_results(self, file=None):
+    def get_results(self, filename=None):
         """Return the results dictionary"""
-        if file:
-            self.result_dict = PickleUtils.load(file, self.logger)
+        if filename:
+            self.result_dict = PickleUtils.load(filename, self.logger)
+            PickleUtils.del_file(filename, self.logger)
         return self.result_dict
 
     def __str__(self):

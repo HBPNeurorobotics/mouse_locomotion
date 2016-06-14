@@ -12,12 +12,12 @@ class PickleUtils:
             pickle.dump(element, f, protocol=2)
 
     @staticmethod
-    def load(file, logger):
+    def load(filename, logger):
         """Load the result dictionary from file"""
 
-        if os.path.isfile(file):
+        if os.path.isfile(filename):
             try:
-                f = open(file, 'rb')
+                f = open(filename, 'rb')
                 result_dict = pickle.load(f)
                 f.close()
                 return result_dict
@@ -25,5 +25,16 @@ class PickleUtils:
                 logger.error("Can't load save file: " + str(e))
 
         else:
-            logger.error("Can't open the file " + str(file) + ". The file doesn't exist.")
+            logger.error("Can't open the file " + str(filename) + ". The file doesn't exist.")
         return {}
+
+    @staticmethod
+    def del_file(filename, logger):
+        if os.path.isfile(filename):
+            try:
+                os.remove(filename)
+            except Exception as e:
+                logger.error("Can't delete save file: " + str(e))
+
+        else:
+            logger.error("Can't find the file " + str(filename) + ". The file doesn't exist.")
