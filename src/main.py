@@ -48,10 +48,10 @@ if hasattr(owner["config"], 'logger'):
         # Create a result instance and save
         try:
             results = Result(owner["body"])
-            owner["config"].logger.info(results)
+            owner["config"].logger.error(results)
             results.save()
         except Exception as e:
-            owner["config"].logger.error("Unable to create a result report. Caused by: " + str(e))
+            owner["config"].logger.warning("Unable to create a result report. Caused by: " + str(e))
             pass
 
         # exit

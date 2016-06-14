@@ -29,7 +29,7 @@ class MetaOptimization(object):
     """This class provides tools to modify the optimization parameters or methods,
     start different optimisation processes, benchmark and plot them"""
 
-    def __init__(self):
+    def __init__(self, obs, opt):
         """Init MetaOptimization class by creating a generic container to exploit
         different results"""
 
@@ -41,6 +41,9 @@ class MetaOptimization(object):
         self.result['scores'] = []
         self.result['configs'] = []
         self.result['param_val'] = []
+
+        self.opt = opt
+        self.obs = obs
 
 
     def save(self, filename="default.mor"):

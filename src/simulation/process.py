@@ -55,7 +55,7 @@ class Process(Manager):
         genetic = Genetic(self.opt, self)
 
         # Run genetic algorithm until convergence or max iteration reached
-        genetic.ga.evolve(freq_stats=10)
+        genetic.ga.evolve(freq_stats=2)
 
         # Stop and display results
         logging.info("Simulation Finished!")
@@ -75,7 +75,7 @@ class Process(Manager):
         mga = GeneticMetaOptimization(opt=self.opt, obs=self)
 
         # Run cross-over benchmark
-        mga.co_bench(step_=0.5)
+        mga.co_bench(step_=0.1)
 
         # Save, diplay and plot results
         mga.save()

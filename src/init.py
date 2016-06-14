@@ -76,7 +76,7 @@ configuration.save_path = SAVE_NAME
 configuration.n_iter = 0
 configuration.t_init = time.time()
 if GENOME:
-    configuration.set_leg_conn_matrix(GENOME)
+    configuration.set_conn_matrix(GENOME)
 
 # Init owner variables
 owner["config"] = configuration
@@ -91,4 +91,4 @@ logger.info("##   Gabriel Urbain - UGent 2016   #")
 logger.info("####################################\n")
 
 # Set simulation parameters
-bge.logic.setTimeScale(configuration.sim_speed)
+#bge.logic.setTimeScale(configuration.sim_speed)

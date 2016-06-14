@@ -25,7 +25,7 @@ from optimization import Optimization
 
 
 class Genetic(Optimization):
-    def __init__(self, opt, observable, genome_size=10, population_size=2, num_max_generation=2, mutation_rate=0.2,
+    def __init__(self, opt, observable, genome_size=10, population_size=30, num_max_generation=40, mutation_rate=0.2,
                  cross_over_rate=0.65, genome_min=-2, genome_max=2.0, interactive_mode=False, stop_num_av=10,
                  stop_thresh=0.01):
         """Creation and initialization function for the genome and the genetic algorithm. It fixes the
@@ -35,9 +35,9 @@ class Genetic(Optimization):
 
         # Algo parameters
         self.genome_size = genome_size
-        if opt["sim_type"] == "BRAIN":
+        if opt["sim_type"] == "META_GA":
             config = eval(opt["config_name"] + "()")
-            self.genome_size = config.get_conn_matrix_leg_len()
+            self.genome_size = config.get_conn_matrix_len()
         self.mutation_rate = mutation_rate
         self.cross_over_rate = cross_over_rate
         self.genome_min = genome_min
