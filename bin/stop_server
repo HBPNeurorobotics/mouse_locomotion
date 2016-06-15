@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+
+# Mouse Locomotion Simulation
+# Human Brain Project SP10
+#
+# This script facilitates the stop of a qSim server on a remote computer behind a screen interface
+#
+# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>. June 2016
+
+XVFBP="screen -S xvfb -p 0 -X stuff $'\003'"
+WIPEP="screen -wipe"
+QSIMP="screen -S qsims -p 0 -X stuff $'\003'"
+
+##################################
+
+echo "[STOP SERVER] ======== Check screen processes ======== "
+
+xvfbtmp=($(screen -ls | grep xvfb))
+if [ ! ${xvfbtmp} ]; then
+	xvfbprocess="No process";
+else
+	xvfbprocess=${xvfbtmp[-1]};
+fi
+qsimstmp=($(screen -ls | grep qsims))
+if [ ! ${qsimstmp} ]; then
+	qsimsprocess="No process";
+else
+	qsimsprocess=${qsimstmp[-1]};
+fi
+echo "[STOP SERVER] XVFB status:  ${xvfbprocess} "
+echo "[STOP SERVER] qSim server status:  ${qsimsprocess} "
+
+##################################
+
+printf "\n[STOP SERVER] ======== Stop screen processes ======== \n"
+
+if [ "${xvfbprocess}" == "???)" ]; then
+	eval "${WIPEP}";
+elif [ "${xvfbprocess}" == "No process" ]; then
+	echo "[STOP SERVER XVFB: Nothing to do!";
+else
+	echo "[STOP SERVER] XVFB: Stop the screen process!";
+	eval "${XVFBP}";
+fi
+
+if [ "${qsimsprocess}" == "???)" ]; then
+	eval "${WIPEP}";
+elif [ "${qsimsprocess}" == "No process" ]; then
+	echo "[STOP SERVER] qSim server: Nothing to do!";
+else
+	echo "[STOP SERVER] qSim server: Stop the screen process!";
+	eval "${QSIMP}";
+fi
+sleep 1
+
+##################################
+
+printf "\n[STOP SERVER] ======== Check screen processes ======== \n"
+
+xvfbtmp=($(screen -ls | grep xvfb))
+if [ ! ${xvfbtmp} ]; then
+	xvfbprocess="No process";
+else
+	xvfbprocess=${xvfbtmp[-1]};
+fi
+qsimstmp=($(screen -ls | grep qsims))
+if [ ! ${qsimstmp} ]; then
+	qsimsprocess="No process";
+else
+	qsimsprocess=${qsimstmp[-1]};
+fi
+echo "[STOP SERVER] XVFB status:  ${xvfbprocess} "
+echo "[STOP SERVER] qSim server status:  ${qsimsprocess} "
