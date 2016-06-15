@@ -58,13 +58,13 @@ class Process(Manager):
 
         # Stop and display results
         logging.info("Simulation Finished!")
-        time.sleep(1)
         logging.info(genetic.ga.bestIndividual())
 
         # Save best individu parameters
         if self.save:
-            PickleUtils.save(datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + ".gabi",
-                        genetic.ga.bestIndividual().getInternalList())
+            PickleUtils.save(
+                self.opt["root_dir"] + "/save/" + datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + ".gabi",
+                genetic.ga.bestIndividual().getInternalList())
 
     def meta_ga_sim(self):
         """Run an meta simulation to benchmark genetic algorithm parameters"""
@@ -75,11 +75,10 @@ class Process(Manager):
         # Run cross-over benchmark
         mga.co_bench(step_=0.1)
 
-        # Save, diplay and plot results
-        mga.save()
+        # Save, display and plot results
+        PickleUtils.save(self.opt["root_dir"] + "/save/default.mor", mga.result)
         mga.display()
-        mga.plot()
-
+        mga.plot(self.opt["root_dir"] + "/save/default.pdf")
 
     def run_sim(self, sim_list):
         """Run a simple on shot simulation"""
@@ -103,6 +102,9 @@ class Process(Manager):
             self.stop()
             time.sleep(1)
         rs_ls = ""
-        for i in res_list:
-            rs_ls += str(i) + "\n"
+        if type(res_list) == list:
+            for i in res_list:
+                rs_ls += str(i) + "\n"
+        else:
+            rs_ls = "No results to show."
         logging.info("Simulation Finished!")

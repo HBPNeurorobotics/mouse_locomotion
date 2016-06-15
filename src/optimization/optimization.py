@@ -19,11 +19,12 @@ from observers import Observer
 
 
 class Optimization(Observer):
-    def __init__(self, opt, observable, population_size, stop_thresh, max_iteration):
+    def __init__(self, opt, observable, max_iteration, population_size=0, stop_thresh=None):
         self.opt = opt
         self.observable = observable
         self.interruption = False
-        self.observable.add_observer(self)
+        if self.observable:
+            self.observable.add_observer(self)
         self.population_size = population_size
         self.best_solutions_list = []
         self.stop_thresh = stop_thresh

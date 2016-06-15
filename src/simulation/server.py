@@ -15,6 +15,7 @@
 # File created by: Gabriel Urbain <gabriel.urbain@ugent.be>. February 2016
 # Modified by: Dimitri Rodarie
 ##
+import rpyc
 
 from simulation import Simulation
 import logging
@@ -43,7 +44,7 @@ class SimServer(Simulation):
     def start(self):
         """Start a service server"""
         try:
-            t = ThreadedServer(SimService, auto_register=True)
+            t = ThreadedServer(SimService, auto_register=True, protocol_config=rpyc.core.protocol.DEFAULT_CONFIG)
             logging.info("Start service server on address: " + str(self.ipaddr) + ":" + str(t.port))
             t.start()
         except KeyboardInterrupt:

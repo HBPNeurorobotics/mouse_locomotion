@@ -130,8 +130,8 @@ class Manager(Simulation, Observable):
                 except Exception as e:
                     logging.error("Exception during test on the server " +
                                   serv_dict[elem]["address"] + ":" +
-                                  serv_dict[elem]["port"] + "\n" +
-                                  "The server will now be ignored\n" +
+                                  str(serv_dict[elem]["port"]) +
+                                  "  The server will now be ignored\n" +
                                   "Details: " + str(e))
                 self.mutex_cloud_state.acquire()
                 self.cloud_state[elem] = serv_dict[elem]
@@ -391,10 +391,9 @@ class Manager(Simulation, Observable):
         # Connect to the server
         try:
             conn = rpyc.connect(server["address"],
-                                server["port"])
+                                server["port"], config=rpyc.core.protocol.DEFAULT_CONFIG)
         except Exception as e:
             exception = "Exception when connecting: " + str(e)
-            logging.error(exception)
             raise Exception(exception)
 
         # Create serving thread to handle answer

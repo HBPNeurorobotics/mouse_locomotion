@@ -25,13 +25,13 @@ from optimization import Optimization
 
 
 class Genetic(Optimization):
-    def __init__(self, opt, observable, genome_size=10, population_size=30, num_max_generation=40, mutation_rate=0.2,
+    def __init__(self, opt, observable, num_max_generation=40, population_size=30, genome_size=10, mutation_rate=0.2,
                  cross_over_rate=0.65, genome_min=-2, genome_max=2.0, interactive_mode=False, stop_num_av=10,
                  stop_thresh=0.01):
         """Creation and initialization function for the genome and the genetic algorithm. It fixes the
         parameters to use in the algorithm"""
 
-        Optimization.__init__(self, opt, observable, population_size, stop_thresh, num_max_generation)
+        Optimization.__init__(self, opt, observable, num_max_generation, population_size, stop_thresh)
 
         # Algo parameters
         self.genome_size = genome_size
@@ -94,23 +94,18 @@ class Genetic(Optimization):
             time.sleep(0.1)
 
         for res in self.res_list:
-            if "score" in res:
-                scores.append(res["score"])
-            else:
-                scores.append(0)
+            scores.append(res["score"] if "score" in res else 0.)
 
-        logging.info("Population gen " + str(self.ga.getCurrentGeneration() + 1) +
-            " scores: " + str(scores))
-        logging.info("Population gen " + str(self.ga.getCurrentGeneration() + 1) +
-            " mean score: " + str(sum(scores)/len(scores)))
+        logging.info("Population gen " + str(self.ga.getCurrentGeneration() + 1) + " scores: " + str(scores))
+        if len(scores) > 0:
+            logging.info("Population gen " + str(self.ga.getCurrentGeneration() + 1) + " mean score: " + str(
+                sum(scores) / len(scores)))
         # self.ga.printStats()
+
         # Update the score of each specimen
         i = 0
         for ind in population.internalPop:
-            if i < len(scores):
-                ind.setRawScore(scores[i])
-            else:
-                ind.setRawScore(0)
+            ind.setRawScore(scores[i] if i < len(scores) else 0.)
             i += 1
 
         # Return the population score result
@@ -124,7 +119,7 @@ class Genetic(Optimization):
 
         if Optimization.conv_fct(self, ga):
             return True
-            
+
         # Get the best specimens
         pop = ga.getPopulation()
         bi = pop.bestFitness()

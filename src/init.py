@@ -90,4 +90,4 @@ logger.info("##   Gabriel Urbain - UGent 2016   #")
 logger.info("####################################\n")
 
 # Set simulation parameters
-#bge.logic.setTimeScale(configuration.sim_speed)
+# bge.logic.setTimeScale(configuration.sim_speed)
