@@ -38,3 +38,9 @@ class PickleUtils:
 
         else:
             logger.error("Can't find the file " + str(filename) + ". The file doesn't exist.")
+
+    @staticmethod
+    def del_all_files(directory, extension, logger):
+        for file_ in os.listdir(directory):
+            if file_.endswith("." + extension):
+                PickleUtils.del_file(file_, logger)

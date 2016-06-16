@@ -36,6 +36,7 @@ class Process(Manager):
         Manager.__init__(self, opt)
         self.sim_type = opt["sim_type"] if "sim_type" in opt else None
         self.save = opt["save"] if "save" in opt else True
+        self.save_directory = self.opt["root_dir"] + "/save/"
 
     def start(self):
         if self.sim_type is None:
@@ -46,6 +47,7 @@ class Process(Manager):
             self.meta_ga_sim()
         else:
             self.run_sim(self.opt)
+        PickleUtils.del_all_files(self.save_directory, "qsm", logging)
 
     def connection_matrix_opti_sim(self):
         """Run an iterative simulation to optimize the connection matrix parameters"""
@@ -63,7 +65,7 @@ class Process(Manager):
         # Save best individu parameters
         if self.save:
             PickleUtils.save(
-                self.opt["root_dir"] + "/save/" + datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + ".gabi",
+                self.save_directory + datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + ".gabi",
                 genetic.ga.bestIndividual().getInternalList())
 
     def meta_ga_sim(self):
@@ -76,9 +78,10 @@ class Process(Manager):
         mga.co_bench(step_=0.1)
 
         # Save, display and plot results
-        PickleUtils.save(self.opt["root_dir"] + "/save/default.mor", mga.result)
+        PickleUtils.save(self.save_directory + "default.mor", mga.result)
         mga.display()
-        mga.plot(self.opt["root_dir"] + "/save/default.pdf")
+        mga.plot(self.save_directory + "default.pdf")
+        PickleUtils.del_all_files(self.save_directory, "qsm", logging)
 
     def run_sim(self, sim_list):
         """Run a simple on shot simulation"""
