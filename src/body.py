@@ -9,11 +9,11 @@
 #  - Edition of a brain controller model (oscillator-based or neural network-based)
 #  - Simulation of the model
 #  - Optimization of the parameters in distributed cloud simulations
-# 
-# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>. February 2016
-# Modified by: Dimitri Rodarie
+#
+# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>
+#                  Dimitri Rodarie <d.rodarie@gmail.com>
+# February 2016
 ##
-
 
 from mathutils import Vector as vec
 
@@ -22,8 +22,18 @@ from muscle import *
 
 
 class Part:
+    """
+    Abstract Class to represent body part
+    """
+
     def __init__(self, config_, simulator, name):
-        """Class initialization"""
+        """
+        Class initialization
+        :param config_: Dictionary containing part parameters
+        :param simulator: String name of the simulator class utility
+        :param name: String name of the part
+        """
+
         self.n_iter = 0
         self.config = config_
         self.logger = config_["logger"]
@@ -33,21 +43,11 @@ class Part:
         self.muscle_type = config_["muscle_type"] + "(muscle_config, self.simulator)"
         self.name = name
 
-
-class Leg(Part):
-    """This class represents a generic leg and its current behaviour in the control process"""
-
-    def __init__(self, config_, orien_, simulator, name):
-        """Class initialization"""
-        Part.__init__(self, config_, simulator, name)
-        self.orien = orien_
-        # Create the muscles objects
-        for muscle_config in config_["muscles"]:
-            self.muscles.append(eval(self.muscle_type))
-        self.connection_matrix = config_["connection_matrix"]
-
     def get_power(self):
-        """Return the time-step power developed by all the leg muscles"""
+        """
+        Return the time-step power developed by all the leg muscles
+        :return: Float power consumed by each muscle
+        """
 
         power = 0
         for m in self.muscles:
@@ -56,7 +56,37 @@ class Leg(Part):
         return power
 
     def update(self, brain_output):
-        """Update control signals and forces"""
+        """
+        Update control signals and forces
+        :param brain_output: List of Float signals from the brain
+        """
+
+
+class Leg(Part):
+    """This class represents a generic leg and its current behaviour in the control process"""
+
+    def __init__(self, config_, orien_, simulator, name):
+        """
+        Class initialization
+        :param config_: Dictionary containing part parameters
+        :param orien_: String describing leg orientation
+        :param simulator: String name of the simulator class utility
+        :param name: String name of the part
+        """
+
+        Part.__init__(self, config_, simulator, name)
+        self.orientation = orien_
+        # Create the muscles objects
+        for muscle_config in config_["muscles"]:
+            self.muscles.append(eval(self.muscle_type))
+        self.connection_matrix = config_["connection_matrix"]
+
+    def update(self, brain_output):
+        """
+        Update control signals and forces
+        :param brain_output: List of Float signals from the brain
+        """
+
         for i in range(len(self.muscles)):
             # Assertion
             if len(self.connection_matrix[self.muscles[i].name]) != len(brain_output):
@@ -72,7 +102,7 @@ class Leg(Part):
                     j += 1
 
                 self.muscles[i].update(ctrl_sig=ctrl_sig)
-                self.logger.debug(self.name + " " + self.orien + " iteration " + str(self.n_iter) +
+                self.logger.debug(self.name + " " + self.orientation + " iteration " + str(self.n_iter) +
                                   ": Control signal = " + str(ctrl_sig))
         self.n_iter += 1
 
@@ -81,7 +111,13 @@ class Backleg(Leg):
     """This class represents a generic backleg and its current behaviour in the control process"""
 
     def __init__(self, config_, orien_, simulator):
-        """Class initialization"""
+        """
+        Class initialization
+        :param config_: Dictionary containing part parameters
+        :param orien_: String describing leg orientation
+        :param simulator: String name of the simulator class utility
+        """
+
         config = {"logger": config_.logger,
                   "muscle_type": config_.muscle_type,
                   "connection_matrix": config_.connection_matrix}
@@ -96,7 +132,13 @@ class Foreleg(Leg):
     """This class represents a generic foreleg and its current behaviour in the control process"""
 
     def __init__(self, config_, orien_, simulator):
-        """Class initialization"""
+        """
+        Class initialization
+        :param config_: Dictionary containing part parameters
+        :param orien_: String describing leg orientation
+        :param simulator: String name of the simulator class utility
+        """
+
         config = {"logger": config_.logger,
                   "muscle_type": config_.muscle_type,
                   "connection_matrix": config_.connection_matrix}
@@ -111,7 +153,12 @@ class Body(Part):
     """This class represents the mouse body and its current behaviour in the control process"""
 
     def __init__(self, config_, simulator):
-        """Class initialization"""
+        """
+        Class initialization
+        :param config_: Dictionary containing part parameters
+        :param simulator: String name of the simulator class utility
+        """
+
         Part.__init__(self,
                       {"logger": config_.logger, "muscle_type": config_.muscle_type},
                       simulator,
@@ -154,7 +201,6 @@ class Body(Part):
 
         # Get distance
         self.dist = math.fabs(vec(self.position - self.origin).x)
-        return
 
     def compute_power(self):
         """Compute time-step power at each iteration"""
@@ -174,8 +220,6 @@ class Body(Part):
         # Append to powers list
         self.powers.append(power)
 
-        return
-
     def monitor_fall(self):
         """Add a fall penalty if head stay under the stand-up level for more than 20 iterations"""
 
@@ -192,8 +236,11 @@ class Body(Part):
             # print("Pos X : " + str(math.fabs(vec(a - self.origin).x)) + " Y : " + str(math.fabs(vec(a - self.origin).y)) + " Z : " + str(math.fabs(vec(a - self.origin).z)))
 
     def get_loss_fct(self):
-        """Compute the body loss function. This should be called only at the end of the simulation
-        in order to avoid useless computation at each iteration"""
+        """
+        Compute the body loss function. This should be called only at the end of the simulation
+        in order to avoid useless computation at each iteration
+        :return: Float loss function score
+        """
 
         self.compute_traveled_dist()
         self.av_power = sum(self.powers) / float(len(self.powers))
@@ -204,13 +251,22 @@ class Body(Part):
 
         return self.loss_fct  # + 1
 
-    def update(self):
-        """Update control signals and forces"""
+    def get_brain_output(self):
+        """
+        Retrieve Brain signal to propagate to the muscles
+        :return: List of Float of signals from the brain
+        """
 
-        # Update brain
         self.brain.update()
-        brain_output = [float(self.brain.state[0]), float(self.brain.state[1]), float(self.brain.state[2]),
-                        float(self.brain.state[3])]
+        return [float(self.brain.state[0]), float(self.brain.state[1]), float(self.brain.state[2]),
+                float(self.brain.state[3])]
+
+    def update(self, brain_output):
+        """
+        Update control signals and forces
+        :param brain_output: List of Float signals from the
+        :return Boolean penalty depending on the model fall
+        """
 
         # Update the four legs
         self.l_ba_leg.update(brain_output)

@@ -12,9 +12,11 @@
 #  - Simulation of the model
 #  - Optimization of the parameters in distributed cloud simulations
 #
-# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>. February 2016
-# Modified by: Dimitri Rodarie
+# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>
+#                  Dimitri Rodarie <d.rodarie@gmail.com>
+# April 2016
 ##
+
 import datetime
 import time
 import logging
@@ -28,7 +30,17 @@ from result import Result
 
 
 class Simulator:
+    """
+    Abstract Simulator class provides tools and abstract functions to implement different simulators
+    to process simulations
+    """
+
     def __init__(self, opt):
+        """
+        Class initialization
+        :param opt: Dictionary containing simulation parameters
+        """
+
         self.args = []
         self.dirname = opt["root_dir"] + "/save"
         if not os.path.exists(self.dirname):
@@ -42,33 +54,48 @@ class Simulator:
         self.genome = opt["genome"] if "genome" in opt else None
 
     def update_filename(self):
+        """Update the save file name to the current datetime"""
+
         self.filename = "sim_" + datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + ".qsm"
         self.filename = self.dirname + "/" + self.filename
 
     @staticmethod
     def launch_simulation(args):
-        # Start batch process and quit
+        """Launch a simulation subprocess"""
+
         logging.debug("Subprocess call: " + str(args))
         subprocess.call(args)
         logging.debug("Subprocess end")
 
     def get_results(self):
-        """This function reads the file saved by the simulator at the end of the simulation to retrieve results"""
+        """
+        This function reads the file saved by the simulator at the end of the simulation to retrieve results
+        :return: Dictionary containing simulation results
+        """
+
         # Retrieve filename
         res = Result()
         results = res.get_results(self.filename)
         return results
 
     def test_simulator(self):
+        """
+        Test a normal simulation and retrieve its results and its cpu and memory consumption
+        :return: Dictionary containing simulation results and mean cpu and memory consumption
+        """
+
         test = Process(target=self.launch_simulation)
         test.daemon = True
         cpu_consumption = []
         memory_consumption = []
         try:
+            # Launch the simulation in a subprocess so we can know its cpu and memory usage
             test.start()
             proc = psutil.Process(test.pid)
             processes = [psutil.Process(os.getpid()), proc]
             time.sleep(1)
+
+            # Every child process is linked to the simulation so we get their consumption too
             for child in proc.children(recursive=True):
                 processes.append(child)
             while proc.status() != psutil.STATUS_ZOMBIE and proc.status() != psutil.STATUS_DEAD:
@@ -77,12 +104,7 @@ class Simulator:
                 time.sleep(0.1)
             test.join()
         except psutil.NoSuchProcess as ex:
-            # Simulation interrupted before the end of the parent process.
-            # Remove useless values due to the interruption
-            if cpu_consumption[-1] == 0.:
-                del cpu_consumption[-1]
-            if memory_consumption[-1] == 0.:
-                del memory_consumption[-1]
+            logging.debug("Test simulation interrupted before the end of the parent process.")
         except Exception as e:
             logging.error("Error during the simlator test : " + str(e))
         logging.info("Test Simulator " + self.__class__.__name__ +

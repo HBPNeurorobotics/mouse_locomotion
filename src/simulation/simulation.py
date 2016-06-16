@@ -1,5 +1,3 @@
-#!/usr/bin/python2
-
 ##
 # Mouse Locomotion Simulation
 #
@@ -12,8 +10,9 @@
 #  - Simulation of the model
 #  - Optimization of the parameters in distributed cloud simulations
 #
-# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>. March 2016
-# Modified by: Dimitri Rodarie
+# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>
+#                  Dimitri Rodarie <d.rodarie@gmail.com>
+# February 2016
 ##
 
 import os
@@ -27,16 +26,17 @@ if os.name == 'posix':
 
 class Simulation:
     """
-    Main class for high level simulation. It receives a set of simulation options as defined
-    in the DEF_OPT dict. Methods start_service() and start_registry can be launched independently
-    to run service and registry	servers. Other methods require a call to start_manager which
-    distribute simulation across the network.
+    Abstract class for high level simulation. It receives a set of simulation options as defined
+    in the DEF_OPT dict.
     """
 
     def __init__(self, opt_=None):
-        """Initialize with CLI options"""
+        """
+        Initialize with CLI options
+        :param opt_: Dictionary containing simulation parameters
+        """
+
         self.opt = opt_
-        self.results = "No results yet : No simulation launched"
         if os.name == 'posix':
             self.ipaddr = self.__get_ip_address('eth0')
         else:
@@ -45,6 +45,12 @@ class Simulation:
 
     @staticmethod
     def __get_ip_address(ifname):
+        """
+        Retrieve machine ip address
+        :param ifname: String name of the network device
+        :return: String machine ip
+        """
+
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         try:
             ip_name = socket.inet_ntoa(fcntl.ioctl(
@@ -59,10 +65,7 @@ class Simulation:
         return ip_name
 
     def start(self):
-        pass
+        """Start the simulation process"""
 
     def stop(self):
-        pass
-
-    def get_results(self):
-        return self.results
+        """Stop the simulation process"""

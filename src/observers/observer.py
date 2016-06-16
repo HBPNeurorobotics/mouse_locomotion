@@ -10,11 +10,23 @@
 #  - Simulation of the model
 #  - Optimization of the parameters in distributed cloud simulations
 #
-# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>. February 2016
-# Modified by: Dimitri Rodarie
+# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>
+#                  Dimitri Rodarie <d.rodarie@gmail.com>
+# April 2016
 ##
 
 
 class Observer:
+    """
+    Observer/Observable pattern
+    Observer Class is notified by Observable for an update
+    """
+
+    def __init__(self):
+        """Class initialization"""
+
     def update(self, **kwargs):
-        pass
+        """
+        Update function called by Observable
+        :param kwargs: Dictionary parameter for the update
+        """

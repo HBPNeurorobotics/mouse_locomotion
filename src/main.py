@@ -9,9 +9,10 @@
 #  - Edition of a brain controller model (oscillator-based or neural network-based)
 #  - Simulation of the model
 #  - Optimization of the parameters in distributed cloud simulations
-# 
-# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>. February 2016
-# Modified by: Dimitri Rodarie
+#
+# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>
+#                  Dimitri Rodarie <d.rodarie@gmail.com>
+# February 2016
 ##
 
 import time
@@ -27,7 +28,8 @@ keyboard = bge.logic.keyboard
 # TODO: Do something with the simulation even if there is no logger declared
 if hasattr(owner["config"], 'logger'):
     # Time-step update instructions
-    penalty = owner["body"].update()
+    brain_signal = owner["body"].get_brain_output()
+    penalty = owner["body"].update(brain_signal)
 
     # DEBUG control and display
     owner["config"].n_iter += 1

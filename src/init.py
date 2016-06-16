@@ -10,10 +10,10 @@
 #  - Simulation of the model
 #  - Optimization of the parameters in distributed cloud simulations
 #
-# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>. February 2016
-# Modified by: Dimitri Rodarie
+# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>
+#                  Dimitri Rodarie <d.rodarie@gmail.com>
+# February 2016
 ##
-
 
 import datetime
 import logging.config

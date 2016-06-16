@@ -1,19 +1,20 @@
+# coding=utf-8
 ##
 # Mouse Locomotion Simulation
 #
 # Human Brain Project SP10
-# 
+#
 # This project provides the user with a framework based on Blender allowing:
 #  - Edition of a 3D model
 #  - Edition of a physical controller model (torque-based or muscle-based)
 #  - Edition of a brain controller model (oscillator-based or neural network-based)
 #  - Simulation of the model
 #  - Optimization of the parameters in distributed cloud simulations
-# 
-# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>. February 2016
-# Modified by: Dimitri Rodarie
+#
+# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>
+#                  Dimitri Rodarie <d.rodarie@gmail.com>
+# February 2016
 ##
-
 
 import logging
 import math
@@ -24,8 +25,17 @@ from utils import *
 
 
 class Muscle:
+    """
+    Abstract Muscle class used to control simulated models
+    """
+
     def __init__(self, params_, simulator):
-        """Class initialization"""
+        """
+        Class initialization
+        :param params_: Dictionary containing parameter for the muscle
+        :param simulator: SimulatorUtils class to access utility functions
+        """
+
         self.n_iter = 0
         self.params = params_
         self.simulator = simulator
@@ -64,25 +74,42 @@ class Muscle:
             self.app_point_2_world = self.obj2.worldTransform * self.app_point_2  # global coordinates of app point 2 in m
 
     def get_power(self):
-        """Return the power developped by the muscle on the two extremity objects"""
+        """
+        Return the power developped by the muscle on the two extremity objects
+        :return: Float power consumed by the muscle
+        """
 
-        return 0
+        return 0.
 
     def draw_muscle(self, color_=[256, 0, 0]):
-        """Draw a line to represent the muscle in the blender simulation"""
+        """
+        Draw a line to represent the muscle in the blender simulation
+        :param color_: Color of the muscle inside the simulator
+        """
+
         self.simulator.draw_line(self.app_point_1_world, self.app_point_2_world, color_)
 
     def update(self, **kwargs):
-        # Here, we update the muscle forces given geometry and control signal
+        """
+        Update the muscle forces given geometry and control signal
+        :param kwargs: Dictionary containing muscle updates
+        """
+
         self.n_iter += 1
 
 
 class HillMuscle(Muscle):
-    """This class implements Hill Model for muscle force """
+    """
+    This class implements Hill Model for muscle force
+    """
 
     def __init__(self, params_, simulator):
-        """Class initialization. Parameters can be found in D.F.B. Haeufle, M. Günther, A. Bayer, S. Schmitt (2014) \
-        Hill-type muscle model with serial damping and eccentric force-velocity relation. Journal of Biomechanics"""
+        """
+        Class initialization. Parameters can be found in D.F.B. Haeufle, M. Günther, A. Bayer, S. Schmitt (2014) \
+        Hill-type muscle model with serial damping and eccentric force-velocity relation. Journal of Biomechanics
+        :param params_: Dictionary containing parameter for the muscle
+        :param simulator: SimulatorUtils class to access utility functions
+        """
 
         Muscle.__init__(self, params_, simulator)
 
@@ -126,8 +153,12 @@ class HillMuscle(Muscle):
         self.SEE_KSEEl = self.SEE_DeltaF_SEE0 / (self.SEE_DeltaU_SEEl * self.SEE_l_SEE0)
 
     def update(self, **kwargs):
-        """Computations are based on D.F.B. Haeufle, M. Günther, A. Bayer, S. Schmitt (2014) \
-        Hill-type muscle model with serial damping and eccentric force-velocity relation. Journal of Biomechanics"""
+        """
+        Computations are based on D.F.B. Haeufle, M. Günther, A. Bayer, S. Schmitt (2014) \
+        Hill-type muscle model with serial damping and eccentric force-velocity relation. Journal of Biomechanics
+        :param kwargs: Dictionary containing muscle updates
+        """
+
         if "l_CE" in kwargs:
             l_CE = kwargs["l_CE"]
         else:
@@ -236,15 +267,22 @@ class HillMuscle(Muscle):
                 dot_l_MTC - dot_l_CE)
             F_MTC = F_SEE + F_SDE
 
-            return F_MTC
+            # return F_MTC
 
 
 class DampedSpringMuscle(Muscle):
-    """This class implements a simple muscle composed by a spring and a damping in parallel"""
+    """
+    This class implements a simple muscle composed by a spring and a damping in parallel
+    """
 
     def __init__(self, params_, simulator):
-        """Class initialization. Requires controller as well as two object and the local point of application \
-        of the spring forces"""
+        """
+        Class initialization. Requires controller as well as two object and the local point of application \
+        of the spring forces
+        :param params_: Dictionary containing parameter for the muscle
+        :param simulator: SimulatorUtils class to access utility functions
+        """
+
         Muscle.__init__(self, params_, simulator)
 
         # Model constants and variables
@@ -263,7 +301,10 @@ class DampedSpringMuscle(Muscle):
             self.force = vec((0, 0, 0))  # vector in N??
 
     def get_power(self):
-        """Return the time-step power developped by the muscle on the two extremity objects"""
+        """
+        Return the time-step power developped by the muscle on the two extremity objects
+        :return: Float power consumed by the muscle
+        """
 
         power = 0.0
         if self.ctrl_sig != 0.0:  # and float((self.force * self.l.normalized())) < 0.0:
@@ -275,12 +316,14 @@ class DampedSpringMuscle(Muscle):
                               " m/s; F = " + str(self.force.length) + " N")
             self.logger.debug("power obj1 = " + str(power_1) + " ; power obj2 = " + str(power_2) +
                               " ; power tot = " + str(power))
-
         return power
 
     def update(self, **kwargs):
-        """Update and apply forces on the objects connected to the spring. The spring can be controlled in length by \
-        fixing manually l0"""
+        """
+        Update and apply forces on the objects connected to the spring. The spring can be controlled in length by \
+        fixing manually l0
+        :param kwargs: Dictionary containing muscle updates
+        """
 
         if "ctrl_sig" in kwargs:
             self.ctrl_sig = kwargs["ctrl_sig"]
@@ -347,8 +390,12 @@ class DampedSpringReducedTorqueMuscle(Muscle):
     factor is added to torque to stabilise the process"""
 
     def __init__(self, params_, simulator):
-        """Class initialization. Requires scene, controller as well as two object and the local point of application \
-        of the spring forces"""
+        """
+        Class initialization. Requires scene, controller as well as two object and the local point of application \
+        of the spring forces
+        :param params_: Dictionary containing parameter for the muscle
+        :param simulator: SimulatorUtils class to access utility functions
+        """
 
         Muscle.__init__(self, params_, simulator)
         # Model constants and variables
@@ -377,8 +424,11 @@ class DampedSpringReducedTorqueMuscle(Muscle):
             self.l_cont = self.l0  # scalar in m
 
     def update(self, **kwargs):
-        """Update and apply forces on the objects connected to the spring. The spring can be controlled in length by \
-        fixing manually l0"""
+        """
+        Update and apply forces on the objects connected to the spring. The spring can be controlled in length by \
+        fixing manually l0
+        :param kwargs: Dictionary containing muscle updates
+        """
 
         if "ctrl_sig" in kwargs:
             ctrl_sig = kwargs["ctrl_sig"]
@@ -454,8 +504,12 @@ class SimpleMuscle(Muscle):
     taking care of anything else."""
 
     def __init__(self, params_, simulator):
-        """Class initialization. Requires scene, controller as well as two object and the local point of application \
-        of the spring forces"""
+        """
+        Class initialization. Requires scene, controller as well as two object and the local point of application \
+        of the spring forces
+        :param params_: Dictionary containing parameter for the muscle
+        :param simulator: SimulatorUtils class to access utility functions
+        """
 
         Muscle.__init__(self, params_, simulator)
         # Model constants and variables
@@ -477,7 +531,10 @@ class SimpleMuscle(Muscle):
         ]
 
     def update(self, **kwargs):
-        """Update and apply forces on the objects connected."""
+        """
+        Update and apply forces on the objects connected.
+        :param kwargs: Dictionary containing muscle updates
+        """
 
         # If muscle has not been deactivated
         if self.active:

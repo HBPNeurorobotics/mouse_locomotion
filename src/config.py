@@ -9,11 +9,11 @@
 #  - Edition of a brain controller model (oscillator-based or neural network-based)
 #  - Simulation of the model
 #  - Optimization of the parameters in distributed cloud simulations
-# 
-# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>. February 2016
-# Modified by: Dimitri Rodarie
+#
+# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>
+#                  Dimitri Rodarie <d.rodarie@gmail.com>
+# February 2016
 ##
-
 
 import logging
 import os
@@ -25,9 +25,13 @@ class Config:
     """Describe the configuration file to pass as an argument to a given simulation"""
 
     def __init__(self, filename=None):
-        """Init default config parameters"""
+        """
+        Init default config parameters
+        :param filename: String path to the config file
+        """
+
         self.logger = logging.Logger("INFO")
-        data = {} if filename is None else JSonUtils.read_json_file(filename, self.logger)
+        data = {} if filename is None else JSonUtils.read_json_file(filename)
         if data == {}:
             self.logger.warning("The config is empty. You may have a problem with your config file.")
         # Simulation parameters
@@ -58,7 +62,10 @@ class Config:
         self.power_ref = data["dist_ref"] if "dist_ref" in data else 1000
 
     def set_conn_matrix(self, vector):
-        """Fills the connection matrix between the brain and the muscles with a vector of values"""
+        """
+        Fills the connection matrix between the brain and the muscles with a vector of values
+        :param vector: List of List of Float values to fill the connection matrix
+        """
 
         conn_size = len(self.connection_matrix) * self.brain["n_osc"]
         if len(vector) != conn_size:
@@ -75,7 +82,10 @@ class Config:
             self.logger.debug("Connection matrix updated: " + str(self.connection_matrix))
 
     def set_leg_conn_matrix(self, vector):
-        """Fills the connection matrix between the brain and the muscles of the leg with a vector of values"""
+        """
+        Fills the connection matrix between the brain and the muscles of the leg with a vector of values
+        :param vector: List of Float values to set the connection matrix for the legs muscles
+        """
 
         if len(vector) != self.get_conn_matrix_leg_len():
             self.logger.error("Vector size (" + str(len(vector)) + ") should match with connection matrix " +
@@ -85,19 +95,22 @@ class Config:
             i = 0
             for line in sorted(self.connection_matrix):
                 if line == "B_biceps.L" or line == "B_biceps.R" \
-                    or line == "F_biceps.L" or line == "F_biceps.R" \
-                    or line == "B_triceps.L" or line == "B_triceps.R" \
-                    or line == "F_triceps.L" or line == "F_triceps.R" \
-                    or line == "B_gastro.L" or line == "B_gastro.R" \
-                    or line == "F_gastro.L" or line == "F_gastro.R":
-                        for j in range(len(self.connection_matrix[line])):
-                            self.connection_matrix[line][j] = vector[i]
-                            i += 1
+                        or line == "F_biceps.L" or line == "F_biceps.R" \
+                        or line == "B_triceps.L" or line == "B_triceps.R" \
+                        or line == "F_triceps.L" or line == "F_triceps.R" \
+                        or line == "B_gastro.L" or line == "B_gastro.R" \
+                        or line == "F_gastro.L" or line == "F_gastro.R":
+                    for j in range(len(self.connection_matrix[line])):
+                        self.connection_matrix[line][j] = vector[i]
+                        i += 1
 
             self.logger.debug("Connection matrix updated for leg: " + str(self.connection_matrix))
 
     def get_conn_matrix_vector(self):
-        """Return the matrix in form of a vector"""
+        """
+        Return the matrix in form of a vector
+        :return: List of List of Float connection matrix
+        """
 
         vect = []
         for line in sorted(self.connection_matrix):
@@ -107,7 +120,10 @@ class Config:
         return vect
 
     def str_conn_matrix(self):
-        """Print the connection matrix"""
+        """
+        Print the connection matrix
+        :return: String representing the matrix
+        """
 
         st = 'Connection Matrix:\n'
         for line in self.connection_matrix:
@@ -120,17 +136,24 @@ class Config:
         return st
 
     def get_conn_matrix_len(self):
-        """Return the total size (lines x columns) of the connection matrix"""
+        """
+        Return the total size (lines x columns) of the connection matrix
+        :return: Int connection matrix length
+        """
 
         return len(self.connection_matrix) * self.brain["n_osc"]
 
     def get_conn_matrix_leg_len(self):
-        """Return the size (lines x columns) of the connection matrix for legs"""
+        """
+        Return the size (lines x columns) of the connection matrix for legs
+        :return: Int connection matrix length for the legs
+        """
 
         return 12 * self.brain["n_osc"]
 
     def config_connection_matrix(self):
-        # Fill default connection matrix
+        """Fill default connection matrix"""
+
         if "muscles" in self.body:
             for m in self.body["muscles"]:
                 self.connection_matrix[m["name"]] = []
@@ -174,6 +197,8 @@ class Config:
                     self.connection_matrix[m["name"]].append(0)
 
     def save_config(self, directory_name=None, filename=None):
+        """Save the current config into a json file"""
+
         dirname_ = "" if directory_name is None else directory_name
         if dirname_ != "" and not os.path.exists(dirname_):
             os.makedirs(dirname_)
@@ -181,6 +206,7 @@ class Config:
         filename_ = self.name if filename is None else filename
         filename_ = dirname_ + "/" + filename_ + ".json"
         data = self.__dict__
+        # Delete useless parameters
         del data["logger"]
         del data["t_init"]
         del data["t_end"]

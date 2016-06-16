@@ -2,16 +2,17 @@
 # Mouse Locomotion Simulation
 #
 # Human Brain Project SP10
-# 
+#
 # This project provides the user with a framework based on Blender allowing:
 #  - Edition of a 3D model
 #  - Edition of a physical controller model (torque-based or muscle-based)
 #  - Edition of a brain controller model (oscillator-based or neural network-based)
 #  - Simulation of the model
 #  - Optimization of the parameters in distributed cloud simulations
-# 
-# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>. April 2016
-# Modified by: Dimitri Rodarie
+#
+# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>
+#                  Dimitri Rodarie <d.rodarie@gmail.com>
+# April 2016
 ##
 
 import logging
@@ -19,12 +20,16 @@ from utils import PickleUtils
 
 
 class Result:
-    """This class is called at the end of a Blender simulation. It collects the simulation results from Blender, and from the
-    different classes of this project. It also provides method to save, display and load the results (usefull inside an
-    optimization algorithm). It takes a Config class as a initialization argument to determine which parameters shall be saved"""
+    """This class is called at the end of a Blender simulation. It collects the simulation results from Blender, and
+    from the different classes of this project. It also provides method to save, display and load the results (usefull
+    inside an optimization algorithm). It takes a Config class as a initialization argument to determine which
+    parameters shall be saved"""
 
     def __init__(self, body_=None):
-        """Initialize the class with a body instance"""
+        """
+        Initialize the class with a body instance
+        :param body_: Body class to save
+        """
 
         if body_:
             self.void = False
@@ -74,7 +79,6 @@ class Result:
         self.result_dict["config_name"] = self.config.name
         self.result_dict["config_opt"] = None  # TODO: fill here!
         self.result_dict["config_muscles"] = self.config.muscle_type
-        return
 
     def save_results(self):
         """Save the results dictionary"""
@@ -91,17 +95,23 @@ class Result:
         else:
             self.logger.error("This result dictionary is currently empty. First load some results before saving.")
 
-        return
-
     def get_results(self, filename=None):
-        """Return the results dictionary"""
+        """
+        Return the results dictionary
+        :param filename: String path to the file
+        :return: Dictionary containing the content of the file
+        """
+
         if filename:
-            self.result_dict = PickleUtils.load(filename, self.logger)
-            PickleUtils.del_file(filename, self.logger)
+            self.result_dict = PickleUtils.load(filename)
+            PickleUtils.del_file(filename)
         return self.result_dict
 
     def __str__(self):
-        """Overload the string method to print a clear report"""
+        """
+        Overload the string method to print a clear report
+        :return: String describing the results
+        """
 
         # Compute report if initialized with body and config
         if self.body:

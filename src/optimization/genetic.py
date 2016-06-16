@@ -12,28 +12,55 @@
 #  - Simulation of the model
 #  - Optimization of the parameters in distributed cloud simulations
 #
-# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>. February 2016
-# Modified by: Dimitri Rodarie
+# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>
+#                  Dimitri Rodarie <d.rodarie@gmail.com>
+# February 2016
 ##
-import time
 
 import copy
-from config import Config
-from pyevolve import *
 import logging
+import time
+
+from config import Config
 from optimization import Optimization
+from pyevolve import *
 
 
 class Genetic(Optimization):
+    """
+    Genetic algorithm using pyevolve package. Perform evolution process on a list of parameters and retrieve the best
+    solution after reaching convergence or a specific threshold
+    Usage:
+                # Instantiate Genetic
+                genetic = Genetic(self.opt, self)
+
+                # Run genetic algorithm
+                genetic.start()
+    """
+
     def __init__(self, opt, observable, num_max_generation=40, population_size=30, genome_size=10, mutation_rate=0.2,
                  cross_over_rate=0.65, genome_min=-2, genome_max=2.0, interactive_mode=False, stop_num_av=10,
                  stop_thresh=0.01):
-        """Creation and initialization function for the genome and the genetic algorithm. It fixes the
-        parameters to use in the algorithm"""
+        """
+        Creation and initialization function for the genome and the genetic algorithm. It fixes the
+        parameters to use in the algorithm
+        :param opt: Dictionary containing simulation parameters
+        :param observable: Observable instance to get update from
+        :param num_max_generation: Int maximum number of generation
+        :param population_size: Int population size
+        :param genome_size: Int genome size
+        :param mutation_rate: Float mutation rate
+        :param cross_over_rate: Float cross over rate
+        :param genome_min: Float min genome value
+        :param genome_max: Float max genome value
+        :param interactive_mode: Bool interactive mode
+        :param stop_num_av: Int size of best solution list
+        :param stop_thresh: Float threshold used to stop the genetic process
+        """
 
         Optimization.__init__(self, opt, observable, num_max_generation, population_size, stop_thresh)
 
-        # Algo parameters
+        # Algorithm parameters
         self.genome_size = genome_size
         if opt["sim_type"] == "META_GA":
             config = Config(opt["config_name"])
@@ -70,8 +97,12 @@ class Genetic(Optimization):
         self.configs = []
 
     def eval_fct(self, population):
-        """Evaluation function of the genetic algorithm. For each population, it computes the
-        score of every genomes and directly write it"""
+        """
+        Evaluation function of the genetic algorithm. For each population, it computes the
+        score of every genomes and directly write it
+        :param population: List of specimen to evaluate
+        :return: Float score for the population
+        """
 
         super_score = Optimization.eval_fct(self, population)
 
@@ -114,8 +145,11 @@ class Genetic(Optimization):
         return sum(scores)
 
     def conv_fct(self, ga):
-        """Convergence function of the genetic algorithm. It is called at each iteration step and
-        return True of False depending on a convergence criteria"""
+        """
+        Convergence function of the genetic algorithm. It is called at each iteration step
+        :param ga: GSimpleGA instance to test
+        :return: Boolean depending on a convergence criteria
+        """
 
         if Optimization.conv_fct(self, ga):
             return True
@@ -134,3 +168,11 @@ class Genetic(Optimization):
                 return True
 
         return False
+
+    def start(self, **kwargs):
+        """
+        Start the genetic process
+        :param kwargs: Dictionary parameter to pass for the simulation
+        """
+
+        self.ga.evolve(freq_stats=kwargs["freq_stats"] if "freq_stats" in kwargs.keys() else 10)

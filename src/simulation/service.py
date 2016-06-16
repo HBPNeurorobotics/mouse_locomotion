@@ -1,5 +1,3 @@
-#!/usr/bin/python2
-
 ##
 # Mouse Locomotion Simulation
 #
@@ -12,9 +10,11 @@
 #  - Simulation of the model
 #  - Optimization of the parameters in distributed cloud simulations
 #
-# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>. February 2016
-# Modified by: Dimitri Rodarie
+#  File created by: Gabriel Urbain <gabriel.urbain@ugent.be>
+#                  Dimitri Rodarie <d.rodarie@gmail.com>
+# February 2016
 ##
+
 import logging
 import sys
 
@@ -28,18 +28,35 @@ else:
 
 
 class SimService(Service):
+    """
+    SimService class listen to server requests and launch simulation depending on the simulator
+    WARNING: Every function called by a SimServer should start with "exposed_"
+    Usage:
+                # Create and start a SimService using a BgServingThread
+                conn = rpyc.connect(address, port)
+                bgt = rpyc.BgServingThread(conn)
+                async_simulation = rpyc.async(conn.root.exposed_simulation)
+    """
+
+    # Service ALIASES used to be recognized by the rpyc registry
     ALIASES = common.ALIASES
 
-    def exposed_simulation(self, opt_):  # this is an exposed method
+    def exposed_simulation(self, opt_):
+        """Launch a normal simulation and return its results"""
+
         return common.launch_simulator(opt_)
 
     def exposed_test(self, opt_):
+        """Launch a simulation and return its results and its cpu and memory usage"""
+
+        # Get the machine current cpu usage and memory before launching simulation
         cpu_percent = sum(psutil.cpu_percent(interval=0.5, percpu=True)) / float(psutil.cpu_count())
         memory_percent = psutil.virtual_memory().percent
         res = {"common": {"CPU": cpu_percent, "memory": memory_percent}}
         logging.info("Test Server " + type(self).__name__ +
                      ": \nCPU = " + str(cpu_percent) +
                      "\nMemory = " + str(memory_percent))
+        # Launch the simulation
         if "simulator" in opt_:
             res[opt_["simulator"]] = common.test_simulator(opt_)
         return res

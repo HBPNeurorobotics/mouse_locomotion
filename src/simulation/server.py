@@ -1,5 +1,3 @@
-#!/usr/bin/python2
-
 ##
 # Mouse Locomotion Simulation
 #
@@ -12,9 +10,11 @@
 #  - Simulation of the model
 #  - Optimization of the parameters in distributed cloud simulations
 #
-# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>. February 2016
-# Modified by: Dimitri Rodarie
+# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>
+#                  Dimitri Rodarie <d.rodarie@gmail.com>
+# February 2016
 ##
+
 import rpyc
 
 from simulation import Simulation
@@ -30,22 +30,30 @@ else:
 
 class SimServer(Simulation):
     """
-    SimService class provides a services server to listen to external requests and start a Simulator
+    SimServer class provides a services server to listen to external requests and start a Simulator
     simulation remotely and asynchronously.
     Usage:
-            # Create and start SimService thread
-            s = ThreadedServer(SimService, auto_register=True)
+            # Create and start SimServer thread
+            s = SimServer(opt)
             s.start()
     """
 
     def __init__(self, opt):
+        """
+        Class initialization
+        :param opt: Dictionary containing simulation parameters
+        """
+
         Simulation.__init__(self, opt)
 
     def start(self):
         """Start a service server"""
+
         try:
             t = ThreadedServer(SimService, auto_register=True, protocol_config=rpyc.core.protocol.DEFAULT_CONFIG)
-            logging.info("Start service server on address: " + str(self.ipaddr) + ":" + str(t.port))
+            logging.info(
+                "Start service server on address: " + str(self.ipaddr) + ":" + str(t.port) + " with PID " + str(
+                    self.pid))
             t.start()
         except KeyboardInterrupt:
             t.stop()

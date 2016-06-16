@@ -1,5 +1,3 @@
-#!/usr/bin/python2
-
 ##
 # Mouse Locomotion Simulation
 #
@@ -12,22 +10,43 @@
 #  - Simulation of the model
 #  - Optimization of the parameters in distributed cloud simulations
 #
-# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>. February 2016
-# Modified by: Dimitri Rodarie
+# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>
+#                  Dimitri Rodarie <d.rodarie@gmail.com>
+# April 2016
 ##
 
 from simulator import Simulator
 
 
 class Blender(Simulator):
+    """
+    Blender Class provides functions to call different blender simulations
+    Usage:
+                # Instantiate Blender Class
+                blender = Blender(opt, type_="BLENDER")
+
+                # Start blender simulation
+                blender.launch_simulation()
+
+    """
+
     ALIASES = {"BLENDER": "blender", "BLENDERPLAYER": "blenderplayer"}
 
     def __init__(self, opt, type_="BLENDERPLAYER"):
+        """
+        Class initialization
+        :param opt: Dictionary containing simulation parameters
+        :param type_: String type of simulation
+        """
+
         Simulator.__init__(self, opt)
         self.type = type_
         self.fullscreen = opt["fullscreen"] if "fullscreen" in opt else False
 
     def launch_simulation(self):
+        """Launch a Blender simulation depending on the type variable.
+        List of the types are in the ALIASES dictionary."""
+
         if self.type in self.ALIASES:
             self.args = [self.simulator_path + self.ALIASES[self.type]]
             eval("self.start_" + self.ALIASES[self.type] + "()")

@@ -1,5 +1,3 @@
-#!/usr/bin/python2
-
 ##
 # Mouse Locomotion Simulation
 #
@@ -12,8 +10,9 @@
 #  - Simulation of the model
 #  - Optimization of the parameters in distributed cloud simulations
 #
-# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>. February 2016
-# Modified by: Dimitri Rodarie
+# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>
+#                  Dimitri Rodarie <d.rodarie@gmail.com>
+# February 2016
 ##
 
 import threading
@@ -54,7 +53,11 @@ class Manager(Simulation, Observable):
     """
 
     def __init__(self, opt):
-        """Create sim manager parameters and start registry server"""
+        """
+        Class initialization
+        :param opt: Dictionary containing simulation parameters
+        """
+
         Simulation.__init__(self, opt)
         Observable.__init__(self)
         # Simulation list stacks
@@ -145,7 +148,10 @@ class Manager(Simulation, Observable):
         logging.debug("Server list " + str(self.server_list) + " cloud " + str(self.cloud_state))
 
     def __select_candidate(self):
-        """Select the most suited candidate in the simulation cloud. """
+        """
+        Select the most suited candidate in the simulation cloud.
+        :return: Int id of the best candidate, 0 if there is no good candidate
+        """
 
         # We check registry_server for new server (adding it as empty one)
         self.__refresh_cloud_state()
@@ -166,15 +172,30 @@ class Manager(Simulation, Observable):
 
     @staticmethod
     def rpyc_casting(rsp):
+        """
+        Return a casted rpyc response
+        :param rsp: rpyc response to cast
+        :return: casted result
+        """
+
         cast = rsp.value
         if not type(rsp.value) == str:
             cast = eval(str(cast))
         return cast
 
     def response_simulation(self, rsp):
-        """Callback function called when a simulation has finished"""
+        """
+        Callback function called when a simulation has finished
+        :param rsp: rpyc response to process
+        """
 
-        def function(server_hash, rsp_):
+        def function(server_id, rsp_):
+            """
+            Function to process the simulation results
+            :param server_id: Int Server id for the cloud
+            :param rsp_: rpyc response to process
+            """
+
             # We add the rsp from the simulation to the rsp list
             self.mutex_rsp.acquire()
             # Since rpyc convert some basic types into its own
@@ -187,17 +208,30 @@ class Manager(Simulation, Observable):
 
             # Decrease thread number in cloud_state dict
             self.mutex_cloud_state.acquire()
-            self.cloud_state[server_hash]["n_threads"] += 1
+            self.cloud_state[server_id]["n_threads"] += 1
             self.mutex_cloud_state.release()
 
-        self.process_callback(rsp, function)
+        self.__process_callback(rsp, function)
 
     def response_test(self, rsp):
+        """
+        Callback function called when a simulation test has finished
+        :param rsp: rpyc response to process
+        """
+
         def function(server_id, rsp_):
+            """
+            Function to process the simulation test results
+            :param server_id: Int Server id for the cloud
+            :param rsp_: rpyc response to process
+            """
+
+            # Process the number of maximum simulation that can be done on the same time
             cpu_capacity = (self.max_CPU_percent_use - rsp_["common"]["CPU"]) / rsp_[self.simulator]["CPU"]
             memory_capacity = (self.max_memory_percent_use - rsp_["common"]["memory"]) / rsp_[self.simulator]["memory"]
             nb_thread = math.floor(min(cpu_capacity, memory_capacity))
-            if nb_thread > 0:
+
+            if nb_thread > 0:  # Change the status of the server on the cloud
                 self.mutex_cloud_state.acquire()
                 self.cloud_state[server_id]["status"] = True
                 self.cloud_state[server_id]["n_threads"] = nb_thread
@@ -206,16 +240,22 @@ class Manager(Simulation, Observable):
                              " is now available for a maximum of " + str(nb_thread) + " simulation(s).")
                 self.mutex_cloud_state.release()
 
-        self.process_callback(rsp, function)
+        self.__process_callback(rsp, function)
 
-    def process_callback(self, rsp, function):
+    def __process_callback(self, rsp, function):
+        """
+        Default callback function called at the end of every service
+        :param rsp: rpyc response to process
+        :param function: Function to process the simulation results
+        """
+
         if not rsp.error:
             conn_found = False
             for item in self.conn_list:
-                if rsp._conn.__hash__() == item["conn"].__hash__():
+                if rsp._conn.__hash__() == item["conn"].__hash__():  # The server has been requested from this manager
                     conn_found = True
                     server_id = item["server"]
-                    if server_id in self.cloud_state:
+                    if server_id in self.cloud_state:  # The server is still in the cloud
                         function(server_id, self.rpyc_casting(rsp))
                         logging.info("Response received from server " + str(self.cloud_state[server_id]["address"]) +
                                      ":" + str(self.cloud_state[server_id]["port"]))
@@ -269,8 +309,7 @@ class Manager(Simulation, Observable):
                 try:
                     time.sleep(self.sim_prun_t)
                 except KeyboardInterrupt:
-                    logging.warning("Simulation interrupted by user! Please clean up " +
-                                    "remote computers.")
+                    logging.warning("Simulation interrupted by user!")
                     self.notify_observers(**{"interruption": True})
                     self.stop()
                     to_init = time.time()
@@ -290,6 +329,7 @@ class Manager(Simulation, Observable):
 
     def stop(self):
         """Stop the simulation manager"""
+
         Simulation.stop(self)
 
         # Stop managing loop
@@ -300,6 +340,7 @@ class Manager(Simulation, Observable):
 
     def start(self):
         """Start a simulation manager"""
+
         self.t_sim_init = time.time()
         logging.info("Start sim manager server with PID " + str(self.pid))
         time.sleep(1)
@@ -316,9 +357,7 @@ class Manager(Simulation, Observable):
 
         # Continue while not asked for termination or when there are candidates in the list
         # and a server to process them
-
         while (not self.mng_stop) or (self.rqt and self.server_dispo):
-
             if self.rqt:
                 # Select a candidate server
                 server_hash = self.__select_candidate()
@@ -352,6 +391,12 @@ class Manager(Simulation, Observable):
         self.terminated = True
 
     def del_clean_simulation(self, server_hash, res):
+        """
+        Remove a clean simulation result from the result array
+        :param server_hash: Int Server id for the cloud
+        :param res: rpyc response to process
+        """
+
         if server_hash in self.results:
             server = self.results[server_hash]
             for simulation in server:
@@ -362,22 +407,34 @@ class Manager(Simulation, Observable):
                     break
 
     def check_sim(self):
+        """
+        Check if simulations have not timeout or returned errors
+        If so, retrieve all the requests of the broken server, add
+        them to the request list and update the state of the server
+        """
+
         for server_hash, simulations in self.results.items():
+            # For every server, we check its current simulation
             clean = True
+            reason = ""
             for simulation in simulations:
                 result = simulation[1]
                 if result.expired or result.error:
+                    reason = "Timeout" if result.expired else "Error"
                     clean = False
                     break
+            # If one of the simulation returned an error or a timeout
             if not clean:
                 self.mutex_rqt.acquire()
+                # Add the request sent to the server to the request list
                 for simulation in simulations:
                     rqt = simulation[0]
                     self.rqt.append(rqt)
                 self.mutex_rqt.release()
 
                 self.mutex_cloud_state.acquire()
-                logging.error("Timeout from server: " +
+                # The server won't be use for simulation anymore.
+                logging.error(reason + " from server: " +
                               str(self.cloud_state[server_hash]["address"]) + ":" +
                               str(self.cloud_state[server_hash]["port"]))
                 self.cloud_state[server_hash]["status"] = False
@@ -388,6 +445,9 @@ class Manager(Simulation, Observable):
                 self.mutex_res.release()
 
     def request_server(self, server_id, server, rqt, service):
+        """Create a connexion to a server and send a request for a service
+        Raise Exception if an error occurred."""
+
         # Connect to the server
         try:
             conn = rpyc.connect(server["address"],
