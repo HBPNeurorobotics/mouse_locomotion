@@ -3,12 +3,12 @@
 #
 # Human Brain Project SP10
 #
-# This project provides the user with a framework based on Blender allowing:
+# This project provides the user with a framework based on 3D simulators allowing:
 #  - Edition of a 3D model
 #  - Edition of a physical controller model (torque-based or muscle-based)
 #  - Edition of a brain controller model (oscillator-based or neural network-based)
 #  - Simulation of the model
-#  - Optimization of the parameters in distributed cloud simulations
+#  - Optimization and Meta-optimization of the parameters in distributed cloud simulations
 #
 # File created by: Gabriel Urbain <gabriel.urbain@ugent.be>
 #                  Dimitri Rodarie <d.rodarie@gmail.com>
@@ -86,7 +86,9 @@ logger.info("####################################")
 logger.info("##   Mouse Locomotion Simulation   #")
 logger.info("##   ---------------------------   #")
 logger.info("##                                 #")
-logger.info("##   Gabriel Urbain - UGent 2016   #")
+logger.info("##     Gabriel Urbain - UGent      #")
+logger.info("##     Dimitri RODARIE - HBP       #")
+logger.info("##              2016               #")
 logger.info("####################################\n")
 
 # Set simulation parameters
