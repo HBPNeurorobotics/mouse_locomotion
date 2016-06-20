@@ -19,6 +19,7 @@
 
 # Add src folder to path
 import logging.config
+import logging.handlers
 import os
 from os.path import dirname, realpath
 import sys
