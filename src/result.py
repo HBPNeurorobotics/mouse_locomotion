@@ -95,16 +95,18 @@ class Result:
         else:
             self.logger.error("This result dictionary is currently empty. First load some results before saving.")
 
-    def get_results(self, filename=None):
+    def get_results(self, filename=None, to_delete=True):
         """
         Return the results dictionary
+        :param to_delete: Boolean depending if the file will be deleted
         :param filename: String path to the file
         :return: Dictionary containing the content of the file
         """
 
         if filename:
             self.result_dict = PickleUtils.load(filename)
-            PickleUtils.del_file(filename)
+            if to_delete:
+                PickleUtils.del_file(filename)
         return self.result_dict
 
     def __str__(self):

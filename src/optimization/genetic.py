@@ -175,7 +175,7 @@ class Genetic(Optimization):
         """
 
         self.best_solutions_list.append(
-            self.ga.evolve(freq_stats=kwargs["freq_stats"] if "freq_stats" in kwargs.keys() else 10))
+            self.ga.evolve(freq_stats=kwargs["freq_stats"] if "freq_stats" in kwargs.keys() else 10).getInternalList())
         self.notify()
         if self.to_save:
             self.save()

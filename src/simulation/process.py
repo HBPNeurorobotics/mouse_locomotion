@@ -102,7 +102,7 @@ class Process(Manager):
             res_list = [common.launch_simulator(sim_list)]
         elif "load_file" in sim_list and sim_list["load_file"]:
             res = Result()
-            sim_list["genome"] = res.get_results(sim_list["load_file"])
+            sim_list["genome"] = res.get_results(sim_list["load_file"], to_delete=False)
             res_list = [common.launch_simulator(sim_list)]
 
         else:
