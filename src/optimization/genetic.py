@@ -20,7 +20,6 @@
 import copy
 import logging
 import time
-
 from config import Config
 from optimization import Optimization
 from pyevolve import *
@@ -175,4 +174,27 @@ class Genetic(Optimization):
         :param kwargs: Dictionary parameter to pass for the simulation
         """
 
-        self.ga.evolve(freq_stats=kwargs["freq_stats"] if "freq_stats" in kwargs.keys() else 10)
+        self.best_solutions_list.append(
+            self.ga.evolve(freq_stats=kwargs["freq_stats"] if "freq_stats" in kwargs.keys() else 10))
+        self.notify()
+        if self.to_save:
+            self.save()
+
+    def notify(self, notification=None):
+        """
+        Notify observers with the current state of the optimization
+        :param notification: Dictionary that contains notification to add to
+        the default notification
+        """
+
+        # Default notification
+        kwargs = {
+            "res": self.results,
+            "configs": self.configs,
+            "current_gen": self.ga.getCurrentGeneration()
+        }
+
+        # Specific notification
+        if notification is not None:
+            kwargs.update(notification)
+        Optimization.notify(self, kwargs)

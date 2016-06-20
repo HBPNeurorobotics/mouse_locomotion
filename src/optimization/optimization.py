@@ -14,14 +14,17 @@
 #                  Dimitri Rodarie <d.rodarie@gmail.com>
 # April 2016
 ##
+import datetime
 
-from observers import Observer
+from observers import Observer, Observable
+from utils import PickleUtils
 
 
-class Optimization(Observer):
+class Optimization(Observer, Observable):
     """
     Optimization abstract class provides tools and abstract functions that will be used in subclasses
     for optimization processes
+    It gets notifications from the simulation thread and can notify its changes for further process
     """
 
     def __init__(self, opt, observable, max_iteration, population_size=0, stop_thresh=None):
@@ -35,6 +38,7 @@ class Optimization(Observer):
         """
 
         Observer.__init__(self)
+        Observable.__init__(self)
         self.opt = opt
         self.observable = observable
         self.interruption = False
@@ -45,6 +49,8 @@ class Optimization(Observer):
         self.stop_thresh = stop_thresh
         self.max_iteration = max_iteration
         self.res_list = []
+        self.to_save = opt["save"] if "save" in opt else True
+        self.save_directory = self.opt["root_dir"] + "/save/"
 
     def eval_fct(self, population):
         """
@@ -87,3 +93,28 @@ class Optimization(Observer):
         Start the optimization process till it reach convergence or threshold
         :param kwargs: Dictionary parameter to pass for the simulation
         """
+
+    def notify(self, notification=None):
+        """
+        Notify observers with the current state of the optimization
+        :param notification: Dictionary that contains notification to add to
+        the default notification
+        """
+
+        # Default notification
+        kwargs = {
+            "interruption": self.interruption,
+            "res": self.res_list
+        }
+
+        # Specific notification
+        if notification is not None:
+            kwargs.update(notification)
+        self.notify_observers(**kwargs)
+
+    def save(self):
+        """Save the current best solutions into a file"""
+
+        PickleUtils.save(
+            self.save_directory + datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + ".gabi",
+            str(self.best_solutions_list))

@@ -21,13 +21,15 @@ import matplotlib
 
 import time
 from genetic import Genetic
+from optimization import Optimization
+from utils import PickleUtils
 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
 
-class MetaOptimization:
+class MetaOptimization(Optimization):
     """
     This class provides tools to modify the optimization parameters or methods,
     start different optimisation processes, benchmark and plot them
@@ -39,25 +41,31 @@ class MetaOptimization:
                 mga.co_bench()
     """
 
-    def __init__(self, opt, observable):
+    def __init__(self, opt, observable, minimum=0, max_iteration=1, step=0.1):
         """
         Init MetaOptimization class by creating a generic container to exploit
         different results
         :param opt: Dictionary containing simulation parameters
         :param observable: Observable instance to get update from
+        :param minimum: Float Meta optimization loop parameter
+        :param max_iteration: Float Meta optimization loop parameter
+        :param step: Float Meta optimization loop parameter
         """
 
-        self.result = dict()
-        self.result['n_gen'] = []
-        self.result['time'] = []
-        self.result['abs_name'] = "Abscissas"
-        self.result['ord_name'] = "Ordinates"
-        self.result['scores'] = []
-        self.result['configs'] = []
-        self.result['param_val'] = []
+        Optimization.__init__(self, opt, None, max_iteration)
+        self.res_list = dict()
+        self.res_list['n_gen'] = []
+        self.res_list['time'] = []
+        self.res_list['abs_name'] = "Abscissas"
+        self.res_list['ord_name'] = "Ordinates"
+        self.res_list['scores'] = []
+        self.res_list['configs'] = []
+        self.res_list['param_val'] = []
 
-        self.opt = opt
         self.observable = observable
+        self.minimum = minimum
+        self.step = step
+        self.t_init = 0
 
     def display(self):
         """Print the results"""
@@ -65,16 +73,16 @@ class MetaOptimization:
         res = "\nMeta Optimization results\n"
         res += "--------------------------\n\n"
         j = 0
-        for i in self.result['param_val']:
+        for i in self.res_list['param_val']:
             min_ = ""
             max_ = ""
             mean_ = ""
-            for scores in self.result["scores"][j]:
+            for scores in self.res_list["scores"][j]:
                 min_ += str(min(scores)) if len(scores) > 0 else str(0.) + " "
                 mean_ += str(sum(scores) / len(scores)) if len(scores) > 0 else str(0.) + " "
                 max_ += str(max(scores)) if len(scores) > 0 else str(0.) + " "
-            res += "## " + self.result['abs_name'] + " = " + str(i) + " ##\n"
-            res += "\tSimulation time: " + str(self.result['time'][j]) + "\n"
+            res += "## " + self.res_list['abs_name'] + " = " + str(i) + " ##\n"
+            res += "\tSimulation time: " + str(self.res_list['time'][j]) + "\n"
             res += "\tMin score evolution: " + "\n\t" + min_ + "\n"
             res += "\tMean score evolution: " + "\n\t" + mean_ + "\n"
             res += "\tMax score evolution: " + "\n\t" + max_ + "\n"
@@ -95,19 +103,19 @@ class MetaOptimization:
         j = 0
         last_it_scores = []
         # raw_scores = []
-        for i in self.result['param_val']:
-            if len(self.result["scores"][j]) <= 0:
+        for i in self.res_list['param_val']:
+            if len(self.res_list["scores"][j]) <= 0:
                 break
             min_ = []
             max_ = []
             mean_ = []
-            for scores in self.result["scores"][j]:
+            for scores in self.res_list["scores"][j]:
                 min_.append(min(scores) if len(scores) > 0 else 0.)
                 mean_.append(sum(scores) / len(scores) if len(scores) > 0 else 0.)
                 max_.append(max(scores) if len(scores) > 0 else 0.)
 
-            iterations = range(len(self.result["scores"][j]))
-            last_it_scores.append(self.result["scores"][j][-1])
+            iterations = range(len(self.res_list["scores"][j]))
+            last_it_scores.append(self.res_list["scores"][j][-1])
             # raw_scores.append([item for sublist in self.result["scores"][j] for item in sublist])
 
             fig = plt.figure()
@@ -116,11 +124,11 @@ class MetaOptimization:
             plt.plot(iterations, max_, 'r-')
 
             ax = fig.add_subplot(111)
-            ax.set_title(self.result['abs_name'] + " = " + str(i))
+            ax.set_title(self.res_list['abs_name'] + " = " + str(i))
             ax.yaxis.grid(True)
             ax.set_xticks([y for y in iterations], )
             ax.set_xlabel("Iteration number")
-            ax.set_ylabel(self.result["ord_name"])
+            ax.set_ylabel(self.res_list["ord_name"])
 
             plots.append(fig)
 
@@ -129,11 +137,11 @@ class MetaOptimization:
         # Create graph for final scores
         if len(last_it_scores) > 0:
             fig, ax = plt.subplots(1)
-            ax.set_title("Score of the last iteration in function of " + self.result['abs_name'])
+            ax.set_title("Score of the last iteration in function of " + self.res_list['abs_name'])
             ax.yaxis.grid(True)
-            ax.set_xticks([y for y in self.result['param_val']], )
-            ax.set_xlabel(self.result['abs_name'])
-            ax.set_ylabel(self.result["ord_name"])
+            ax.set_xticks([y for y in self.res_list['param_val']], )
+            ax.set_xlabel(self.res_list['abs_name'])
+            ax.set_ylabel(self.res_list["ord_name"])
             bplot = ax.boxplot(last_it_scores,
                                notch=True,  # notch shape
                                vert=True,  # vertical box alignment
@@ -152,6 +160,30 @@ class MetaOptimization:
         else:
             logging.warning("Nothing to save in the pdf file")
 
+    def update(self, **kwargs):
+        """
+        Retrieve results from the simulation and update parameters
+        Raise Exception if one of the required parameter is missing
+        :param kwargs: Dictionary parameter used for update
+        """
+
+        if "interruption" in kwargs.keys() and type(kwargs["interruption"]) == bool:
+            self.interruption = kwargs["interruption"]
+
+        if "res" in kwargs.keys():
+            self.res_list['scores'] = kwargs["res"]
+        else:
+            raise Exception("Parameter 'res' missing in notification")
+        if "configs" in kwargs.keys():
+            self.res_list['configs'].append(kwargs["configs"])
+        else:
+            raise Exception("Parameter 'configs' missing in notification")
+        if "current_gen" in kwargs.keys():
+            self.res_list['n_gen'].append(kwargs["current_gen"])
+        else:
+            raise Exception("Parameter 'n_gen' missing in notification")
+        self.res_list['time'].append(time.time() - self.t_init)
+
 
 class GeneticMetaOptimization(MetaOptimization):
     """
@@ -167,39 +199,33 @@ class GeneticMetaOptimization(MetaOptimization):
 
         MetaOptimization.__init__(self, opt, observable)
 
-    def co_bench(self, min_=0, max_=1, step_=0.1):
+    def co_bench(self):
         """
         Benchmark evolution of the cross-over parameter
-        :param min_: Float Meta optimization loop parameter
-        :param max_: Float Meta optimization loop parameter
-        :param step_: Float Meta optimization loop parameter
         """
 
         # Configure result container
-        self.result['abs_name'] = "Cross-Over Rate"
-        self.result['ord_name'] = "Loss function scores"
+        self.res_list['abs_name'] = "Cross-Over Rate"
+        self.res_list['ord_name'] = "Loss function scores"
 
-        for i in np.arange(min_, max_ + step_, step_):
-            self.result['param_val'].append(i)
-            t_init = time.time()
+        for i in np.arange(self.minimum, self.max_iteration + self.step, self.step):
+            self.res_list['param_val'].append(i)
 
             genetic = Genetic(self.opt, self.observable, cross_over_rate=i)
+            genetic.add_observer(self)
             genetic.start(**{"freq_stats": 2})
 
-            self.result['scores'].append(genetic.results)
-            self.result['configs'].append(genetic.configs)
-            self.result['time'].append(time.time() - t_init)
-            self.result['n_gen'].append(genetic.ga.getCurrentGeneration())
-            if genetic.interruption:
+            if self.interruption:
                 break
 
-    def mut_bench(self, min_=0, max_=1, step_=0.1):
-        """
-        Benchmark evolution of the mutation parameter
-        :param min_: Float Meta optimization loop parameter
-        :param max_: Float Meta optimization loop parameter
-        :param step_: Float Meta optimization loop parameter
-        """
+        # Save, display and plot results
+        PickleUtils.save(self.save_directory + "default.mor", self.res_list)
+        self.display()
+        self.plot(self.save_directory + "default.pdf")
+        PickleUtils.del_all_files(self.save_directory, "qsm")
+
+    def mut_bench(self):
+        """Benchmark evolution of the mutation parameter"""
 
     def pop_size_bench(self):
         """Benchmark evolution of the extrema in the interval [-val val]"""

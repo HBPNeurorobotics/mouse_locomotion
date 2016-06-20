@@ -15,7 +15,6 @@
 # February 2016
 ##
 
-import datetime
 import logging
 import time
 import sys
@@ -84,12 +83,6 @@ class Process(Manager):
         logging.info("Simulation Finished!")
         logging.info(genetic.ga.bestIndividual())
 
-        # Save best individu parameters
-        if self.save:
-            PickleUtils.save(
-                self.save_directory + datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + ".gabi",
-                genetic.ga.bestIndividual().getInternalList())
-
     def meta_ga_sim(self):
         """Run an meta simulation to benchmark genetic algorithm parameters"""
 
@@ -97,13 +90,7 @@ class Process(Manager):
         mga = GeneticMetaOptimization(self.opt, self)
 
         # Run cross-over benchmark
-        mga.co_bench(step_=0.1)
-
-        # Save, display and plot results
-        PickleUtils.save(self.save_directory + "default.mor", mga.result)
-        mga.display()
-        mga.plot(self.save_directory + "default.pdf")
-        PickleUtils.del_all_files(self.save_directory, "qsm")
+        mga.co_bench()
 
     def run_sim(self, sim_list):
         """
@@ -135,4 +122,6 @@ class Process(Manager):
                 rs_ls += str(i) + "\n"
         else:
             rs_ls = "No results to show."
+
         logging.info("Simulation Finished!")
+        return rs_ls

@@ -50,7 +50,7 @@ else:
     CONFIG_NAME = root + "/configs/default_dog_vert_simulation_config.json"
     LOG_FILE = os.path.expanduser("~").replace("\\", "/") + "/.log/qSim.log"
     dirname = root + "/save"
-    filename = "sim_" + datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + ".qsm"
+    filename = "sim_" + datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S_%f") + ".qsm"
     if not os.path.exists(dirname):
         os.makedirs(dirname)
     SAVE_NAME = dirname + "/" + filename

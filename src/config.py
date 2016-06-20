@@ -18,7 +18,7 @@
 import logging
 import os
 
-from utils import JSonUtils
+from utils import JsonUtils
 
 
 class Config:
@@ -31,7 +31,7 @@ class Config:
         """
 
         self.logger = logging.Logger("INFO")
-        data = {} if filename is None else JSonUtils.read_json_file(filename)
+        data = {} if filename is None else JsonUtils.read_json_file(filename)
         if data == {}:
             self.logger.warning("The config is empty. You may have a problem with your config file.")
         # Simulation parameters
@@ -212,4 +212,4 @@ class Config:
         del data["t_end"]
         del data["n_iter"]
 
-        JSonUtils.write_json_file(filename_, data)
+        JsonUtils.write_json_file(filename_, data)

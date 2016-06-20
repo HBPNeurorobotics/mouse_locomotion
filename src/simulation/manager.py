@@ -380,7 +380,6 @@ class Manager(Simulation, Observable):
                     self.mutex_rqt.acquire()
                     self.rqt.pop()
                     self.mutex_rqt.release()
-                    time.sleep(1)
                 else:
                     self.server_dispo = False
                     time.sleep(self.mng_prun_t)

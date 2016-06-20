@@ -20,7 +20,7 @@ import os
 import logging
 
 
-class JSonUtils:
+class JsonUtils:
     """
     Utility class to manipulate json files
     """

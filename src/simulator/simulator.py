@@ -56,7 +56,7 @@ class Simulator:
     def update_filename(self):
         """Update the save file name to the current datetime"""
 
-        self.filename = "sim_" + datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + ".qsm"
+        self.filename = "sim_" + datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S_%f") + ".qsm"
         self.filename = self.dirname + "/" + self.filename
 
     @staticmethod
