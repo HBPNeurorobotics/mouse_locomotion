@@ -117,18 +117,25 @@ class MetaOptimization:
         # Create graph for final scores
         if len(last_it_scores) > 0:
             fig, ax = plt.subplots(1)
-            ax.set_title("Score of the last iteration in function of " + self.result['abs_name'])
-            ax.yaxis.grid(True)
-            ax.set_xticks([y for y in self.result['param_val']], )
-            ax.set_xlabel(self.result['abs_name'])
-            ax.set_ylabel(self.result["ord_name"])
             bplot = ax.boxplot(last_it_scores,
-                               notch=True,  # notch shape
-                               vert=True,  # vertical box alignment
-                               patch_artist=True)  # fill with color
-            colors = ['pink', 'lightblue', 'lightgreen']
+                labels=self.result['param_val'],   
+                vert=True,
+                patch_artist=True)                                                                     
+            colors = []                                                                                                         
+            for a in range(len(self.result['param_val'])):                                                                      
+                if a % 3 == 0:                                                                                                  
+                    colors.append('pink')
+                if a % 3 == 1:
+                    colors.append('lightblue')
+                if a % 3 == 1:
+                    colors.append('lightgreen')
             for patch, color in zip(bplot['boxes'], colors):
                 patch.set_facecolor(color)
+            ax.set_title("Score of the last iteration in function of " + self.result['abs_name'])
+            ax.yaxis.grid(True)
+            ax.set_yticklabels([])
+            ax.set_xlabel(self.result['abs_name'])
+            ax.set_ylabel(self.result["ord_name"])
             plots.append(fig)
 
             # Copy figures in a pdf
