@@ -42,6 +42,7 @@ class Registry(UDPRegistryServer, Simulation):
     def start(self):
         """Start a registry server"""
 
-        logging.info("Start registry server on address: " + str(self.ipaddr) + ":" + str(REGISTRY_PORT))
+        logging.info("Start registry server on address: " + str(self.ipaddr) + ":" + str(REGISTRY_PORT) + " with PID " +
+                     str(self.pid))
         setup_logger(False, None)
         UDPRegistryServer.start(self)

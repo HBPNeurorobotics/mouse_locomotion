@@ -15,6 +15,7 @@
 # February 2016
 ##
 
+import os
 import threading
 from threading import Thread, Lock
 from collections import deque
@@ -25,7 +26,6 @@ import math
 import rpyc
 from rpyc.utils.factory import DiscoveryError
 from observers import Observable
-from simulation import Simulation
 import sys
 
 if sys.version_info[:2] < (3, 4):
@@ -34,7 +34,7 @@ else:
     from simulation import common
 
 
-class Manager(Simulation, Observable):
+class Manager(Observable):
     """
     Manager class provides a high level interface to distribute a large number of
     simulation requests in a variable size computation cloud using tools like asynchonous
@@ -57,8 +57,6 @@ class Manager(Simulation, Observable):
         Class initialization
         :param opt: Dictionary containing simulation parameters
         """
-
-        Simulation.__init__(self, opt)
         Observable.__init__(self)
         # Simulation list stacks
         # NB: FIFO: append answer on the left and remove the right one
@@ -330,8 +328,6 @@ class Manager(Simulation, Observable):
     def stop(self):
         """Stop the simulation manager"""
 
-        Simulation.stop(self)
-
         # Stop managing loop
         self.mng_stop = True
         self.sim_time = time.time() - self.t_sim_init
@@ -342,8 +338,7 @@ class Manager(Simulation, Observable):
         """Start a simulation manager"""
 
         self.t_sim_init = time.time()
-        logging.info("Start sim manager server with PID " + str(self.pid))
-        time.sleep(1)
+        logging.info("Start sim manager server with PID " + str(os.getpid()))
         self.terminated = False
         self.mng_stop = False
         self.thread = Thread(target=self.run)

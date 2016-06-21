@@ -117,7 +117,7 @@ class Genetic(Optimization):
             gen_list.append(ind.getInternalList())
             sim_list.append(copy.copy(self.opt))
 
-        self.observable.run_sim(sim_list)
+        self.observable.simulate(sim_list)
 
         # Wait for simulation results
         while len(self.res_list) < len(sim_list) and not self.interruption:

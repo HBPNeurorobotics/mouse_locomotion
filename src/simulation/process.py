@@ -16,26 +16,25 @@
 ##
 
 import logging
-import time
 import sys
 from optimization import Genetic, GeneticMetaOptimization
 from result import Result
 from utils import PickleUtils
 
 if sys.version_info[:2] < (3, 4):
+    from simulation import Simulation
     from manager import Manager
     import common
 else:
-    from simulation import Manager, common
+    from simulation import Manager, common, Simulation
 
 
-class Process(Manager):
+class Process(Simulation):
     """
     The Process class launch different type of simulation including :
     - Simple simulation
     - Genetic optimization on simulations (opt["sim_type"]="CM")
     - Meta-Genetic optimization on simulation (opt["sim_type"]="META_GA")
-    See also Manager.
     Usage:
             # Create and start the simulation Process
             process = Process(opt)
@@ -51,13 +50,20 @@ class Process(Manager):
         :param opt: Dictionary that contains simulation parameters
         """
 
-        Manager.__init__(self, opt)
+        Simulation.__init__(self)
+        self.opt = opt
         self.sim_type = opt["sim_type"] if "sim_type" in opt else None
         self.save = opt["save"] if "save" in opt else True
         self.save_directory = self.opt["root_dir"] + "/save/"
+        self.manager = Manager(opt)
+        self.res_list = []
 
     def start(self):
         """Launch the desired simulation(s) process"""
+
+        # Start manager
+        self.manager.start()
+        self.res_list = []
 
         if self.sim_type is None:
             self.run_sim(self.opt)
@@ -67,6 +73,16 @@ class Process(Manager):
             self.meta_ga_sim()
         else:
             self.run_sim(self.opt)
+        self.stop()
+
+    def stop(self):
+        """
+        Stop the current simulations
+        """
+
+        # Stop and display results
+        self.manager.stop()
+
         # Delete all the simulation files that might stayed after simulation
         PickleUtils.del_all_files(self.save_directory, "qsm")
 
@@ -74,7 +90,7 @@ class Process(Manager):
         """Run an iterative simulation to optimize the connection matrix parameters"""
 
         # Create genetic algorithm
-        genetic = Genetic(self.opt, self)
+        genetic = Genetic(self.opt, self.manager)
 
         # Run genetic algorithm until convergence or max iteration reached
         genetic.start(**{"freq_stats": 2})
@@ -87,7 +103,7 @@ class Process(Manager):
         """Run an meta simulation to benchmark genetic algorithm parameters"""
 
         # Create meta optimization
-        mga = GeneticMetaOptimization(self.opt, self)
+        mga = GeneticMetaOptimization(self.opt, self.manager)
 
         # Run cross-over benchmark
         mga.co_bench()
@@ -99,27 +115,26 @@ class Process(Manager):
         """
 
         if "local" in sim_list and sim_list["local"]:
-            res_list = [common.launch_simulator(sim_list)]
+            self.res_list.append(common.launch_simulator(sim_list))
         elif "load_file" in sim_list and sim_list["load_file"]:
             res = Result()
             sim_list["genome"] = res.get_results(sim_list["load_file"], to_delete=False)
-            res_list = [common.launch_simulator(sim_list)]
-
+            self.res_list.append(common.launch_simulator(sim_list))
         else:
-            # Start manager
-            Manager.start(self)
             # Simulate
             if type(sim_list) != list:
                 sim_list = [sim_list]
-            res_list = self.simulate(sim_list)
+            self.res_list.append(self.manager.simulate(sim_list))
 
-            # Stop and display results
-            self.stop()
-            time.sleep(1)
+    def display_results(self):
+        """
+        Display results retrieved so far.
+        :return: String representing the results list
+        """
+
         rs_ls = ""
-        if type(res_list) == list:
-            for i in res_list:
-                rs_ls += str(i) + "\n"
+        for i in self.res_list:
+            rs_ls += str(i) + "\n"
         else:
             rs_ls = "No results to show."
 
