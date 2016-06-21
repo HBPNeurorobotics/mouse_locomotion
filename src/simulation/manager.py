@@ -21,7 +21,6 @@ from threading import Thread, Lock
 from collections import deque
 import logging
 import time
-
 import math
 import rpyc
 from rpyc.utils.factory import DiscoveryError
@@ -225,8 +224,10 @@ class Manager(Observable):
             """
 
             # Process the number of maximum simulation that can be done on the same time
-            cpu_capacity = (self.max_CPU_percent_use - rsp_["common"]["CPU"]) / rsp_[self.simulator]["CPU"]
-            memory_capacity = (self.max_memory_percent_use - rsp_["common"]["memory"]) / rsp_[self.simulator]["memory"]
+            cpu_capacity = (self.max_CPU_percent_use - rsp_["common"]["CPU"]) / \
+                           (rsp_[self.simulator]["CPU"] - rsp_["common"]["CPU"])
+            memory_capacity = (self.max_memory_percent_use - rsp_["common"]["memory"]) / \
+                              (rsp_[self.simulator]["memory"] - rsp_["common"]["memory"])
             nb_thread = math.floor(min(cpu_capacity, memory_capacity))
 
             if nb_thread > 0:  # Change the status of the server on the cloud
@@ -426,13 +427,14 @@ class Manager(Observable):
                     self.rqt.append(rqt)
                 self.mutex_rqt.release()
 
-                self.mutex_cloud_state.acquire()
-                # The server won't be use for simulation anymore.
-                logging.error(reason + " from server: " +
-                              str(self.cloud_state[server_hash]["address"]) + ":" +
-                              str(self.cloud_state[server_hash]["port"]))
-                self.cloud_state[server_hash]["status"] = False
-                self.mutex_cloud_state.release()
+                if server_hash in self.cloud_state:
+                    self.mutex_cloud_state.acquire()
+                    # The server won't be use for simulation anymore.
+                    logging.error(reason + " from server: " +
+                                  str(self.cloud_state[server_hash]["address"]) + ":" +
+                                  str(self.cloud_state[server_hash]["port"]))
+                    self.cloud_state[server_hash]["status"] = False
+                    self.mutex_cloud_state.release()
 
                 self.mutex_res.acquire()
                 del self.results[server_hash]

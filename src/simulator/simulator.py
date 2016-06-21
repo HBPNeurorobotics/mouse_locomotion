@@ -92,26 +92,18 @@ class Simulator:
             # Launch the simulation in a subprocess so we can know its cpu and memory usage
             test.start()
             proc = psutil.Process(test.pid)
-            processes = [psutil.Process(os.getpid()), proc]
-            time.sleep(1)
 
-            # Every child process is linked to the simulation so we get their consumption too
-            for child in proc.children(recursive=True):
-                processes.append(child)
             while proc.status() != psutil.STATUS_ZOMBIE and proc.status() != psutil.STATUS_DEAD:
-                cpu_consumption.append(sum(map(lambda x: x.cpu_percent(interval=0.1), processes)) / psutil.cpu_count())
-                memory_consumption.append(sum(map(lambda x: x.memory_percent(), processes)))
+                cpu_consumption.append(sum(psutil.cpu_percent(interval=0.5, percpu=True)) / psutil.cpu_count())
+                memory_consumption.append(psutil.virtual_memory().percent)
                 time.sleep(0.1)
             test.join()
         except psutil.NoSuchProcess as ex:
-            logging.debug("Test simulation interrupted before the end of the parent process.")
+            logging.debug("Test simulation stopped correctly.")
         except Exception as e:
             logging.error("Error during the simlator test : " + str(e))
         logging.info("Test Simulator " + self.__class__.__name__ +
                      ": \nCPU = " + str(cpu_consumption) +
                      "\nMemory = " + str(memory_consumption))
-
-        res = Result()
-        return {"CPU": 0. if len(cpu_consumption) <= 0 else sum(cpu_consumption) / float(len(cpu_consumption)),
-                "memory": 0. if len(memory_consumption) <= 0 else sum(memory_consumption) / float(
-                    len(memory_consumption)), "result": res.get_results(self.filename)}
+        return {"CPU": 0. if len(cpu_consumption) <= 0 else max(cpu_consumption),
+                "memory": 0. if len(memory_consumption) <= 0 else max(memory_consumption)}
