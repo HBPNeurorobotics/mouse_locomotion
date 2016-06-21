@@ -37,7 +37,7 @@ class Genetic(Optimization):
                 genetic.start()
     """
 
-    def __init__(self, opt, observable, num_max_generation=40, population_size=30, genome_size=10, mutation_rate=0.2,
+    def __init__(self, opt, observable, num_max_generation=40, population_size=30, genome_size=None, mutation_rate=0.2,
                  cross_over_rate=0.65, genome_min=-2, genome_max=2.0, interactive_mode=False, stop_num_av=10,
                  stop_thresh=0.01):
         """
@@ -60,10 +60,7 @@ class Genetic(Optimization):
         Optimization.__init__(self, opt, observable, num_max_generation, population_size, stop_thresh)
 
         # Algorithm parameters
-        self.genome_size = genome_size
-        if opt["sim_type"] == "META_GA":
-            config = Config(opt["config_name"])
-            self.genome_size = config.get_conn_matrix_len()
+        self.genome_size = Config(opt["config_name"]).get_conn_matrix_len() if genome_size is None else genome_size
         self.mutation_rate = mutation_rate
         self.cross_over_rate = cross_over_rate
         self.genome_min = genome_min
