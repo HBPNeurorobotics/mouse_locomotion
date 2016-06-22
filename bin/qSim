@@ -36,7 +36,7 @@ class SimCli(cli.Application):
     """This script provide a framework for quadruped locomotion driven by reservoir computing"""
 
     # Default CLI application options
-    DEF_OPT = {"simulator": "BLENDER", "simulator_path": "/bin/Blender2.77/", "model": "dog_vert.blend",
+    DEF_OPT = {"simulator": "BLENDER", "simulator_path": "bin/Blender2.77", "model": "dog_vert.blend",
                "root_dir": root,
                "config_name": "default_dog_vert_simulation_config",
                "sim_type": "RUN", "registry": False, "service": False, "local": False,
@@ -51,7 +51,7 @@ class SimCli(cli.Application):
     simulator = cli.SwitchAttr(["-e", "--environment"], str, default=DEF_OPT["simulator"],
                                help="Simulator name : BLENDER")
     path = cli.SwitchAttr(["-p", "--binpath"], str, default=DEF_OPT["simulator_path"],
-                          help="Path of Simulator binaries")
+                          help="Path of Simulator binaries. Relative path start with no /. To use PATH variable, check - p 'PATH'")
     model = cli.SwitchAttr(["-m", "--model"], str, default=DEF_OPT["model"],
                            help="Model to simulation")
     config = cli.SwitchAttr(["-c", "--config"], str, default=DEF_OPT["config_name"],
@@ -91,7 +91,12 @@ class SimCli(cli.Application):
                       "logfile": self.logfile}
         opt = common_opt.copy()
         opt["simulator"] = self.simulator
-        opt["simulator_path"] = (self.root + self.path) if self.path == self.DEF_OPT["simulator_path"] else self.path
+        if self.path[0] == "/":
+            opt["simulator_path"] =  (self.path + "/")
+        elif self.path == "PATH":
+            opt["simulator_path"] =  ""
+        else:
+            opt["simulator_path"] = self.root + "/" + self.path + "/"
         opt["cpu_use"] = self.max_cpu_percentage if self.max_cpu_percentage is not None else 50
         opt["memory_use"] = self.max_memory_percentage if self.max_memory_percentage is not None else 90
         opt["model"] = self.root + "/mdl/" + self.model
