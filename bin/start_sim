@@ -8,7 +8,7 @@
 # File created by: Gabriel Urbain <gabriel.urbain@ugent.be>. June 2016
 
 WIPEP="screen -wipe"
-QSIMP="screen -dmLS qsimm qSim -S -m dog_vert.blend -t META_GA -p '/bin/Blender2.77/';"
+QSIMP="screen -dmLS qsimm qSim -S -m dog_vert.blend -t META_GA -p 'bin/Blender2.76/';"
 
 ##################################
 
