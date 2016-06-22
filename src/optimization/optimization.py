@@ -51,6 +51,7 @@ class Optimization(Observer, Observable):
         self.res_list = []
         self.to_save = opt["save"] if "save" in opt else True
         self.save_directory = self.opt["root_dir"] + "/save/"
+        self.extension = ".sim"
 
     def eval_fct(self, population):
         """
@@ -80,10 +81,7 @@ class Optimization(Observer, Observable):
         """
 
         if "res" in kwargs.keys():
-            if type(kwargs["res"]) == dict:
-                self.res_list.append(kwargs["res"].copy())
-            else:
-                self.res_list.append(kwargs["res"])
+            self.res_list = kwargs["res"].copy() if type(kwargs["res"]) == dict else kwargs["res"]
         elif "interruption" in kwargs.keys():
             if type(kwargs["interruption"]) == bool and kwargs["interruption"]:
                 self.interruption = True
@@ -112,9 +110,18 @@ class Optimization(Observer, Observable):
             kwargs.update(notification)
         self.notify_observers(**kwargs)
 
-    def save(self):
-        """Save the current best solutions into a file"""
+    def save(self, filename="Optimization", result=None):
+        """
+        Save the current results into a file
+        :param filename: String name begin for the file
+        :param result: Content to save in the file
+        """
 
         PickleUtils.save(
-            self.save_directory + datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + ".gabi",
-            str(self.best_solutions_list))
+            self.save_directory + filename + datetime.datetime.now().strftime("_%Y_%m_%d_%H_%M") + self.extension,
+            self.res_list if result is None else result)
+
+    def save_best_sol(self):
+        """Save the current best solutions into a file"""
+
+        self.save(result=self.best_solutions_list)

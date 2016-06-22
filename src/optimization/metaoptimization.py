@@ -17,6 +17,7 @@
 
 import logging
 import numpy as np
+import datetime
 import matplotlib
 
 import time
@@ -171,7 +172,7 @@ class MetaOptimization(Optimization):
             self.interruption = kwargs["interruption"]
 
         if "res" in kwargs.keys():
-            self.res_list['scores'] = kwargs["res"]
+            self.res_list['scores'].append(kwargs["res"])
         else:
             raise Exception("Parameter 'res' missing in notification")
         if "configs" in kwargs.keys():
@@ -219,9 +220,10 @@ class GeneticMetaOptimization(MetaOptimization):
                 break
 
         # Save, display and plot results
-        PickleUtils.save(self.save_directory + "default.mor", self.res_list)
+        self.save(filename="GeneticMetaOptimization")
         self.display()
-        self.plot(self.save_directory + "default.pdf")
+        self.plot(self.save_directory + "GeneticMetaOptimization" +
+                  datetime.datetime.now().strftime("_%Y_%m_%d_%H_%M") + ".pdf")
         PickleUtils.del_all_files(self.save_directory, "qsm")
 
     def mut_bench(self):

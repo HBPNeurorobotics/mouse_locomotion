@@ -86,4 +86,4 @@ class PickleUtils:
 
         for file_ in os.listdir(directory):
             if file_.endswith("." + extension):
-                PickleUtils.del_file(file_)
+                PickleUtils.del_file(directory + file_)

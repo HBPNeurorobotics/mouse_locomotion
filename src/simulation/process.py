@@ -17,6 +17,7 @@
 
 import logging
 import sys
+import datetime
 from optimization import Genetic, GeneticMetaOptimization
 from result import Result
 from utils import PickleUtils
@@ -125,6 +126,11 @@ class Process(Simulation):
             if type(sim_list) != list:
                 sim_list = [sim_list]
             self.res_list.append(self.manager.simulate(sim_list))
+
+        # Save the results
+        if self.save:
+            PickleUtils.save(self.save_directory + "Simulation_" + datetime.datetime.now().strftime("%Y_%m_%d_%H_%M") +
+                             ".sim", self.res_list)
 
     def display_results(self):
         """

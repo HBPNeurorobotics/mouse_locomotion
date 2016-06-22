@@ -19,7 +19,6 @@
 
 import copy
 import logging
-import time
 from config import Config
 from optimization import Optimization
 from pyevolve import *
@@ -116,10 +115,6 @@ class Genetic(Optimization):
 
         self.observable.simulate(sim_list)
 
-        # Wait for simulation results
-        while len(self.res_list) < len(sim_list) and not self.interruption:
-            time.sleep(0.1)
-
         for res in self.res_list:
             scores.append(res["score"] if "score" in res else 0.)
 
@@ -175,7 +170,11 @@ class Genetic(Optimization):
             self.ga.evolve(freq_stats=kwargs["freq_stats"] if "freq_stats" in kwargs.keys() else 10).getInternalList())
         self.notify()
         if self.to_save:
-            self.save()
+            self.save(filename="GeneticOptimization", result={
+                "res": self.results,
+                "configs": self.configs,
+                "current_gen": self.ga.getCurrentGeneration()
+            })
 
     def notify(self, notification=None):
         """

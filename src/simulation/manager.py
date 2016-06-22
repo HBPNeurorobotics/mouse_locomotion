@@ -58,9 +58,8 @@ class Manager(Observable):
         """
         Observable.__init__(self)
         # Simulation list stacks
-        # NB: FIFO: append answer on the left and remove the right one
-        self.rqt = deque([])  # Request FIFO
-        self.rsp = deque([])  # Response FIFO
+        self.rqt = []
+        self.rsp = []
         self.cloud_state = dict()  # dictionary of server state on the cloud. Entries are server hashes
         self.server_list = []  # list of active servers
         self.conn_list = []  # list of active RPYC connections
@@ -194,14 +193,15 @@ class Manager(Observable):
             """
 
             # We add the rsp from the simulation to the rsp list
-            self.mutex_rsp.acquire()
-            # Since rpyc convert some basic types into its own
-            # we have to cast back to be able to use the classical functions
-            self.rsp.appendleft(rsp_)
-            self.mutex_rsp.release()
+            for simulation in self.results[server_id]:
+                if self.rpyc_casting(simulation[1]) == rsp_:
+                    self.mutex_rsp.acquire()
+                    self.rsp[simulation[2]] = rsp_
+                    self.mutex_rsp.release()
+                    break
 
             # Notify observer about the new result
-            self.notify_observers(**{"res": rsp_})
+            self.notify_observers(**{"res": self.rsp})
 
             # Decrease thread number in cloud_state dict
             self.mutex_cloud_state.acquire()
@@ -292,11 +292,15 @@ class Manager(Observable):
 
             # Create a request list and reset results
             self.mutex_rqt.acquire()
-            self.rqt.extendleft(sim_list)
-            sim_n = len(self.rqt)
+            for k, v in enumerate(sim_list):
+                self.rqt.append({"index": k, "rqt": v})
+            sim_n = len(sim_list)
+            self.rqt_n += sim_n
             self.mutex_rqt.release()
             self.mutex_rsp.acquire()
-            self.rsp = deque([])
+            self.rsp = list()
+            for i in range(self.rqt_n):
+                self.rsp.append({"score": 0.})
             self.mutex_rsp.release()
             # Check for simulation and interrupt when processed or interrupted
             to = 0
@@ -315,9 +319,8 @@ class Manager(Observable):
                     self.interrupted = True
 
             # Create rsp buff
-            rsps = list(self.rsp)
             logging.warning("Simulation finished!")
-            return rsps
+            return self.rsp
 
         # If it isn't print error message and return
         else:
@@ -375,6 +378,7 @@ class Manager(Observable):
                     # Clear request from list:
                     self.mutex_rqt.acquire()
                     self.rqt.pop()
+                    self.rqt_n -= 1
                     self.mutex_rqt.release()
                 else:
                     self.server_dispo = False
@@ -423,8 +427,8 @@ class Manager(Observable):
                 self.mutex_rqt.acquire()
                 # Add the request sent to the server to the request list
                 for simulation in simulations:
-                    rqt = simulation[0]
-                    self.rqt.append(rqt)
+                    self.rqt.append({"index": simulation[2], "rqt": simulation[0]})
+                    self.rqt_n += 1
                 self.mutex_rqt.release()
 
                 if server_hash in self.cloud_state:
@@ -480,7 +484,7 @@ class Manager(Observable):
             raise Exception(exception)
 
         try:
-            res = async_simulation(rqt)
+            res = async_simulation(rqt["rqt"])
             res.set_expiry(self.sim_timeout)
 
             # Assign asynchronous callback
@@ -496,5 +500,5 @@ class Manager(Observable):
         self.mutex_res.acquire()
         if server_id not in self.results:
             self.results[server_id] = []
-        self.results[server_id].append([rqt, res])
+        self.results[server_id].append([rqt["rqt"], res, rqt["index"]])
         self.mutex_res.release()
