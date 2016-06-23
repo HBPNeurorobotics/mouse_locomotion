@@ -19,7 +19,6 @@ import logging
 import sys
 import datetime
 from optimization import Genetic, GeneticMetaOptimization
-from result import Result
 from utils import PickleUtils
 
 if sys.version_info[:2] < (3, 4):
@@ -118,8 +117,7 @@ class Process(Simulation):
         if "local" in sim_list and sim_list["local"]:
             self.res_list.append(common.launch_simulator(sim_list))
         elif "load_file" in sim_list and sim_list["load_file"]:
-            res = Result()
-            sim_list["genome"] = res.get_results(sim_list["load_file"], to_delete=False)
+            sim_list["genome"] = PickleUtils.load(sim_list["load_file"])
             self.res_list.append(common.launch_simulator(sim_list))
         else:
             # Simulate

@@ -157,9 +157,11 @@ class Manager(Observable):
         self.check_sim()
         self.mutex_cloud_state.acquire()
         # Select the server with the largest number of simulations available
+        cloud_list = self.cloud_state.items()
         if len(self.cloud_state) >= 2:
-            self.cloud_state = sorted(self.cloud_state.items(), key=lambda x: x[1]["n_threads"], reverse=True)
-        for key in self.cloud_state:
+            cloud_list = sorted(cloud_list, key=lambda x: x[1]["n_threads"], reverse=True)
+        for item in cloud_list:
+            key = item[0]
             if self.cloud_state[key]["n_threads"] > 0 and self.cloud_state[key]["status"]:
                 self.mutex_cloud_state.release()
                 return key
