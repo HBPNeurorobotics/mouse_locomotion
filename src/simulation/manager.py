@@ -18,7 +18,6 @@
 import os
 import threading
 from threading import Thread, Lock
-from collections import deque
 import logging
 import time
 import math
@@ -29,8 +28,10 @@ import sys
 
 if sys.version_info[:2] < (3, 4):
     import common
+    from connection import ServerInfo, SimulationRequest, Connexion
 else:
     from simulation import common
+    from simulation.connection import ServerInfo, SimulationRequest, Connexion
 
 
 class Manager(Observable):
@@ -113,8 +114,8 @@ class Manager(Observable):
 
         # Transform server list into a dict
         serv_list_dict = []
-        for item in map(lambda x: ["address", x[0], "port", x[1], "n_threads", 0, "status", False], self.server_list):
-            serv_list_dict.append(dict(zip((item[0::2]), (item[1::2]))))
+        for item in map(lambda x: ServerInfo(x[0], x[1]), self.server_list):
+            serv_list_dict.append(item)
         serv_dict = dict(zip(map(hash, self.server_list), serv_list_dict))
 
         # Create sets for server_dict and cloud_state
@@ -128,8 +129,8 @@ class Manager(Observable):
                     self.request_server(elem, serv_dict[elem], self.rqt[0], "Test")
                 except Exception as e:
                     logging.error("Exception during test on the server " +
-                                  serv_dict[elem]["address"] + ":" +
-                                  str(serv_dict[elem]["port"]) +
+                                  serv_dict[elem].address + ":" +
+                                  str(serv_dict[elem].port) +
                                   "  The server will now be ignored\n" +
                                   "Details: " + str(e))
                 self.mutex_cloud_state.acquire()
@@ -159,10 +160,10 @@ class Manager(Observable):
         # Select the server with the largest number of simulations available
         cloud_list = self.cloud_state.items()
         if len(self.cloud_state) >= 2:
-            cloud_list = sorted(cloud_list, key=lambda x: x[1]["n_threads"], reverse=True)
+            cloud_list = sorted(cloud_list, key=lambda x: x[1].nb_threads, reverse=True)
         for item in cloud_list:
             key = item[0]
-            if self.cloud_state[key]["n_threads"] > 0 and self.cloud_state[key]["status"]:
+            if self.cloud_state[key].nb_threads > 0 and self.cloud_state[key].status:
                 self.mutex_cloud_state.release()
                 return key
         self.mutex_cloud_state.release()
@@ -196,9 +197,9 @@ class Manager(Observable):
 
             # We add the rsp from the simulation to the rsp list
             for simulation in self.results[server_id]:
-                if self.rpyc_casting(simulation[1]) == rsp_:
+                if self.rpyc_casting(simulation.callback) == rsp_:
                     self.mutex_rsp.acquire()
-                    self.rsp[simulation[2]] = rsp_
+                    self.rsp[simulation.index] = rsp_
                     self.mutex_rsp.release()
                     break
 
@@ -207,7 +208,7 @@ class Manager(Observable):
 
             # Decrease thread number in cloud_state dict
             self.mutex_cloud_state.acquire()
-            self.cloud_state[server_id]["n_threads"] += 1
+            self.cloud_state[server_id].nb_threads += 1
             self.mutex_cloud_state.release()
 
         self.__process_callback(rsp, function)
@@ -234,10 +235,10 @@ class Manager(Observable):
 
             if nb_thread > 0:  # Change the status of the server on the cloud
                 self.mutex_cloud_state.acquire()
-                self.cloud_state[server_id]["status"] = True
-                self.cloud_state[server_id]["n_threads"] = nb_thread
-                logging.info("The server " + str(self.cloud_state[server_id]["address"]) +
-                             ":" + str(self.cloud_state[server_id]["port"]) +
+                self.cloud_state[server_id].status = True
+                self.cloud_state[server_id].nb_threads = nb_thread
+                logging.info("The server " + str(self.cloud_state[server_id].address) +
+                             ":" + str(self.cloud_state[server_id].port) +
                              " is now available for a maximum of " + str(nb_thread) + " simulation(s).")
                 self.mutex_cloud_state.release()
 
@@ -253,13 +254,13 @@ class Manager(Observable):
         if not rsp.error:
             conn_found = False
             for item in self.conn_list:
-                if rsp._conn.__hash__() == item["conn"].__hash__():  # The server has been requested from this manager
+                if rsp._conn.__hash__() == item.connexion.__hash__():  # The server has been requested from this manager
                     conn_found = True
-                    server_id = item["server"]
+                    server_id = item.server_id
                     if server_id in self.cloud_state:  # The server is still in the cloud
                         function(server_id, self.rpyc_casting(rsp))
-                        logging.info("Response received from server " + str(self.cloud_state[server_id]["address"]) +
-                                     ":" + str(self.cloud_state[server_id]["port"]))
+                        logging.info("Response received from server " + str(self.cloud_state[server_id].address) +
+                                     ":" + str(self.cloud_state[server_id].port))
 
                         # Remove clean simulation callback from the list
                         self.del_clean_simulation(server_id, rsp)
@@ -270,9 +271,9 @@ class Manager(Observable):
                     # As soon as we stop the thread, the function is directly exited because the callback
                     # function is handle by the thread itself
 
-                    logging.info("Deletion of connection: " + str(item["conn"].__hash__()) + "!")
-                    item["conn"].close()
-                    t = item["thread"]
+                    logging.info("Deletion of connection: " + str(item.connexion.__hash__()))
+                    item.connexion.close()
+                    t = item.thread
                     self.mutex_conn_list.acquire()
                     self.conn_list.remove(item)
                     self.mutex_conn_list.release()
@@ -295,7 +296,7 @@ class Manager(Observable):
             # Create a request list and reset results
             self.mutex_rqt.acquire()
             for k, v in enumerate(sim_list):
-                self.rqt.append({"index": k, "rqt": v})
+                self.rqt.append(SimulationRequest(v, k))
             sim_n = len(sim_list)
             self.rqt_n += sim_n
             self.mutex_rqt.release()
@@ -370,11 +371,11 @@ class Manager(Observable):
                         self.request_server(server_hash, self.cloud_state[server_hash], self.rqt[-1], "Simulation")
                     except Exception as e:
                         raise Exception("Exception during simulation on the server " +
-                                        self.cloud_state[server_hash]["address"] + ":" +
-                                        self.cloud_state[server_hash]["port"] + "\n" + str(e))
+                                        self.cloud_state[server_hash].address + ":" +
+                                        self.cloud_state[server_hash].port + "\n" + str(e))
                     # Update the cloud_state list
                     self.mutex_cloud_state.acquire()
-                    self.cloud_state[server_hash]["n_threads"] -= 1
+                    self.cloud_state[server_hash].nb_threads -= 1
                     self.mutex_cloud_state.release()
 
                     # Clear request from list:
@@ -401,7 +402,7 @@ class Manager(Observable):
         if server_hash in self.results:
             server = self.results[server_hash]
             for simulation in server:
-                if res == simulation[1] and res.ready:
+                if res == simulation.callback and res.ready:
                     self.mutex_res.acquire()
                     del self.results[server_hash][server.index(simulation)]
                     self.mutex_res.release()
@@ -419,7 +420,7 @@ class Manager(Observable):
             clean = True
             reason = ""
             for simulation in simulations:
-                result = simulation[1]
+                result = simulation.callback
                 if result.expired or result.error:
                     reason = "Timeout" if result.expired else "Error"
                     clean = False
@@ -429,7 +430,8 @@ class Manager(Observable):
                 self.mutex_rqt.acquire()
                 # Add the request sent to the server to the request list
                 for simulation in simulations:
-                    self.rqt.append({"index": simulation[2], "rqt": simulation[0]})
+                    simulation.callback = None
+                    self.rqt.append(simulation)
                     self.rqt_n += 1
                 self.mutex_rqt.release()
 
@@ -437,9 +439,9 @@ class Manager(Observable):
                     self.mutex_cloud_state.acquire()
                     # The server won't be use for simulation anymore.
                     logging.error(reason + " from server: " +
-                                  str(self.cloud_state[server_hash]["address"]) + ":" +
-                                  str(self.cloud_state[server_hash]["port"]))
-                    self.cloud_state[server_hash]["status"] = False
+                                  str(self.cloud_state[server_hash].address) + ":" +
+                                  str(self.cloud_state[server_hash].port))
+                    self.cloud_state[server_hash].status = False
                     self.mutex_cloud_state.release()
 
                 self.mutex_res.acquire()
@@ -452,8 +454,8 @@ class Manager(Observable):
 
         # Connect to the server
         try:
-            conn = rpyc.connect(server["address"],
-                                server["port"], config=rpyc.core.protocol.DEFAULT_CONFIG)
+            conn = rpyc.connect(server.address,
+                                server.port, config=rpyc.core.protocol.DEFAULT_CONFIG)
         except Exception as e:
             exception = "Exception when connecting: " + str(e)
             raise Exception(exception)
@@ -467,15 +469,14 @@ class Manager(Observable):
             conn.close()
             raise Exception(exception)
         self.mutex_conn_list.acquire()
-        self.conn_list.append({"server": server_id, "conn": conn,
-                               "thread": bgt})
+        self.conn_list.append(Connexion(server_id, conn, bgt))
         self.mutex_conn_list.release()
 
         # Create asynchronous handle
         if service in common.REQUESTS:
             logging.info("Starting " + common.REQUESTS[service] + " service on server: " +
-                         str(server["address"]) + ":" +
-                         str(server["port"]))
+                         str(server.address) + ":" +
+                         str(server.port))
             async_simulation = rpyc.async(eval("conn.root.exposed_" + common.REQUESTS[service]))
             callback = eval("self.response_" + common.REQUESTS[service])
         else:
@@ -486,11 +487,12 @@ class Manager(Observable):
             raise Exception(exception)
 
         try:
-            res = async_simulation(rqt["rqt"])
+            res = async_simulation(rqt.rqt)
             res.set_expiry(self.sim_timeout)
 
             # Assign asynchronous callback
             res.add_callback(callback)
+            rqt.callback = res
         except Exception as e:
             exception = "Exception from server: " + str(e)
             logging.error(exception)
@@ -502,5 +504,5 @@ class Manager(Observable):
         self.mutex_res.acquire()
         if server_id not in self.results:
             self.results[server_id] = []
-        self.results[server_id].append([rqt["rqt"], res, rqt["index"]])
+        self.results[server_id].append(rqt)
         self.mutex_res.release()
