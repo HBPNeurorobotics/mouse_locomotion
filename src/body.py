@@ -14,11 +14,11 @@
 #                  Dimitri Rodarie <d.rodarie@gmail.com>
 # February 2016
 ##
-
+import math
 from mathutils import Vector as vec
 
 from brain import Brain
-from muscle import *
+from muscles import *
 
 
 class Part:

@@ -17,7 +17,7 @@ module, you'll find the adapters above cited.
 
 """
 
-from optimization.pyevolve import __version__
+from optimizations.pyevolve import __version__
 import Consts
 import Util
 import logging

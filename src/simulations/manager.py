@@ -30,8 +30,8 @@ if sys.version_info[:2] < (3, 4):
     import common
     from connection import ServerInfo, SimulationRequest, Connexion
 else:
-    from simulation import common
-    from simulation.connection import ServerInfo, SimulationRequest, Connexion
+    from simulations import common
+    from simulations.connection import ServerInfo, SimulationRequest, Connexion
 
 
 class Manager(Observable):

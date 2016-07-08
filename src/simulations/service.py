@@ -24,7 +24,7 @@ from rpyc import Service
 if sys.version_info[:2] < (3, 4):
     import common
 else:
-    from simulation import common
+    from simulations import common
 
 
 class SimService(Service):

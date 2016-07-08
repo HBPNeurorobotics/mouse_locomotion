@@ -77,7 +77,7 @@ from sys import platform as sys_platform
 from sys import stdout as sys_stdout
 
 import code
-import optimization.pyevolve
+import optimizations.pyevolve
 
 # Platform dependant code for the Interactive Mode
 if sys_platform[:3] == "win":
@@ -823,13 +823,13 @@ class GSimpleGA:
                                 print "Loading modules for Interactive Mode...",
                                 logging.debug("Windows Interactive Mode key detected ! generation=%d",
                                               self.getCurrentGeneration())
-                                from optimization.pyevolve import Interaction
+                                from optimizations.pyevolve import Interaction
                                 print " done !"
                                 interact_banner = "## Pyevolve v.%s - Interactive Mode ##\nPress CTRL-Z to quit interactive mode." % (
-                                optimization.pyevolve.__version__,)
+                                    optimizations.pyevolve.__version__,)
                                 session_locals = {"ga_engine": self,
                                                   "population": self.getPopulation(),
-                                                  "pyevolve": optimization.pyevolve,
+                                                  "pyevolve": optimizations.pyevolve,
                                                   "it": Interaction}
                                 print
                                 code.interact(interact_banner, local=session_locals)
@@ -839,13 +839,13 @@ class GSimpleGA:
                         print "Loading modules for Interactive Mode...",
                         logging.debug("Manual Interactive Mode key detected ! generation=%d",
                                       self.getCurrentGeneration())
-                        from optimization.pyevolve import Interaction
+                        from optimizations.pyevolve import Interaction
                         print " done !"
                         interact_banner = "## Pyevolve v.%s - Interactive Mode ##" % (
-                        optimization.pyevolve.__version__,)
+                            optimizations.pyevolve.__version__,)
                         session_locals = {"ga_engine": self,
                                           "population": self.getPopulation(),
-                                          "pyevolve": optimization.pyevolve,
+                                          "pyevolve": optimizations.pyevolve,
                                           "it": Interaction}
                         print
                         code.interact(interact_banner, local=session_locals)

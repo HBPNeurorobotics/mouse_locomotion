@@ -18,7 +18,7 @@
 import logging
 import sys
 import datetime
-from optimization import Genetic, GeneticMetaOptimization
+from optimizations import Genetic, GeneticMetaOptimization
 from utils import PickleUtils
 
 if sys.version_info[:2] < (3, 4):
@@ -26,7 +26,7 @@ if sys.version_info[:2] < (3, 4):
     from manager import Manager
     import common
 else:
-    from simulation import Manager, common, Simulation
+    from simulations import Manager, common, Simulation
 
 
 class Process(Simulation):

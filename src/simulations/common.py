@@ -17,7 +17,7 @@
 
 import logging
 import rpyc
-from simulator import *
+from simulators import *
 
 ALIASES = ["BLENDERSIM", "BLENDERPLAYER"]
 REQUESTS = {"Simulation": "simulation", "Test": "test"}

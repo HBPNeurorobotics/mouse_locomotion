@@ -30,7 +30,7 @@ src = root + "/src"
 sys.path.append(src)
 
 from plumbum import cli
-from simulation import SimServer, Registry, Process
+from simulations import SimServer, Registry, Process
 
 
 class SimCli(cli.Application):
@@ -52,7 +52,8 @@ class SimCli(cli.Application):
     simulator = cli.SwitchAttr(["-e", "--environment"], str, default=DEF_OPT["simulator"],
                                help="Simulator name : BLENDER")
     path = cli.SwitchAttr(["-p", "--binpath"], str, default=DEF_OPT["simulator_path"],
-                          help="Path of Simulator binaries. Relative path start with no /. To use PATH variable, check - p 'PATH'")
+                          help="Path of Simulator binaries. Relative path start with no /. " +
+                               "To use PATH variable, check - p 'PATH'")
     model = cli.SwitchAttr(["-m", "--model"], str, default=DEF_OPT["model"],
                            help="Model to simulation")
     config = cli.SwitchAttr(["-c", "--config"], str, default=DEF_OPT["config_name"],
@@ -93,9 +94,9 @@ class SimCli(cli.Application):
         opt = common_opt.copy()
         opt["simulator"] = self.simulator
         if self.path[0] == "/":
-            opt["simulator_path"] =  (self.path + "/")
+            opt["simulator_path"] = (self.path + "/")
         elif self.path == "PATH":
-            opt["simulator_path"] =  ""
+            opt["simulator_path"] = ""
         else:
             opt["simulator_path"] = self.root + "/" + self.path + "/"
         opt["cpu_use"] = self.max_cpu_percentage if self.max_cpu_percentage is not None else 50

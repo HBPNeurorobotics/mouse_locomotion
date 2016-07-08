@@ -17,7 +17,7 @@
 
 import rpyc
 
-from simulation import Simulation
+from simulations import Simulation
 import logging
 import sys
 from rpyc.utils.server import ThreadedServer
@@ -25,7 +25,7 @@ from rpyc.utils.server import ThreadedServer
 if sys.version_info[:2] < (3, 4):
     from service import SimService
 else:
-    from simulation import SimService
+    from simulations import SimService
 
 
 class SimServer(Simulation):
