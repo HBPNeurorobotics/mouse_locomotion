@@ -207,7 +207,7 @@ class DampedSpringReducedTorqueMuscle(Muscle):
             torque_1 = self.damp_torque_fact * lever_1_vect.cross(-force)
             torque_2 = self.damp_torque_fact * lever_2_vect.cross(force)
 
-            # apply impusle on an object point only in traction
+            # apply impulse on an object point only in traction
             f_type = "Push"
             if float((force * self.l.normalized())) < 0.0:
                 f_type = "Pull"
