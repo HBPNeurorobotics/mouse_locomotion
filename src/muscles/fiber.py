@@ -96,6 +96,17 @@ class Fiber:
         self.k_t = 0.0047
         self.l_t = 0.964
 
+        # Initial Energy parameters
+        self.e1 = -76.6
+        self.e2 = -792
+        self.e3 = 124
+        self.e4 = 0.72
+
+        # Total Energy parameters
+        self.m = 0.25
+        self.r = 1.5
+        self.initial_energy = 0.
+
     def __process_recruitment(self, spike_frequency):
         """
         Update the recruitment of the fiber based on the frequency of the spikes input
@@ -162,7 +173,7 @@ class Fiber:
         """
 
         self.activation_frequency = 1 - math.exp(
-            - math.pow((self.__specific_function() * self.f_eff / (self.af * nf)), nf))
+            - math.pow((self.__specific_function() * self.f_eff / (self.af * self.nf)), self.nf))
         return self.activation_frequency
 
     def __process_force_length(self):
@@ -193,8 +204,8 @@ class Fiber:
         :return: Float parallel elastic force of the fiber
         """
 
-        return self.c1 * self.k1 * math.log(math.exp((self.length / self.max_length - self.l_r1) / self.k1) + 1) + \
-               self.eta * self.velocity
+        return self.c1 * self.k1 * math.log(
+            math.exp((self.length / self.max_length - self.l_r1) / self.k1) + 1) + self.eta * self.velocity
 
     def __process_thick_filament_compression(self):
         """
@@ -217,8 +228,7 @@ class Fiber:
         :return: Float passive force deployed by the muscle
         """
 
-        return self.__process_parallel_elastic() + \
-               self.activation_frequency * self.__process_thick_filament_compression()
+        return self.__process_parallel_elastic() + self.activation_frequency * self.__process_thick_filament_compression()
 
     def __process_active_force(self):
         """
@@ -325,6 +335,15 @@ class FastTwitchFiber(Fiber):
         self.a_v1 = 0.
         self.a_v2 = 0.
         self.b_v = 0.69
+
+        # Initial Energy parameters
+        self.e1 = 145
+        self.e2 = -3322
+        self.e3 = 1530
+        self.e4 = 1.45
+
+        # Total Energy parameters
+        self.r = 1.
 
     def __specific_function(self):
         """
