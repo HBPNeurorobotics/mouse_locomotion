@@ -25,7 +25,7 @@ class Fiber:
     motor neurons.
     """
 
-    def __init__(self, h, f_pcsa, length, velocity, f_05):
+    def __init__(self, h, f_pcsa, length, velocity, f_05, l_se, l_max, length_0):
         """
         Class initialization. Parameters can be found in Tsianos & al. (2012)
         :param h: Float Euler parameter
@@ -33,6 +33,9 @@ class Fiber:
         :param length: Float Normalized current length of the fiber
         :param velocity: Float normalized current velocity of the fiber
         :param f_05: Float firing rate frequency at which the fiber produce half of its maximal force
+        :param l_se: Float Normalized length of the fiber tendon
+        :param l_max: Float Maximal length of the fiber
+        :param length_0: Float Maximal length of the fiber
         """
 
         self.h = h
@@ -40,9 +43,9 @@ class Fiber:
         # Fiber parameters
         self.f_05 = f_05
         self.length = length
-        self.max_length = 0.
-        self.length_0 = 0.
-        self.f_tet = 0.
+        self.l_se = l_se  # Use only to process series elastic force
+        self.max_length = l_max
+        self.length_0 = length_0  # Use only in energy process
         self.velocity = velocity
         self.f_pcsa = f_pcsa
 
@@ -121,15 +124,15 @@ class Fiber:
             1 - self.u_th) * spike_frequency if spike_frequency > self.u_th else self.f_min
         return self.f_env
 
-    def __process_tf(self, d_f_eff):
+    def __process_tf(self, d_f_eff, length):
         """
         Process tf value used to process intermediate and effective firing frequencies
         :param d_f_eff: Float derived effective firing frequency
         :return: Float tf value
         """
 
-        self.tf = self.t_f1 * math.pow(self.length, 2) + self.t_f2 * self.f_env if d_f_eff >= 0. \
-            else (self.t_f3 + self.t_f4 * self.activation_frequency) / self.length
+        self.tf = self.t_f1 * math.pow(length, 2) + self.t_f2 * self.f_env if d_f_eff >= 0. \
+            else (self.t_f3 + self.t_f4 * self.activation_frequency) / length
         return self.tf
 
     def __intermediate_firing_frequency(self):
@@ -160,21 +163,21 @@ class Fiber:
 
         return 1.
 
-    def __process_nf(self):
+    def __process_nf(self, length):
         """
         Update the shape of the sigmoid relationship (nf) based on fiber length
         :return: Float nf parameter
         """
 
-        self.nf = self.n_f0 + self.n_f1 * (1 / self.length - 1)
+        self.nf = self.n_f0 + self.n_f1 * (1 / length - 1)
         return self.nf
 
-    def __activation_frequency(self):
+    def __activation_frequency(self, length):
         """
         Update activation frequency which can be used to process active and passive fiber forces
         :return: Float activation frequency of the fiber
         """
-
+        self.__process_nf(length)
         self.activation_frequency = 1 - math.exp(
             - math.pow((self.__specific_function() * self.f_eff / (self.af * self.nf)), self.nf))
         return self.activation_frequency
@@ -223,7 +226,10 @@ class Fiber:
         Process the passive force due to the tendon the fiber
         :return: Float tendon force of the fiber
         """
-        return self.c_t * self.k_t * math.log(math.exp((self.length - self.l_t) / self.k_t) + 1)
+        return self.c_t * self.k_t * math.log(math.exp((self.l_se - self.l_t) / self.k_t) + 1)
+
+    def get_length_elastic(self, force):
+        return self.l_t + self.k_t * math.log(math.exp(force / (self.c_t * self.k_t)) - 1)
 
     def __passive_force(self):
         """
@@ -242,10 +248,11 @@ class Fiber:
         return self.__force_length() * self.__force_velocity() * self.activation_frequency
 
     def __effective_activation(self, force, length):
+        self.__update_activation_frequency(self.f_max, length)
         return self.activation_frequency
 
-    def __initial_energy(self, force, length, velocity):
-        return self.__cross_bridge_energy(force, length, velocity) + self.__activation_energy(force)
+    def __initial_energy(self, force):
+        return self.__cross_bridge_energy(force, self.length, self.velocity) + self.__activation_energy(force)
 
     def __initial_tetanic_energy(self, velocity):
         return (self.e1 * math.pow(velocity, 2) + self.e2 * velocity + self.e3) / (self.e4 - velocity)
@@ -266,8 +273,15 @@ class Fiber:
     def __tetanic_activation_energy(self):
         return self.a * self.__initial_tetanic_energy(0.)
 
-    def __recovery_energy(self, force, length, velocity):
-        return self.__initial_energy(force, length, velocity) * self.r
+    def __recovery_energy(self, force):
+        return self.__initial_energy(force) * self.r
+
+    def __update_activation_frequency(self, spike_frequency, length):
+        self.__process_recruitment(spike_frequency)
+        self.__process_tf((self.f_int - self.f_eff) / self.tf if self.tf != 0 else 0., length)
+        self.__intermediate_firing_frequency()
+        self.__effective_firing_frequency()
+        self.__activation_frequency(self.length)
 
     def update_force(self, spike_frequency):
         """
@@ -275,18 +289,13 @@ class Fiber:
         :return: Float force deployed by the muscle
         """
 
-        self.__process_recruitment(spike_frequency)
-        self.__process_tf((self.f_int - self.f_eff) / self.tf if self.tf != 0 else 0.)
-        self.__intermediate_firing_frequency()
-        self.__effective_firing_frequency()
-        self.__process_nf()
-        self.__activation_frequency()
+        self.__update_activation_frequency(spike_frequency, self.length)
 
         return self.__passive_force() + self.__active_force()
 
-    def update_energy(self, force, length, energy):
-        return (self.__initial_energy(force, length, energy) +
-                self.__recovery_energy(force, length, energy)) * self.m
+    def update_energy(self, force):
+        return (self.__initial_energy(force) +
+                self.__recovery_energy(force)) * self.m
 
 
 class SlowTwitchFiber(Fiber):
@@ -294,7 +303,7 @@ class SlowTwitchFiber(Fiber):
     Describe slow twitch muscle fibers and their activity. Corresponds approximately to Type I muscle fibers
     """
 
-    def __init__(self, h, f_pcsa, length, velocity, f_05):
+    def __init__(self, h, f_pcsa, length, velocity, f_05, l_se, l_max, length_0):
         """
         Class initialization. Parameters can be found in Tsianos & al. (2012)
         :param h: Float Euler parameter
@@ -302,9 +311,12 @@ class SlowTwitchFiber(Fiber):
         :param length: Float Normalized current length of the fiber
         :param velocity: Float normalized current velocity of the fiber
         :param f_05: Float firing rate frequency at which the fiber produce half of its maximal force
+        :param l_se: Float Normalized length of the fiber tendon
+        :param l_max: Float Maximal length of the fiber
+        :param length_0: Float Maximal length of the fiber
         """
 
-        Fiber.__init__(self, h, f_pcsa, length, velocity, f_05)
+        Fiber.__init__(self, h, f_pcsa, length, velocity, f_05, l_se, l_max, length_0)
         # Yielding parameters
 
         self.c_gamma = 0.35
@@ -328,7 +340,7 @@ class FastTwitchFiber(Fiber):
     Describe fast twitch muscle fibers and their activity. Corresponds approximately to Type II muscle fibers
     """
 
-    def __init__(self, h, pcsa, length, velocity, f_05):
+    def __init__(self, h, pcsa, length, velocity, f_05, l_se, l_max, length_0):
         """
         Class initialization. Parameters can be found in Tsianos & al. (2012)
         :param h: Float Euler parameter
@@ -336,9 +348,12 @@ class FastTwitchFiber(Fiber):
         :param length: Float Normalized current length of the fiber
         :param velocity: Float normalized current velocity of the fiber
         :param f_05: Float firing rate frequency at which the fiber produce half of its maximal force
+        :param l_se: Float Normalized length of the fiber tendon
+        :param l_max: Float Maximal length of the fiber
+        :param length_0: Float Maximal length of the fiber
         """
 
-        Fiber.__init__(self, h, pcsa, length, velocity, f_05)
+        Fiber.__init__(self, h, pcsa, length, velocity, f_05, l_se, l_max, length_0)
         self.u_r = 0.8
         self.u_th = self.f_pcsa * self.u_r
 
