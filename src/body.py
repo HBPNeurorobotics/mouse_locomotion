@@ -17,8 +17,8 @@
 import math
 from mathutils import Vector as vec
 
-from brain import Brain
 from muscles import *
+from oscillators import ParallelOscillator
 
 
 class Part:
@@ -187,7 +187,7 @@ class Body(Part):
         self.r_ba_leg = Backleg(config_, "R", simulator)
 
         # Create the brain object
-        self.brain = Brain(config_)
+        self.brain = ParallelOscillator(config_.brain)
 
         # Create the muscles objects following config
         for muscle_config in config_.body["muscles"]:
