@@ -15,7 +15,7 @@
 ##
 
 from neuron import Neuron
-from integrateAndFireNeuron import IntegrateAndFireNeuron
+from integrateAndFireNeuron import IntegrateAndFireAdaptationNeuron
 from synapse import Synapse
 
 import numpy as np
@@ -23,8 +23,8 @@ import numpy as np
 
 class MatsuokaNeurons:
     def __init__(self, exitating_config, inhibiting_config, inner_weight, out_weight):
-        self.exitatingNeuron = IntegrateAndFireNeuron(exitating_config)
-        self.inhibitingNeuron = IntegrateAndFireNeuron(inhibiting_config)
+        self.exitatingNeuron = IntegrateAndFireAdaptationNeuron(exitating_config)
+        self.inhibitingNeuron = IntegrateAndFireAdaptationNeuron(inhibiting_config)
         self.input = Neuron()
         self.output = Neuron()
 

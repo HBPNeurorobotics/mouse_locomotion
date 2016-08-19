@@ -1,5 +1,0 @@
-from synapse import Synapse
-from neuron import Neuron
-from integrateAndFireNeuron import IntegrateAndFireNeuron
-from matsuokaNeurons import MatsuokaNeurons
-from parallel0scillators import ParallelOscillators
