@@ -31,7 +31,7 @@ class Config:
         """
 
         self.logger = logging.Logger("INFO")
-        data = {} if filename is None else JsonUtils.read_json_file(filename)
+        data = {} if filename is None else JsonUtils.read_file(filename)
         if data == {}:
             self.logger.warning("The config is empty. You may have a problem with your config file.")
         # Simulation parameters
@@ -48,7 +48,6 @@ class Config:
         self.n_iter = 0
 
         # Physical parameters
-        self.muscle_type = data["muscle_type"] if "muscle_type" in data else "DampedSpringReducedTorqueMuscle"
         self.back_leg_L_muscles = data["back_leg_L_muscles"] if "back_leg_L_muscles" in data else []
         self.back_leg_R_muscles = data["back_leg_R_muscles"] if "back_leg_R_muscles" in data else []
         self.front_leg_L_muscles = data["front_leg_L_muscles"] if "front_leg_L_muscles" in data else []
@@ -212,4 +211,4 @@ class Config:
         del data["t_end"]
         del data["n_iter"]
 
-        JsonUtils.write_json_file(filename_, data)
+        JsonUtils.write_file(filename_, data)

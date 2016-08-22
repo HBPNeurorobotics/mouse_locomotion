@@ -286,7 +286,7 @@
         "c": 200,
         "name": "muscle_abdos",
         "obj_2": "obj_body.B",
-        "k": 4000,
+        "k": 5000,
         "anch_2": [
           0.45,
           0,
@@ -305,7 +305,8 @@
     "obj": "obj_body",
     "name": "Doggy Vertebrate"
   },
-  "back_leg_L_muscles": [
+  "back_leg_L_muscles": {
+    "muscles": [
     {
       "kc": -40,
       "c": 50,
@@ -370,10 +371,12 @@
       "k": 200
     }
   ],
-  "muscle_type": "DampedSpringMuscle",
+    "muscle_type": "DampedSpringMuscle"
+  },
   "name": "default_dog_vert_simulation_config",
   "simulator": "Simulator",
-  "back_leg_R_muscles": [
+  "back_leg_R_muscles": {
+    "muscles": [
     {
       "kc": -40,
       "c": 50,
@@ -437,10 +440,13 @@
       "brain_sig": 4,
       "k": 200
     }
-  ],
+    ],
+    "muscle_type": "DampedSpringMuscle"
+  },
   "timeout": 20,
   "dist_ref": 20,
-  "front_leg_L_muscles": [
+  "front_leg_L_muscles": {
+    "muscles": [
     {
       "kc": -7,
       "c": 40,
@@ -481,7 +487,7 @@
       "kl0": 0.4,
       "logger": "INFO",
       "brain_sig": 3,
-      "k": 1000
+      "k": 1500
     },
     {
       "kc": 0,
@@ -504,9 +510,12 @@
       "brain_sig": 3,
       "k": 10
     }
-  ],
+    ],
+    "muscle_type": "DampedSpringMuscle"
+  },
   "power_ref": 20,
-  "front_leg_R_muscles": [
+  "front_leg_R_muscles": {
+    "muscles": [
     {
       "kc": -7,
       "c": 40,
@@ -547,7 +556,7 @@
       "kl0": 0.4,
       "logger": "INFO",
       "brain_sig": 1,
-      "k": 1000
+      "k": 1500
     },
     {
       "kc": 0,
@@ -570,7 +579,9 @@
       "brain_sig": 1,
       "k": 10
     }
-  ],
+    ],
+    "muscle_type": "DampedSpringMuscle"
+  },
   "brain": {
     "neuron_config": {
       "tau": 0.6e-2,
@@ -580,7 +591,7 @@
       "threshold": 0,
       "h": 1e-3
     },
-    "n_osc": 1,
+    "n_osc": 4,
     "inner_weights": 2.0,
     "weights": 0.5
   },
@@ -607,12 +618,6 @@
       0,
       0
     ],
-    "B_triceps.L": [
-      0,
-      0,
-      0,
-      0
-    ],
     "muscle_vert2_up": [
       0,
       0,
@@ -631,40 +636,10 @@
       0,
       0
     ],
-    "F_gastro.R": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "F_gastro.L": [
-      0,
-      0,
-      0,
-      0
-    ],
     "muscle_vert5_down": [
       0,
       0,
       0,
-      0
-    ],
-    "F_biceps.L": [
-      0,
-      1,
-      0,
-      0
-    ],
-    "F_triceps.L": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "B_biceps.R": [
-      0,
-      0,
-      1,
       0
     ],
     "muscle_vert1_down": [
@@ -676,24 +651,6 @@
     "muscle_vert4_up": [
       0,
       0,
-      0,
-      0
-    ],
-    "F_triceps.R": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "B_biceps.L": [
-      0,
-      0,
-      1,
-      0
-    ],
-    "F_biceps.R": [
-      0,
-      1,
       0,
       0
     ],
@@ -721,25 +678,7 @@
       0,
       0
     ],
-    "B_gastro.L": [
-      0,
-      0,
-      1,
-      0
-    ],
     "muscle_vert3_down": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "B_gastro.R": [
-      0,
-      0,
-      1,
-      0
-    ],
-    "B_triceps.R": [
       0,
       0,
       0,
@@ -749,6 +688,78 @@
       0,
       0,
       0,
+      0
+    ],
+    "F_gastro.R": [
+      0,
+      1,
+      0,
+      0
+    ],
+    "F_gastro.L": [
+      1,
+      0,
+      0,
+      0
+    ],
+    "F_biceps.L": [
+      1,
+      0,
+      0,
+      0
+    ],
+    "F_biceps.R": [
+      0,
+      1,
+      0,
+      0
+    ],
+    "F_triceps.L": [
+      0,
+      0.1,
+      0,
+      0
+    ],
+    "F_triceps.R": [
+      0.1,
+      0,
+      0,
+      0
+    ],
+    "B_biceps.L": [
+      0,
+      0,
+      0.5,
+      0
+    ],
+    "B_biceps.R": [
+      0,
+      0,
+      0,
+      0.5
+    ],
+    "B_gastro.L": [
+      0,
+      0,
+      0.5,
+      0
+    ],
+    "B_gastro.R": [
+      0,
+      0,
+      0,
+      0.5
+    ],
+    "B_triceps.L": [
+      0,
+      0,
+      0,
+      0.5
+    ],
+    "B_triceps.R": [
+      0,
+      0,
+      0.5,
       0
     ]
   }

@@ -117,7 +117,7 @@ class Process(Simulation):
         if "local" in sim_list and sim_list["local"]:
             self.res_list.append(common.launch_simulator(sim_list))
         elif "load_file" in sim_list and sim_list["load_file"]:
-            sim_list["genome"] = PickleUtils.load(sim_list["load_file"])
+            sim_list["genome"] = PickleUtils.read_file(sim_list["load_file"])
             self.res_list.append(common.launch_simulator(sim_list))
         else:
             # Simulate
@@ -127,7 +127,8 @@ class Process(Simulation):
 
         # Save the results
         if self.save:
-            PickleUtils.save(self.save_directory + "Simulation_" + datetime.datetime.now().strftime("%Y_%m_%d_%H_%M") +
+            PickleUtils.write_file(
+                self.save_directory + "Simulation_" + datetime.datetime.now().strftime("%Y_%m_%d_%H_%M") +
                              ".sim", self.res_list)
 
     def display_results(self):

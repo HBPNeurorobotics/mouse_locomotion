@@ -117,7 +117,7 @@ class Optimization(Observer, Observable):
         :param result: Content to save in the file
         """
 
-        PickleUtils.save(
+        PickleUtils.write_file(
             self.save_directory + filename + datetime.datetime.now().strftime("_%Y_%m_%d_%H_%M") + self.extension,
             self.res_list if result is None else result)
 

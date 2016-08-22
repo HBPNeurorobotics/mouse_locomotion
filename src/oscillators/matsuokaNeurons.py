@@ -14,9 +14,9 @@
 # Modified by: Gabriel Urbain <gabriel.urbain@ugent.be>.
 ##
 
-from neuron import Neuron
-from integrateAndFireNeuron import IntegrateAndFireAdaptationNeuron
-from synapse import Synapse
+from .neuron import Neuron
+from .integrateAndFireNeuron import IntegrateAndFireAdaptationNeuron
+from .synapse import Synapse
 
 import numpy as np
 

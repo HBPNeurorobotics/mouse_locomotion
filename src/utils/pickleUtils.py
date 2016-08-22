@@ -19,8 +19,10 @@ import os
 import pickle
 import logging
 
+from utils.fileUtils import FileUtils
 
-class PickleUtils:
+
+class PickleUtils(FileUtils):
     """
     Utility class to manipulate files using pickle
     """
@@ -29,7 +31,7 @@ class PickleUtils:
         """Class initialization"""
 
     @staticmethod
-    def save(filename, element):
+    def write_file(filename, element):
         """
         Save a elements into a file
         :param filename: String path to the file
@@ -40,7 +42,7 @@ class PickleUtils:
             pickle.dump(element, f, protocol=2)
 
     @staticmethod
-    def load(filename):
+    def read_file(filename):
         """
         Load the result dictionary from file
         :param filename: String path to the file
@@ -60,30 +62,20 @@ class PickleUtils:
             logging.error("Can't open the file " + str(filename) + ". The file doesn't exist.")
         return {}
 
-    @staticmethod
-    def del_file(filename):
-        """
-        Delete a file if possible
-        :param filename: String path to the file
-        """
 
-        if os.path.isfile(filename):
-            try:
-                os.remove(filename)
-            except Exception as e:
-                logging.error("Can't delete save file: " + str(e))
+if __name__ == "__main__":
 
-        else:
-            logging.error("Can't find the file " + str(filename) + ". The file doesn't exist.")
+    directory = "/home/rodarie/Documents/mouse_locomotion/save/"
+    max_ = 0.
 
-    @staticmethod
-    def del_all_files(directory, extension):
-        """
-        Delete a list of files if possible
-        :param directory: String path to the directory containing the files
-        :param extension: String extension of the files. Should start with a dot.
-        """
+    for file_ in os.listdir(directory):
+        if file_.endswith(".sim"):
+            dict_ = PickleUtils.read_file(directory + file_)
+            for i in range(len(dict_["configs"])):
+                current_max = max(dict_["res"][i])
+                if current_max > max_:
+                    max_ = current_max
+                    PickleUtils.write_file(directory + "best_solution.gene",
+                                           dict_["configs"][i][dict_["res"][i].index(current_max)])
 
-        for file_ in os.listdir(directory):
-            if file_.endswith("." + extension):
-                PickleUtils.del_file(directory + file_)
+            print(max_)

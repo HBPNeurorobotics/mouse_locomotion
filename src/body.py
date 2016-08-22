@@ -106,6 +106,22 @@ class Leg(Part):
                                   ": Control signal = " + str(ctrl_sig))
         self.n_iter += 1
 
+    def update_osci(self, brain_output):
+        for i in range(len(self.muscles)):
+            # Assertion
+            if len(self.connection_matrix[self.muscles[i].name]) != len(brain_output):
+                self.logger.error("The brain outputs number (" + str(len(brain_output)) +
+                                  ") should match the number in the connection matrix (" +
+                                  str(len(self.connection_matrix[self.muscles[i].name])) + "). Please verify config!")
+            # Send linear combination of brain outputs
+            else:
+                ctrl_sig = 0
+                j = 0
+                for output in brain_output:
+                    ctrl_sig += self.connection_matrix[self.muscles[i].name][j] * output
+                    j += 1
+                    self.muscles[i].update_frequency(ctrl_sig=ctrl_sig)
+
 
 class Backleg(Leg):
     """This class represents a generic backleg and its current behaviour in the control process"""
@@ -119,12 +135,13 @@ class Backleg(Leg):
         """
 
         config = {"logger": config_.logger,
-                  "muscle_type": config_.muscle_type,
+                  "muscle_type": config_.back_leg_L_muscles[
+                      'muscle_type'] if "muscle_type" in config_.back_leg_L_muscles else "DampedSpringMuscle",
                   "connection_matrix": config_.connection_matrix}
         if orien_ == "L":
-            config["muscles"] = config_.back_leg_L_muscles
+            config["muscles"] = config_.back_leg_L_muscles["muscles"]
         else:
-            config["muscles"] = config_.back_leg_R_muscles
+            config["muscles"] = config_.back_leg_R_muscles["muscles"]
         Leg.__init__(self, config, orien_, simulator, type(self).__name__)
 
 
@@ -140,12 +157,13 @@ class Foreleg(Leg):
         """
 
         config = {"logger": config_.logger,
-                  "muscle_type": config_.muscle_type,
+                  "muscle_type": config_.front_leg_L_muscles[
+                      'muscle_type'] if "muscle_type" in config_.front_leg_L_muscles else "DampedSpringMuscle",
                   "connection_matrix": config_.connection_matrix}
         if orien_ == "L":
-            config["muscles"] = config_.front_leg_L_muscles
+            config["muscles"] = config_.front_leg_L_muscles["muscles"]
         else:
-            config["muscles"] = config_.front_leg_R_muscles
+            config["muscles"] = config_.front_leg_R_muscles["muscles"]
         Leg.__init__(self, config, orien_, simulator, type(self).__name__)
 
 
@@ -160,7 +178,9 @@ class Body(Part):
         """
 
         Part.__init__(self,
-                      {"logger": config_.logger, "muscle_type": config_.muscle_type},
+                      {"logger": config_.logger,
+                       "muscle_type": config_.body[
+                           'muscle_type'] if "muscle_type" in config_.body else "DampedSpringMuscle"},
                       simulator,
                       config_.body["name"])
         self.config = config_
@@ -192,6 +212,13 @@ class Body(Part):
         # Create the muscles objects following config
         for muscle_config in config_.body["muscles"]:
             self.muscles.append(eval(self.muscle_type))
+
+            # for i_ in range(100):
+            #    brain_output = self.get_brain_output()
+            #    self.l_ba_leg.update_osci(brain_output)
+            #    self.r_ba_leg.update_osci(brain_output)
+            #    self.l_fo_leg.update_osci(brain_output)
+            #    self.r_fo_leg.update_osci(brain_output)
 
     def compute_traveled_dist(self):
         """Return a float representing the distance between origin and the current position"""
@@ -232,7 +259,7 @@ class Body(Part):
         else:
             self.count = 0
             # a = self.body_obj.worldTransform * vec((0, 0, 0))
-        # Get distance
+            # Get distance
             # print("Pos X : " + str(math.fabs(vec(a - self.origin).x)) + " Y : " + str(math.fabs(vec(a - self.origin).y)) + " Z : " + str(math.fabs(vec(a - self.origin).z)))
 
     def get_loss_fct(self):
@@ -285,6 +312,7 @@ class Body(Part):
         self.monitor_fall()
 
         self.n_iter += 1
+        # self.l_ba_leg.muscles[0].print_update()
         self.logger.debug("Body " + self.name + " iteration " + str(self.n_iter))
         self.logger.debug("Average power: " + "{0:0.2f}".format(self.av_power))
         return self.penalty

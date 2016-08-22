@@ -19,8 +19,10 @@ import json
 import os
 import logging
 
+from utils.fileUtils import FileUtils
 
-class JsonUtils:
+
+class JsonUtils(FileUtils):
     """
     Utility class to manipulate json files
     """
@@ -29,7 +31,7 @@ class JsonUtils:
         """Class initialization"""
 
     @staticmethod
-    def read_json_file(filename):
+    def read_file(filename):
         """
         Read json file if exists and return its content as a dictionary
         :param filename: String path to the json file
@@ -48,7 +50,7 @@ class JsonUtils:
         return {}
 
     @staticmethod
-    def write_json_file(filename, data):
+    def write_file(filename, data):
         """
         Write down data on a json file
         :param filename: String path to the json file

@@ -14,7 +14,7 @@
 # Modified by: Gabriel Urbain <gabriel.urbain@ugent.be>.
 ##
 
-from neuron import Neuron
+from .neuron import Neuron
 
 
 class IntegrateAndFireNeuron(Neuron):

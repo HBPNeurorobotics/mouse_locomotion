@@ -16,13 +16,9 @@
 
 import numpy as np
 import time
-from matsuokaNeurons import MatsuokaNeurons
-import matplotlib
+from .matsuokaNeurons import MatsuokaNeurons
 
-from synapse import Synapse
-
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
+from .synapse import Synapse
 
 
 class ParallelOscillator:
@@ -33,10 +29,10 @@ class ParallelOscillator:
         self.rec = np.array(np.zeros((4, 1)))
         self.state = []
         for i in range(2):
-            self.neurons.append(MatsuokaNeurons(self.config.neuron_config,
-                                                self.config.neuron_config,
-                                                self.config.inner_weights,
-                                                self.config.weights))
+            self.neurons.append(MatsuokaNeurons(self.config["neuron_config"],
+                                                self.config["neuron_config"],
+                                                self.config["inner_weights"],
+                                                self.config["weights"]))
 
         self.neurons[0].add_synapse(1, self.neurons[1].output)
         self.neurons[1].add_synapse(1, self.neurons[0].output)
@@ -50,29 +46,14 @@ class ParallelOscillator:
         self.state = []
         for i in range(2):
             self.neurons[i].update()
-            self.state.append(self.neurons[i].exitatingNeuron.y)
-            self.state.append(self.neurons[i].inhibitingNeuron.y)
+            self.state.append(self.neurons[i].exitatingNeuron.y / 5.)
+            self.state.append(self.neurons[i].inhibitingNeuron.y / 5.)
             if self.save:
-                res.append([self.neurons[i].exitatingNeuron.y])
-                res.append([self.neurons[i].inhibitingNeuron.y])
+                res.append([self.neurons[i].exitatingNeuron.y / 5.])
+                res.append([self.neurons[i].inhibitingNeuron.y / 5.])
         if self.save:
             res = np.array(res)
             self.rec = np.hstack((self.rec, res))
-
-    def plot(self, stop_time):
-        time_ = np.arange(0, stop_time + 1)
-        plot_abscissa_step = stop_time / 10
-        plt.figure(2, figsize=(15, 10))
-        plt.suptitle('Matsuoka Oscillator for mouse gaits control\n')
-        plt.subplot(211)
-        for n in range(4):
-            plt.plot(time_, self.rec[n, :], color=np.random.rand(3, 1), label='y' + str(n))
-        plt.xticks(np.arange(0, stop_time, plot_abscissa_step))
-        plt.xlabel('Time step')
-        plt.ylabel('Value of state variables')
-        plt.legend()
-        plt.savefig('Matsuoka_oscillator_mouse_' + str(time.clock()) + '.png')
-        plt.clf()
 
 
 if __name__ == "__main__":
@@ -109,4 +90,3 @@ if __name__ == "__main__":
             perturbation.reset_updates()
             perturbation.update()
         osc.update()
-    osc.plot(sim_time)

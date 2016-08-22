@@ -131,7 +131,7 @@ class Fiber:
         :return: Float tf value
         """
 
-        self.tf = self.t_f1 * math.pow(length, 2) + self.t_f2 * self.f_env if d_f_eff >= 0. \
+        self.tf = self.t_f1 * pow(length, 2) + self.t_f2 * self.f_env if d_f_eff >= 0. \
             else (self.t_f3 + self.t_f4 * self.activation_frequency) / length
         return self.tf
 
@@ -140,7 +140,8 @@ class Fiber:
         Update intermediate firing frequency which will be used to process effective firing frequency
         :return: Float intermediate firing frequency
         """
-
+        if self.f_int == 0.:
+            self.f_int = self.f_env
         d_f_int = (self.f_env - self.f_int) / self.tf
         self.f_int += self.h * d_f_int
         return self.f_int
@@ -150,7 +151,8 @@ class Fiber:
         Update effective firing frequency which will be used to process muscle activity
         :return:  Float effective firing frequency
         """
-
+        if self.f_eff == 0.:
+            self.f_eff = self.f_int
         d_f_eff = (self.f_int - self.f_eff) / self.tf
         self.f_eff += self.h * d_f_eff
         return self.f_eff
@@ -178,8 +180,9 @@ class Fiber:
         :return: Float activation frequency of the fiber
         """
         self.__process_nf(length)
-        self.activation_frequency = 1 - math.exp(
-            - math.pow((self.__specific_function() * self.f_eff / (self.af * self.nf)), self.nf))
+        spec = self.__specific_function()
+        param = spec * self.f_eff / (self.af * self.nf)
+        self.activation_frequency = 1 - math.exp(-pow(param, self.nf))
         return self.activation_frequency
 
     def __force_length(self):
@@ -188,7 +191,7 @@ class Fiber:
         :return: Float length based active force of the fiber
         """
 
-        return math.exp(-math.pow(math.fabs((math.pow(self.length, self.beta) - 1) / self.omega), self.rho))
+        return math.exp(-pow(math.fabs((pow(self.length, self.beta) - 1) / self.omega), self.rho))
 
     def __force_velocity(self):
         """
@@ -201,7 +204,7 @@ class Fiber:
                    (self.max_velocity + self.velocity * (self.c_v0 + self.c_v1 * self.length))
         else:
             return (self.b_v - self.velocity *
-                    (self.a_v0 + self.a_v1 * self.length + self.a_v2 * math.pow(self.length, 2))) / \
+                    (self.a_v0 + self.a_v1 * self.length + self.a_v2 * pow(self.length, 2))) / \
                    (self.b_v + self.velocity)
 
     def __parallel_elastic(self):
@@ -255,7 +258,7 @@ class Fiber:
         return self.__cross_bridge_energy(force, self.length, self.velocity) + self.__activation_energy(force)
 
     def __initial_tetanic_energy(self, velocity):
-        return (self.e1 * math.pow(velocity, 2) + self.e2 * velocity + self.e3) / (self.e4 - velocity)
+        return (self.e1 * pow(velocity, 2) + self.e2 * velocity + self.e3) / (self.e4 - velocity)
 
     def __cross_bridge_energy(self, force, length, velocity):
         return self.__effective_activation(force, length) * self.__force_length() * self.__tetanic_cross_bridge_energy(
@@ -283,12 +286,13 @@ class Fiber:
         self.__effective_firing_frequency()
         self.__activation_frequency(self.length)
 
-    def update_force(self, spike_frequency):
+    def update_force(self, spike_frequency, length, velocity):
         """
         Update the force of the muscle
         :return: Float force deployed by the muscle
         """
-
+        self.length = length
+        self.velocity = velocity
         self.__update_activation_frequency(spike_frequency, self.length)
 
         return self.__passive_force() + self.__active_force()
@@ -296,6 +300,14 @@ class Fiber:
     def update_energy(self, force):
         return (self.__initial_energy(force) +
                 self.__recovery_energy(force)) * self.m
+
+    def print_updates(self):
+        print("F_env: " + str(self.f_env) + "\n" +
+              "F_int: " + str(self.f_int) + "\n" +
+              "F_eff: " + str(self.f_eff) + "\n" +
+              "F_act: " + str(self.activation_frequency) + "\n" +
+              "Active force: " + str(self.__active_force()) + "\n" +
+              "Passive force: " + str(self.__passive_force()) + "\n")
 
 
 class SlowTwitchFiber(Fiber):

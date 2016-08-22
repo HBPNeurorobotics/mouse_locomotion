@@ -78,7 +78,7 @@ class Result:
         # Config  features
         self.result_dict["config_name"] = self.config.name
         self.result_dict["config_opt"] = None  # TODO: fill here!
-        self.result_dict["config_muscles"] = self.config.muscle_type
+        # self.result_dict["config_muscles"] = self.config.muscle_type
 
     def save_results(self):
         """Save the results dictionary"""
@@ -89,7 +89,7 @@ class Result:
 
         # Save when not empty
         if self.result_dict:
-            PickleUtils.save(self.config.save_path, self.result_dict)
+            PickleUtils.write_file(self.config.save_path, self.result_dict)
             self.void = True
 
         else:
@@ -104,7 +104,7 @@ class Result:
         """
 
         if filename:
-            self.result_dict = PickleUtils.load(filename)
+            self.result_dict = PickleUtils.read_file(filename)
             if to_delete:
                 PickleUtils.del_file(filename)
         return self.result_dict
