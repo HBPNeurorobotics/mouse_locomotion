@@ -1,0 +1,742 @@
+{
+  "body": {
+    "muscles": [
+      {
+        "kc": 0,
+        "c": 100,
+        "name": "muscle_neck1",
+        "obj_2": "obj_head",
+        "k": 2000,
+        "anch_2": [
+          -0.06,
+          0,
+          -0.71
+        ],
+        "anch_1": [
+          -0.95,
+          0,
+          0.47
+        ],
+        "kl0": 0.8,
+        "logger": "INFO",
+        "obj_1": "obj_body"
+      },
+      {
+        "kc": 0,
+        "c": 100,
+        "name": "muscle_neck2",
+        "obj_2": "obj_head",
+        "k": 2000,
+        "anch_2": [
+          0.117,
+          0,
+          -0.26
+        ],
+        "anch_1": [
+          -0.59,
+          0,
+          1.4
+        ],
+        "kl0": 0.8,
+        "logger": "INFO",
+        "obj_1": "obj_body"
+      },
+      {
+        "kc": 0,
+        "c": 100,
+        "name": "muscle_vert1_up",
+        "obj_2": "obj_vert.1",
+        "k": 3000,
+        "anch_2": [
+          -0.01,
+          0,
+          0.1
+        ],
+        "anch_1": [
+          -0.186,
+          0,
+          0.93
+        ],
+        "kl0": 0.8,
+        "logger": "INFO",
+        "obj_1": "obj_body"
+      },
+      {
+        "kc": 0,
+        "c": 100,
+        "name": "muscle_vert1_down",
+        "obj_2": "obj_vert.1",
+        "k": 3000,
+        "anch_2": [
+          -0.01,
+          0,
+          -0.1
+        ],
+        "anch_1": [
+          -0.167,
+          0,
+          0.65
+        ],
+        "kl0": 0.8,
+        "logger": "INFO",
+        "obj_1": "obj_body"
+      },
+      {
+        "kc": 0,
+        "c": 100,
+        "name": "muscle_vert2_up",
+        "obj_2": "obj_vert.2",
+        "k": 3000,
+        "anch_2": [
+          -0.01,
+          0,
+          0.1
+        ],
+        "anch_1": [
+          0.01,
+          0,
+          0.1
+        ],
+        "kl0": 0.8,
+        "logger": "INFO",
+        "obj_1": "obj_vert.1"
+      },
+      {
+        "kc": 0,
+        "c": 100,
+        "name": "muscle_vert2_down",
+        "obj_2": "obj_vert.2",
+        "k": 3000,
+        "anch_2": [
+          -0.01,
+          0,
+          -0.1
+        ],
+        "anch_1": [
+          0.01,
+          0,
+          -0.1
+        ],
+        "kl0": 0.8,
+        "logger": "INFO",
+        "obj_1": "obj_vert.1"
+      },
+      {
+        "kc": 0,
+        "c": 100,
+        "name": "muscle_vert3_up",
+        "obj_2": "obj_vert.3",
+        "k": 3000,
+        "anch_2": [
+          -0.01,
+          0,
+          0.1
+        ],
+        "anch_1": [
+          0.01,
+          0,
+          0.1
+        ],
+        "kl0": 0.8,
+        "logger": "INFO",
+        "obj_1": "obj_vert.2"
+      },
+      {
+        "kc": 0,
+        "c": 100,
+        "name": "muscle_vert3_down",
+        "obj_2": "obj_vert.3",
+        "k": 3000,
+        "anch_2": [
+          -0.01,
+          0,
+          -0.1
+        ],
+        "anch_1": [
+          0.01,
+          0,
+          -0.1
+        ],
+        "kl0": 0.8,
+        "logger": "INFO",
+        "obj_1": "obj_vert.2"
+      },
+      {
+        "kc": 0,
+        "c": 100,
+        "name": "muscle_vert4_up",
+        "obj_2": "obj_vert.4",
+        "k": 3000,
+        "anch_2": [
+          -0.01,
+          0,
+          0.1
+        ],
+        "anch_1": [
+          0.01,
+          0,
+          0.1
+        ],
+        "kl0": 0.8,
+        "logger": "INFO",
+        "obj_1": "obj_vert.3"
+      },
+      {
+        "kc": 0,
+        "c": 100,
+        "name": "muscle_vert4_down",
+        "obj_2": "obj_vert.4",
+        "k": 3000,
+        "anch_2": [
+          -0.01,
+          0,
+          -0.1
+        ],
+        "anch_1": [
+          0.01,
+          0,
+          -0.1
+        ],
+        "kl0": 0.8,
+        "logger": "INFO",
+        "obj_1": "obj_vert.3"
+      },
+      {
+        "kc": 0,
+        "c": 100,
+        "name": "muscle_vert5_up",
+        "obj_2": "obj_vert.5",
+        "k": 3000,
+        "anch_2": [
+          -0.01,
+          0,
+          0.1
+        ],
+        "anch_1": [
+          0.01,
+          0,
+          0.1
+        ],
+        "kl0": 0.8,
+        "logger": "INFO",
+        "obj_1": "obj_vert.4"
+      },
+      {
+        "kc": 0,
+        "c": 100,
+        "name": "muscle_vert5_down",
+        "obj_2": "obj_vert.5",
+        "k": 3000,
+        "anch_2": [
+          -0.01,
+          0,
+          -0.1
+        ],
+        "anch_1": [
+          0.01,
+          0,
+          -0.1
+        ],
+        "kl0": 0.8,
+        "logger": "INFO",
+        "obj_1": "obj_vert.4"
+      },
+      {
+        "kc": 0,
+        "c": 100,
+        "name": "muscle_vert6_up",
+        "obj_2": "obj_body.B",
+        "k": 3000,
+        "anch_2": [
+          0.425,
+          0,
+          0.93
+        ],
+        "anch_1": [
+          0.01,
+          0,
+          0.1
+        ],
+        "kl0": 0.8,
+        "logger": "INFO",
+        "obj_1": "obj_vert.5"
+      },
+      {
+        "kc": 0,
+        "c": 100,
+        "name": "muscle_vert6_down",
+        "obj_2": "obj_body.B",
+        "k": 3000,
+        "anch_2": [
+          0.425,
+          0,
+          0.65
+        ],
+        "anch_1": [
+          0.01,
+          0,
+          -0.1
+        ],
+        "kl0": 0.8,
+        "logger": "INFO",
+        "obj_1": "obj_vert.5"
+      },
+      {
+        "kc": 0,
+        "c": 200,
+        "name": "muscle_abdos",
+        "obj_2": "obj_body.B",
+        "k": 5000,
+        "anch_2": [
+          0.45,
+          0,
+          -0.61
+        ],
+        "anch_1": [
+          -0.1977,
+          0,
+          -0.61
+        ],
+        "kl0": 0.85,
+        "logger": "INFO",
+        "obj_1": "obj_body"
+      }
+    ],
+    "obj": "obj_body",
+    "name": "Doggy Vertebrate"
+  },
+  "name": "default_dog_vert_simulation_config",
+  "simulator": "Simulator",
+  "timeout": 20,
+  "dist_ref": 20,
+  "power_ref": 20,
+  "front_leg_L_muscles": {
+    "muscles": [
+      {
+        "name": "F_biceps.L",
+        "obj_2": "obj_upper_arm.L",
+        "obj_1": "obj_body",
+        "anch_2": [
+          -0.01,
+          0,
+          0.33
+        ],
+        "anch_1": [
+          -0.93,
+          -1,
+          0.48
+        ],
+        "logger": "INFO",
+        "percent_slow_fiber": 0,
+        "pcsa": 2.6,
+        "angle": 21.68
+      },
+      {
+        "name": "F_triceps.L",
+        "obj_2": "obj_upper_arm.L",
+        "obj_1": "obj_body",
+        "anch_2": [
+          0.13,
+          0,
+          0.978
+        ],
+        "anch_1": [
+          -0.61,
+          -1,
+          0.5
+        ],
+        "logger": "INFO",
+        "percent_slow_fiber": 4.6,
+        "pcsa": 15.49,
+        "angle": 41.88
+      },
+      {
+        "name": "F_gastro.L",
+        "obj_2": "obj_wrist.L",
+        "obj_1": "obj_upper_arm.L",
+        "anch_2": [
+          0.085,
+          0,
+          0
+        ],
+        "anch_1": [
+          0.175,
+          0,
+          0.752
+        ],
+        "logger": "INFO",
+        "percent_slow_fiber": 0,
+        "pcsa": 1.26,
+        "angle": 26.4
+      }
+    ],
+    "muscle_type": "BrownMuscle"
+  },
+  "front_leg_R_muscles": {
+    "muscles": [
+      {
+        "name": "F_biceps.R",
+        "obj_2": "obj_upper_arm.R",
+        "obj_1": "obj_body",
+        "anch_2": [
+          -0.01,
+          0,
+          0.33
+        ],
+        "anch_1": [
+          -0.93,
+          1,
+          0.48
+        ],
+        "logger": "INFO",
+        "percent_slow_fiber": 0,
+        "pcsa": 2.6,
+        "angle": 21.68
+      },
+      {
+        "name": "F_triceps.R",
+        "obj_2": "obj_upper_arm.R",
+        "obj_1": "obj_body",
+        "anch_2": [
+          0.13,
+          0,
+          0.978
+        ],
+        "anch_1": [
+          -0.61,
+          1,
+          0.5
+        ],
+        "logger": "INFO",
+        "percent_slow_fiber": 4.6,
+        "pcsa": 15.49,
+        "angle": 41.88
+      },
+      {
+        "name": "F_gastro.R",
+        "obj_2": "obj_wrist.R",
+        "obj_1": "obj_upper_arm.R",
+        "anch_2": [
+          0.085,
+          0,
+          0
+        ],
+        "anch_1": [
+          0.175,
+          0,
+          0.752
+        ],
+        "kl0": 1,
+        "logger": "INFO",
+        "percent_slow_fiber": 0,
+        "pcsa": 1.26,
+        "angle": 26.4
+      }
+    ],
+    "muscle_type": "BrownMuscle"
+  },
+  "back_leg_L_muscles": {
+    "muscles": [
+      {
+        "name": "B_biceps.L",
+        "obj_2": "obj_shin.L",
+        "obj_1": "obj_body.B",
+        "anch_2": [
+          0.066,
+          0,
+          0.3
+        ],
+        "anch_1": [
+          0.91,
+          -1,
+          -0.3
+        ],
+        "logger": "INFO",
+        "percent_slow_fiber": 0,
+        "pcsa": 9.58,
+        "angle": 15.63
+      },
+      {
+        "name": "B_triceps.L",
+        "obj_2": "obj_shin.L",
+        "obj_1": "obj_body.B",
+        "anch_2": [
+          -0.102,
+          0,
+          0.55
+        ],
+        "anch_1": [
+          0.72,
+          -1,
+          0.23
+        ],
+        "logger": "INFO",
+        "percent_slow_fiber": 0,
+        "pcsa": 1.26,
+        "angle": 26.4
+      },
+      {
+        "name": "B_gastro.L",
+        "obj_2": "obj_shin_lower.L",
+        "obj_1": "obj_thigh.L",
+        "anch_2": [
+          0.09,
+          0,
+          0.14
+        ],
+        "anch_1": [
+          -0.053,
+          0,
+          -0.77
+        ],
+        "logger": "INFO",
+        "percent_slow_fiber": 0,
+        "pcsa": 4.83,
+        "angle": 0
+      }
+    ],
+    "muscle_type": "BrownMuscle"
+  },
+  "back_leg_R_muscles": {
+    "muscles": [
+      {
+        "name": "B_biceps.R",
+        "obj_2": "obj_shin.R",
+        "obj_1": "obj_body.B",
+        "anch_2": [
+          0.066,
+          0,
+          0.3
+        ],
+        "anch_1": [
+          0.91,
+          1,
+          -0.3
+        ],
+        "logger": "INFO",
+        "percent_slow_fiber": 0,
+        "pcsa": 9.58,
+        "angle": 15.63
+      },
+      {
+        "name": "B_triceps.R",
+        "obj_2": "obj_shin.R",
+        "obj_1": "obj_body.B",
+        "anch_2": [
+          -0.102,
+          0,
+          0.55
+        ],
+        "anch_1": [
+          0.72,
+          1,
+          0.23
+        ],
+        "logger": "INFO",
+        "percent_slow_fiber": 0,
+        "pcsa": 1.26,
+        "angle": 26.4
+      },
+      {
+        "name": "B_gastro.R",
+        "obj_2": "obj_shin_lower.R",
+        "obj_1": "obj_thigh.R",
+        "anch_2": [
+          0.09,
+          0,
+          0.14
+        ],
+        "anch_1": [
+          -0.053,
+          0,
+          -0.77
+        ],
+        "logger": "INFO",
+        "percent_slow_fiber": 0,
+        "pcsa": 4.83,
+        "angle": 0
+      }
+    ],
+    "muscle_type": "BrownMuscle"
+  },
+  "brain": {
+    "neuron_config": {
+      "tau": 0.6e-2,
+      "T": 1.5e-2,
+      "b": 2.5,
+      "c": 0.68,
+      "threshold": 0,
+      "h": 1e-3
+    },
+    "n_osc": 4,
+    "inner_weights": 2.0,
+    "weights": 0.5
+  },
+  "logger_name": "INFO",
+  "sim_speed": 1.0,
+  "exit_condition": "owner['config'].n_iter > 3500",
+  "connection_matrix": {
+    "muscle_vert5_up": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "muscle_neck2": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "muscle_neck1": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "muscle_vert2_up": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "muscle_vert3_up": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "muscle_vert2_down": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "F_gastro.R": [
+      0,
+      1,
+      0,
+      0
+    ],
+    "F_gastro.L": [
+      1,
+      0,
+      0,
+      0
+    ],
+    "F_biceps.L": [
+      1,
+      0,
+      0,
+      0
+    ],
+    "F_biceps.R": [
+      0,
+      1,
+      0,
+      0
+    ],
+    "F_triceps.L": [
+      0,
+      0.1,
+      0,
+      0
+    ],
+    "F_triceps.R": [
+      0.1,
+      0,
+      0,
+      0
+    ],
+    "B_biceps.L": [
+      0,
+      0,
+      0.5,
+      0
+    ],
+    "B_biceps.R": [
+      0,
+      0,
+      0,
+      0.5
+    ],
+    "B_gastro.L": [
+      0,
+      0,
+      0.5,
+      0
+    ],
+    "B_gastro.R": [
+      0,
+      0,
+      0,
+      0.5
+    ],
+    "B_triceps.L": [
+      0,
+      0,
+      0,
+      0.5
+    ],
+    "B_triceps.R": [
+      0,
+      0,
+      0.5,
+      0
+    ],
+    "muscle_vert5_down": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "muscle_vert1_down": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "muscle_vert4_up": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "muscle_vert1_up": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "muscle_vert6_up": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "muscle_abdos": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "muscle_vert4_down": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "muscle_vert3_down": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "muscle_vert6_down": [
+      0,
+      0,
+      0,
+      0
+    ]
+  }
+}

@@ -67,6 +67,26 @@ if __name__ == "__main__":
 
     directory = "/home/rodarie/Documents/mouse_locomotion/save/"
     max_ = 0.
+    for file_ in os.listdir(directory):
+        if file_.startswith("GeneticMeta"):
+            dict_ = PickleUtils.read_file(directory + file_)
+            for optimization in range(len(dict_["configs"])):
+                max_i = 0.
+                for i in range(len(dict_["configs"][optimization])):
+                    current_max = max(dict_["scores"][optimization][i])
+                    if current_max > max_:
+                        max_ = current_max
+                    if current_max > max_i:
+                        max_i = current_max
+                        PickleUtils.write_file(directory + "best_solution_" + str(optimization) + ".gene",
+                                               dict_["configs"][optimization][i][
+                                                   dict_["scores"][optimization][i].index(current_max)])
+
+                print(max_)
+
+if __name__ == "__main2__":
+    directory = "/home/rodarie/Documents/mouse_locomotion/save/"
+    max_ = 0.
 
     for file_ in os.listdir(directory):
         if file_.endswith(".sim"):

@@ -139,7 +139,6 @@ class MetaOptimization(Optimization):
         if len(last_it_scores) > 0:
             fig, ax = plt.subplots(1)
             bplot = ax.boxplot(last_it_scores,
-                               labels=self.res_list['param_val'],
                                vert=True,
                                patch_artist=True)
             colors = []
