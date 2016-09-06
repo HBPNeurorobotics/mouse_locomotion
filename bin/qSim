@@ -92,23 +92,27 @@ class SimCli(cli.Application):
                       "verbose": self.verbose,
                       "logfile": self.logfile}
         opt = common_opt.copy()
-        opt["simulator"] = self.simulator
-        if self.path[0] == "/":
-            opt["simulator_path"] = (self.path + "/")
-        elif self.path == "PATH":
-            opt["simulator_path"] = ""
-        else:
-            opt["simulator_path"] = self.root + "/" + self.path + "/"
-        opt["cpu_use"] = self.max_cpu_percentage if self.max_cpu_percentage is not None else 50
-        opt["memory_use"] = self.max_memory_percentage if self.max_memory_percentage is not None else 90
-        opt["model"] = self.root + "/mdl/" + self.model
-        opt["config_name"] = self.root + "/configs/" + self.config + ".json"
-        opt["sim_type"] = self.sim_type
-        opt["fullscreen"] = self.fullscreen
-        opt["local"] = self.local
-        opt["load_file"] = self.load_file
-        opt["save"] = self.save
-        opt["timeout"] = self.sim_timeout
+        if not self.registry:
+            opt["simulator"] = self.simulator
+            if self.path[0] == "/":
+                opt["simulator_path"] = (self.path + "/")
+            elif self.path == "PATH":
+                opt["simulator_path"] = ""
+            else:
+                opt["simulator_path"] = self.root + "/" + self.path + "/"
+            opt["model"] = self.root + "/mdl/" + self.model
+            opt["config_name"] = self.root + "/configs/" + self.config + ".json"
+            opt["fullscreen"] = self.fullscreen
+        if self.service:
+            opt["cpu_use"] = self.max_cpu_percentage if self.max_cpu_percentage is not None else 50
+            opt["memory_use"] = self.max_memory_percentage if self.max_memory_percentage is not None else 90
+
+        elif not self.registry:
+            opt["sim_type"] = self.sim_type
+            opt["local"] = self.local
+            opt["load_file"] = self.load_file
+            opt["save"] = self.save
+            opt["timeout"] = self.sim_timeout
 
         # Configure logging
         log_file = opt["logfile"]
@@ -132,7 +136,7 @@ class SimCli(cli.Application):
         elif self.registry:
             s = Registry(common_opt)
         elif self.service:
-            s = SimServer(common_opt)
+            s = SimServer(opt)
         # Else, start chosen simulation
         else:
             s = Process(opt)

@@ -65,8 +65,6 @@ class Manager(Observable):
         self.server_list = []  # list of active servers
         self.conn_list = []  # list of active RPYC connections
         # Server parameters
-        self.max_CPU_percent_use = opt["cpu_use"]
-        self.max_memory_percent_use = opt["memory_use"]
         self.simulator = opt["simulator"]
         # Simulation manager parameter
         self.rqt_n = 0
@@ -89,7 +87,6 @@ class Manager(Observable):
         self.mutex_rsp = Lock()
         self.mutex_rqt = Lock()
         self.mutex_res = Lock()
-        self.lock_test_server = Lock()
 
         self.thread = None
         logging.debug("Sim Manager initialization achieved. Number of active threads = " +
@@ -125,16 +122,10 @@ class Manager(Observable):
         # Compare and update cloud_state set if needed
         for elem in keys_serv_dict.difference(keys_cloud_state):
             if len(self.rqt) > 0:
-                try:
-                    self.request_server(elem, serv_dict[elem], self.rqt[0], "Test")
-                except Exception as e:
-                    logging.error("Exception during test on the server " +
-                                  serv_dict[elem].address + ":" +
-                                  str(serv_dict[elem].port) +
-                                  "  The server will now be ignored\n" +
-                                  "Details: " + str(e))
                 self.mutex_cloud_state.acquire()
                 self.cloud_state[elem] = serv_dict[elem]
+                self.cloud_state[elem].status = True
+                self.cloud_state[elem].nb_threads = 0
                 self.mutex_cloud_state.release()
 
         for elem in keys_cloud_state.difference(keys_serv_dict):
@@ -160,10 +151,10 @@ class Manager(Observable):
         # Select the server with the largest number of simulations available
         cloud_list = self.cloud_state.items()
         if len(self.cloud_state) >= 2:
-            cloud_list = sorted(cloud_list, key=lambda x: x[1].nb_threads, reverse=True)
+            cloud_list = sorted(cloud_list, key=lambda x: x[1].nb_threads, reverse=False)
         for item in cloud_list:
             key = item[0]
-            if self.cloud_state[key].nb_threads > 0 and self.cloud_state[key].status:
+            if self.cloud_state[key].status:
                 self.mutex_cloud_state.release()
                 return key
         self.mutex_cloud_state.release()
@@ -208,7 +199,7 @@ class Manager(Observable):
 
             # Decrease thread number in cloud_state dict
             self.mutex_cloud_state.acquire()
-            self.cloud_state[server_id].nb_threads += 1
+            self.cloud_state[server_id].nb_threads -= 1
             self.mutex_cloud_state.release()
 
         self.__process_callback(rsp, function)
@@ -227,20 +218,12 @@ class Manager(Observable):
             """
 
             # Process the number of maximum simulation that can be done on the same time
-            cpu_capacity = (self.max_CPU_percent_use - rsp_["common"]["CPU"]) / \
-                           (rsp_[self.simulator]["CPU"] - rsp_["common"]["CPU"])
-            memory_capacity = (self.max_memory_percent_use - rsp_["common"]["memory"]) / \
-                              (rsp_[self.simulator]["memory"] - rsp_["common"]["memory"])
-            nb_thread = math.floor(min(cpu_capacity, memory_capacity))
-
-            if nb_thread > 0:  # Change the status of the server on the cloud
-                self.mutex_cloud_state.acquire()
-                self.cloud_state[server_id].status = True
-                self.cloud_state[server_id].nb_threads = nb_thread
-                logging.info("The server " + str(self.cloud_state[server_id].address) +
-                             ":" + str(self.cloud_state[server_id].port) +
-                             " is now available for a maximum of " + str(nb_thread) + " simulation(s).")
-                self.mutex_cloud_state.release()
+            logging.info("Test server " + self.cloud_state[server_id].address + ":" +
+                         str(self.cloud_state[server_id].port) + " consumptions:\n" +
+                         "Common:{\n\tCPU = " + str(rsp_["common"]["CPU"]) +
+                         "\n\tMemory = " + str(rsp_["common"]["memory"]) + "\n}," +
+                         self.simulator + ":{\n\tCPU = " + str(rsp_[self.simulator]["CPU"]) +
+                         "\n\tMemory = " + str(rsp_[self.simulator]["memory"]) + "\n}")
 
         self.__process_callback(rsp, function)
 
@@ -372,10 +355,10 @@ class Manager(Observable):
                     except Exception as e:
                         raise Exception("Exception during simulation on the server " +
                                         self.cloud_state[server_hash].address + ":" +
-                                        self.cloud_state[server_hash].port + "\n" + str(e))
+                                        str(self.cloud_state[server_hash].port) + "\n" + str(e))
                     # Update the cloud_state list
                     self.mutex_cloud_state.acquire()
-                    self.cloud_state[server_hash].nb_threads -= 1
+                    self.cloud_state[server_hash].nb_threads += 1
                     self.mutex_cloud_state.release()
 
                     # Clear request from list:

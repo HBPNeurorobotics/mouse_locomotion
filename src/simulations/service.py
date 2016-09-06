@@ -46,17 +46,25 @@ class SimService(Service):
 
         return common.launch_simulator(opt_)
 
-    def exposed_test(self, opt_):
+    @staticmethod
+    def test_simulators(opt_):
         """Launch a simulation and return its results and its cpu and memory usage"""
 
         # Get the machine current cpu usage and memory before launching simulation
         cpu_percent = sum(psutil.cpu_percent(interval=0.5, percpu=True)) / float(psutil.cpu_count())
         memory_percent = psutil.virtual_memory().percent
         res = {"common": {"CPU": cpu_percent, "memory": memory_percent}}
-        logging.info("Test Server " + type(self).__name__ +
-                     ": \nCPU = " + str(cpu_percent) +
-                     "\nMemory = " + str(memory_percent))
         # Launch the simulation
         if "simulator" in opt_:
             res[opt_["simulator"]] = common.test_simulator(opt_)
+        return res
+
+    def exposed_test(self, opt_):
+        """Launch a simulation and return its results and its cpu and memory usage"""
+
+        # Get the machine current cpu usage and memory before launching simulation
+        res = self.test_simulators(opt_)
+        logging.info("Test Server " + type(self).__name__ +
+                     ": \nCPU = " + str(res["common"]["CPU"]) +
+                     "\nMemory = " + str(res["common"]["memory"]))
         return res
