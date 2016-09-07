@@ -12,50 +12,51 @@
 #
 # File created by: Gabriel Urbain <gabriel.urbain@ugent.be>
 #                  Dimitri Rodarie <d.rodarie@gmail.com>
-# June 2016
+# August 2016
 ##
-
-import json
-import os
 import logging
 
+import numpy
+import os
 from utils.fileUtils import FileUtils
 
 
-class JsonUtils(FileUtils):
+class NumpyUtils(FileUtils):
     """
-    Utility class to manipulate json files
+        Utility class to manipulate files using numpy
     """
 
     def __init__(self):
         """Class initialization"""
 
     @staticmethod
-    def read_file(filename):
+    def write_file(filename, element):
         """
-        Read json file if exists and return its content as a dictionary
-        :param filename: String path to the json file
-        :return: Dictionary of the json content
+        Save a elements into a file
+        :param filename: String path to the file
+        :param element: Content to store in the file
         """
 
+        numpy.save(filename, element)
+
+    @staticmethod
+    def read_file(filename):
+        """
+        Load the result dictionary from file
+        :param filename: String path to the file
+        :return: Dictionary containing the content of the file
+        """
+        if not filename.endswith(".npy"):
+            filename += ".npy"
         if os.path.isfile(filename):
             try:
-                with open(filename, 'r') as data_file:
-                    return json.load(data_file)
+                f = open(filename, 'rb')
+                result_dict = numpy.load(filename)
+                f.close()
+                return result_dict
             except Exception as e:
                 logging.error("Can't load saved file: " + str(e))
 
         else:
             logging.error("Can't open the file " + str(filename) + ". The file doesn't exist.")
         return {}
-
-    @staticmethod
-    def write_file(filename, data):
-        """
-        Write down data on a json file
-        :param filename: String path to the json file
-        :param data: Dictionary containing the data to store
-        """
-
-        with open(filename, 'w') as f:
-            json.dump(data, f)

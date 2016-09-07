@@ -56,7 +56,7 @@ class PickleUtils(FileUtils):
                 f.close()
                 return result_dict
             except Exception as e:
-                logging.error("Can't load save file: " + str(e))
+                logging.error("Can't load saved file: " + str(e))
 
         else:
             logging.error("Can't open the file " + str(filename) + ". The file doesn't exist.")
