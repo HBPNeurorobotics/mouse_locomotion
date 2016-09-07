@@ -15,12 +15,15 @@
 # February 2016
 ##
 import math
+import threading
+import socket
+
 import rpyc
 
 from simulations import Simulation
 import logging
 import sys
-from rpyc.utils.server import ThreadPoolServer
+from rpyc.utils.server import Server
 
 if sys.version_info[:2] < (3, 4):
     from service import SimService
@@ -53,8 +56,7 @@ class SimServer(Simulation):
 
         if self.max_threads >= 1:
             try:
-                t = ThreadPoolServer(SimService, auto_register=True, protocol_config=rpyc.core.protocol.DEFAULT_CONFIG,
-                                     nbThreads=int(self.max_threads))
+                t = ServiceServer(int(self.max_threads))
                 logging.info(
                     "Start service server on address: " + str(self.ipaddr) + ":" + str(t.port) + " with PID " + str(
                         self.pid))
@@ -79,3 +81,49 @@ class SimServer(Simulation):
             self.max_threads = nb_thread
         logging.info("The server " + str(self.ipaddr) + " is now available for a maximum of " +
                      str(nb_thread) + " simulation(s).")
+
+
+class ServiceServer(Server):
+    def __init__(self, max_threads):
+        Server.__init__(self, SimService, auto_register=True, protocol_config=rpyc.core.protocol.DEFAULT_CONFIG)
+        self.workers = 0
+        self.max_threads = max_threads
+        self.lock = threading.Lock()
+
+    def _accept_method(self, sock):
+        t = threading.Thread(target=self._serve_clients, args=(sock, self))
+        t.setDaemon(True)
+        self.lock.acquire()
+        self.workers += 1
+        self.lock.release()
+        t.start()
+
+    def _serve_clients(self, sock, parent):
+        self._authenticate_and_serve_client(sock)
+        parent.lock.acquire()
+        parent.workers -= 1
+        parent.lock.release()
+
+    def accept(self):
+        """accepts an incoming socket connection (blocking)"""
+        if self.workers < self.max_threads:
+            while self.active:
+                try:
+                    sock, addrinfo = self.listener.accept()
+                except socket.timeout:
+                    pass
+                except socket.error:
+                    ex = sys.exc_info()[1]
+                    if rpyc.utils.server.get_exc_errno(ex) == rpyc.utils.server.errno.EINTR:
+                        pass
+                    else:
+                        raise EOFError()
+                else:
+                    break
+
+            if not self.active:
+                return
+            sock.setblocking(True)
+            self.logger.info("accepted %s:%s", addrinfo[0], addrinfo[1])
+            self.clients.add(sock)
+            self._accept_method(sock)

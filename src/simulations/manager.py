@@ -14,13 +14,12 @@
 #                  Dimitri Rodarie <d.rodarie@gmail.com>
 # February 2016
 ##
-
+import copy
 import os
 import threading
 from threading import Thread, Lock
 import logging
 import time
-import math
 import rpyc
 from rpyc.utils.factory import DiscoveryError
 from observers import Observable
@@ -168,10 +167,15 @@ class Manager(Observable):
         :return: casted result
         """
 
-        cast = rsp.value
-        if not type(rsp.value) == str:
-            cast = eval(str(cast))
-        return cast
+        try:
+            cast = rsp.value
+            if not type(rsp.value) == str:
+                cast = eval(str(cast))
+            return cast
+        except Exception as e:
+            exception = "Impossible to cast the result. Exception:\n" + str(e)
+            logging.error(exception)
+            return exception
 
     def response_simulation(self, rsp):
         """
@@ -188,9 +192,9 @@ class Manager(Observable):
 
             # We add the rsp from the simulation to the rsp list
             for simulation in self.results[server_id]:
-                if self.rpyc_casting(simulation.callback) == rsp_:
+                if simulation.callback == rsp_:
                     self.mutex_rsp.acquire()
-                    self.rsp[simulation.index] = rsp_
+                    self.rsp[simulation.index] = copy.copy(self.rpyc_casting(rsp_))
                     self.mutex_rsp.release()
                     break
 
@@ -216,14 +220,16 @@ class Manager(Observable):
             :param server_id: Int Server id for the cloud
             :param rsp_: rpyc response to process
             """
-
-            # Process the number of maximum simulation that can be done on the same time
-            logging.info("Test server " + self.cloud_state[server_id].address + ":" +
-                         str(self.cloud_state[server_id].port) + " consumptions:\n" +
-                         "Common:{\n\tCPU = " + str(rsp_["common"]["CPU"]) +
-                         "\n\tMemory = " + str(rsp_["common"]["memory"]) + "\n}," +
-                         self.simulator + ":{\n\tCPU = " + str(rsp_[self.simulator]["CPU"]) +
-                         "\n\tMemory = " + str(rsp_[self.simulator]["memory"]) + "\n}")
+            rsp_cast = self.rpyc_casting(rsp_)
+            if type(rsp_cast) == dict:
+                logging.info("Test server " + self.cloud_state[server_id].address + ":" +
+                             str(self.cloud_state[server_id].port) + " consumptions:\n" +
+                             "Common:{\n\tCPU = " + str(rsp_cast["common"]["CPU"]) +
+                             "\n\tMemory = " + str(rsp_cast["common"]["memory"]) + "\n}," +
+                             self.simulator + ":{\n\tCPU = " + str(rsp_cast[self.simulator]["CPU"]) +
+                             "\n\tMemory = " + str(rsp_cast[self.simulator]["memory"]) + "\n}")
+            else:
+                logging.error("Impossible to cast the results.")
 
         self.__process_callback(rsp, function)
 
@@ -241,7 +247,7 @@ class Manager(Observable):
                     conn_found = True
                     server_id = item.server_id
                     if server_id in self.cloud_state:  # The server is still in the cloud
-                        function(server_id, self.rpyc_casting(rsp))
+                        function(server_id, rsp)
                         logging.info("Response received from server " + str(self.cloud_state[server_id].address) +
                                      ":" + str(self.cloud_state[server_id].port))
 
@@ -342,7 +348,7 @@ class Manager(Observable):
 
         # Continue while not asked for termination or when there are candidates in the list
         # and a server to process them
-        while (not self.mng_stop) or (self.rqt and self.server_dispo):
+        while not self.mng_stop and self.rqt:
             if self.rqt:
                 # Select a candidate server
                 server_hash = self.__select_candidate()
@@ -352,20 +358,27 @@ class Manager(Observable):
                     self.server_dispo = True
                     try:
                         self.request_server(server_hash, self.cloud_state[server_hash], self.rqt[-1], "Simulation")
+                    except EOFError as eo:
+                        # Connection reset by peer
+                        logging.error("Unexpected disconnection from the server " +
+                                      self.cloud_state[server_hash].address)
+                        time.sleep(5)
+                        self.server_dispo = False
                     except Exception as e:
                         raise Exception("Exception during simulation on the server " +
                                         self.cloud_state[server_hash].address + ":" +
                                         str(self.cloud_state[server_hash].port) + "\n" + str(e))
-                    # Update the cloud_state list
-                    self.mutex_cloud_state.acquire()
-                    self.cloud_state[server_hash].nb_threads += 1
-                    self.mutex_cloud_state.release()
+                    if self.server_dispo:
+                        # Update the cloud_state list
+                        self.mutex_cloud_state.acquire()
+                        self.cloud_state[server_hash].nb_threads += 1
+                        self.mutex_cloud_state.release()
 
-                    # Clear request from list:
-                    self.mutex_rqt.acquire()
-                    self.rqt.pop()
-                    self.rqt_n -= 1
-                    self.mutex_rqt.release()
+                        # Clear request from list:
+                        self.mutex_rqt.acquire()
+                        self.rqt.pop()
+                        self.rqt_n -= 1
+                        self.mutex_rqt.release()
                 else:
                     self.server_dispo = False
                     time.sleep(self.mng_prun_t)
@@ -386,9 +399,12 @@ class Manager(Observable):
             server = self.results[server_hash]
             for simulation in server:
                 if res == simulation.callback and res.ready:
-                    self.mutex_res.acquire()
-                    del self.results[server_hash][server.index(simulation)]
-                    self.mutex_res.release()
+                    for key, sim_ in enumerate(self.results[server_hash]):
+                        if sim_.index == simulation.index:
+                            self.mutex_res.acquire()
+                            del self.results[server_hash][key]
+                            self.mutex_res.release()
+                            break
                     break
 
     def check_sim(self):
@@ -414,7 +430,7 @@ class Manager(Observable):
                 # Add the request sent to the server to the request list
                 for simulation in simulations:
                     simulation.callback = None
-                    self.rqt.append(simulation)
+                    self.rqt.append(simulation.copy())
                     self.rqt_n += 1
                 self.mutex_rqt.release()
 
@@ -426,6 +442,13 @@ class Manager(Observable):
                                   str(self.cloud_state[server_hash].port))
                     self.cloud_state[server_hash].status = False
                     self.mutex_cloud_state.release()
+                    for connection in self.conn_list:
+                        if connection.server_id == server_hash:
+                            self.mutex_conn_list.acquire()
+                            connection.connexion.close()
+                            del connection
+                            self.mutex_conn_list.release()
+                            break
 
                 self.mutex_res.acquire()
                 del self.results[server_hash]
@@ -451,6 +474,7 @@ class Manager(Observable):
             logging.error(exception)
             conn.close()
             raise Exception(exception)
+
         self.mutex_conn_list.acquire()
         self.conn_list.append(Connexion(server_id, conn, bgt))
         self.mutex_conn_list.release()

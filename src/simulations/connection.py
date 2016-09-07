@@ -14,6 +14,7 @@
 #                  Dimitri Rodarie <d.rodarie@gmail.com>
 # June 2016
 ##
+import copy
 
 
 class SimulationRequest:
@@ -22,9 +23,12 @@ class SimulationRequest:
         self.index = index
         self.callback = callback
 
+    def copy(self):
+        return SimulationRequest(self.rqt, self.index, copy.copy(self.callback))
+
 
 class Connexion:
-    def __init__(self, server_id, connexion, thread):
+    def __init__(self, server_id, connexion, thread=None):
         self.server_id = server_id
         self.connexion = connexion
         self.thread = thread

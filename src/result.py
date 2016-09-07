@@ -14,7 +14,7 @@
 #                  Dimitri Rodarie <d.rodarie@gmail.com>
 # April 2016
 ##
-
+import copy
 import logging
 from utils import PickleUtils
 
@@ -51,10 +51,10 @@ class Result:
         """Compute key values to report the simulation results"""
 
         # Time features
-        self.result_dict["t_end"] = self.config.t_end
-        self.result_dict["t_init"] = self.config.t_init
-        self.result_dict["t_sim"] = self.result_dict["t_end"] - self.result_dict["t_init"]
-        self.result_dict["t_out"] = self.config.timeout
+        self.result_dict["t_end"] = round(self.config.t_end, 3)
+        self.result_dict["t_init"] = round(self.config.t_init, 3)
+        self.result_dict["t_sim"] = round(self.result_dict["t_end"] - self.result_dict["t_init"], 3)
+        self.result_dict["t_out"] = round(self.config.timeout, 3)
 
         try:
             test = eval(self.config.exit_condition)
@@ -77,7 +77,7 @@ class Result:
 
         # Config  features
         self.result_dict["config_name"] = self.config.name
-        self.result_dict["config_opt"] = None  # TODO: fill here!
+        # self.result_dict["config_opt"] = None  # TODO: fill here!
         # self.result_dict["config_muscles"] = self.config.muscle_type
 
     def save_results(self):
@@ -107,7 +107,7 @@ class Result:
             self.result_dict = PickleUtils.read_file(filename)
             if to_delete:
                 PickleUtils.del_file(filename)
-        return self.result_dict
+        return copy.copy(self.result_dict)
 
     def __str__(self):
         """
