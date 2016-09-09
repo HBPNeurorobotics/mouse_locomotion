@@ -16,15 +16,10 @@
 ##
 
 import logging
-import sys
 
 import psutil
 from rpyc import Service
-
-if sys.version_info[:2] < (3, 4):
-    import common
-else:
-    from simulations import common
+from simulators import common
 
 
 class SimService(Service):
@@ -39,7 +34,7 @@ class SimService(Service):
     """
 
     # Service ALIASES used to be recognized by the rpyc registry
-    ALIASES = common.ALIASES
+    ALIASES = ["BLENDERSIM", "BLENDERPLAYER"]
 
     def exposed_simulation(self, opt_):
         """Launch a normal simulation and return its results"""

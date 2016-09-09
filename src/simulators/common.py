@@ -16,14 +16,10 @@
 ##
 
 import logging
-import rpyc
 from simulators import *
 
-ALIASES = ["BLENDERSIM", "BLENDERPLAYER"]
-REQUESTS = {"Simulation": "simulation", "Test": "test"}
 SIMULATORS = {"BLENDER": "Blender"}
 DEFAULT_SIMULATOR = "BLENDER"
-rpyc.core.protocol.DEFAULT_CONFIG['allow_pickle'] = True
 
 
 def get_simulator(opt_):

@@ -20,15 +20,12 @@ import socket
 
 import rpyc
 
-from simulations import Simulation
+from simulations import PROTOCOL_CONFIG
+from simulations.simulation import Simulation
 import logging
 import sys
 from rpyc.utils.server import Server
-
-if sys.version_info[:2] < (3, 4):
-    from service import SimService
-else:
-    from simulations import SimService
+from service import SimService
 
 
 class SimServer(Simulation):
@@ -85,7 +82,7 @@ class SimServer(Simulation):
 
 class ServiceServer(Server):
     def __init__(self, max_threads):
-        Server.__init__(self, SimService, auto_register=True, protocol_config=rpyc.core.protocol.DEFAULT_CONFIG)
+        Server.__init__(self, SimService, auto_register=True, protocol_config=PROTOCOL_CONFIG)
         self.workers = 0
         self.max_threads = max_threads
         self.lock = threading.Lock()

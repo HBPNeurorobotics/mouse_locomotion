@@ -1,8 +1,8 @@
-from .simulation import Simulation
-from .server import SimServer
-from .process import Process
+import rpyc
+
+PROTOCOL_CONFIG = rpyc.core.protocol.DEFAULT_CONFIG
+rpyc.core.protocol.DEFAULT_CONFIG['allow_pickle'] = True
+
 from .registry import Registry
-from .manager import Manager
-from .service import SimService
-from .connection import *
-import common as common
+from servers import *
+from clients import *

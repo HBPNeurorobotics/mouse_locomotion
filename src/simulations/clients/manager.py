@@ -23,14 +23,10 @@ import time
 import rpyc
 from rpyc.utils.factory import DiscoveryError
 from observers import Observable
-import sys
+from connection import ServerInfo, SimulationRequest, Connexion
+from simulations import PROTOCOL_CONFIG
 
-if sys.version_info[:2] < (3, 4):
-    import common
-    from connection import ServerInfo, SimulationRequest, Connexion
-else:
-    from simulations import common
-    from simulations.connection import ServerInfo, SimulationRequest, Connexion
+REQUESTS = {"Simulation": "simulation", "Test": "test"}
 
 
 class Manager(Observable):
@@ -297,8 +293,14 @@ class Manager(Observable):
             # Check for simulation and interrupt when processed or interrupted
             to = 0
             to_init = 0
-            while (len(self.rsp) != sim_n or self.rqt) and (not self.terminated) and \
-                    (to < self.interrupt_to):
+            simulation_running = True
+            time.sleep(1)
+            while (self.rqt or simulation_running) and not self.terminated and to < self.interrupt_to:
+                simulation_running = False
+                for result in self.results.values():
+                    if len(result) != 0:
+                        simulation_running = True
+                        break
                 if self.interrupted:
                     to = time.time() - to_init
                 try:
@@ -348,7 +350,7 @@ class Manager(Observable):
 
         # Continue while not asked for termination or when there are candidates in the list
         # and a server to process them
-        while not self.mng_stop and self.rqt:
+        while not self.mng_stop:
             if self.rqt:
                 # Select a candidate server
                 server_hash = self.__select_candidate()
@@ -361,7 +363,7 @@ class Manager(Observable):
                     except EOFError as eo:
                         # Connection reset by peer
                         logging.error("Unexpected disconnection from the server " +
-                                      self.cloud_state[server_hash].address)
+                                      self.cloud_state[server_hash].address + "\n" + str(eo))
                         time.sleep(5)
                         self.server_dispo = False
                     except Exception as e:
@@ -461,7 +463,7 @@ class Manager(Observable):
         # Connect to the server
         try:
             conn = rpyc.connect(server.address,
-                                server.port, config=rpyc.core.protocol.DEFAULT_CONFIG)
+                                server.port, config=PROTOCOL_CONFIG)
         except Exception as e:
             exception = "Exception when connecting: " + str(e)
             raise Exception(exception)
@@ -480,12 +482,12 @@ class Manager(Observable):
         self.mutex_conn_list.release()
 
         # Create asynchronous handle
-        if service in common.REQUESTS:
-            logging.info("Starting " + common.REQUESTS[service] + " service on server: " +
+        if service in REQUESTS:
+            logging.info("Starting " + REQUESTS[service] + " service on server: " +
                          str(server.address) + ":" +
                          str(server.port))
-            async_simulation = rpyc.async(eval("conn.root.exposed_" + common.REQUESTS[service]))
-            callback = eval("self.response_" + common.REQUESTS[service])
+            async_simulation = rpyc.async(eval("conn.root.exposed_" + REQUESTS[service]))
+            callback = eval("self.response_" + REQUESTS[service])
         else:
             exception = "Manager.request_server: Service unhandled by the manager"
             logging.error(exception)
