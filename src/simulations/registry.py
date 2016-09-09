@@ -15,7 +15,7 @@
 # February 2016
 ##
 
-from simulation import Simulation
+from .simulation import Simulation
 from rpyc.utils.registry import REGISTRY_PORT, DEFAULT_PRUNING_TIMEOUT, UDPRegistryServer
 from rpyc.lib import setup_logger
 import logging

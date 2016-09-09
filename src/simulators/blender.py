@@ -15,7 +15,7 @@
 # April 2016
 ##
 
-from simulator import Simulator
+from .simulator import Simulator
 
 
 class Blender(Simulator):

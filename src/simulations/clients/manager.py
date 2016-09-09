@@ -23,7 +23,7 @@ import time
 import rpyc
 from rpyc.utils.factory import DiscoveryError
 from observers import Observable
-from connection import ServerInfo, SimulationRequest, Connexion
+from .connection import ServerInfo, SimulationRequest, Connexion
 from simulations import PROTOCOL_CONFIG
 
 REQUESTS = {"Simulation": "simulation", "Test": "test"}

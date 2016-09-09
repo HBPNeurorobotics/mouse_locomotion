@@ -15,7 +15,6 @@
 ##
 
 import numpy as np
-import time
 from .matsuokaNeurons import MatsuokaNeurons
 
 from .synapse import Synapse

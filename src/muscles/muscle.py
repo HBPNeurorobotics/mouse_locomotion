@@ -19,8 +19,6 @@
 import logging
 from mathutils import Vector as vec
 
-from utils import *
-
 
 class Muscle:
     """

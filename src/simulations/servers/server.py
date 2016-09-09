@@ -25,7 +25,7 @@ from simulations.simulation import Simulation
 import logging
 import sys
 from rpyc.utils.server import Server
-from service import SimService
+from .service import SimService
 
 
 class SimServer(Simulation):

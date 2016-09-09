@@ -1,6 +1,5 @@
 from muscles import Muscle
 from mathutils import Vector as vec
-from utils import *
 
 
 class DampedSpringMuscle(Muscle):

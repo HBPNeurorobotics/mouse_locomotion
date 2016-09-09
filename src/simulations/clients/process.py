@@ -21,7 +21,7 @@ from optimizations import Genetic, GeneticMetaOptimization
 from utils import PickleUtils
 
 from simulations.simulation import Simulation
-from manager import Manager
+from .manager import Manager
 from simulators import common
 
 

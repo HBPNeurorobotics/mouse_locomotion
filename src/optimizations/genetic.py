@@ -20,8 +20,8 @@
 import copy
 import logging
 from config import Config
-from optimization import Optimization
-from pyevolve import *
+from .optimization import Optimization
+from .pyevolve import *
 
 
 class Genetic(Optimization):
