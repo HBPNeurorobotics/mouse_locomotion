@@ -30,7 +30,7 @@ src = root + "/src"
 sys.path.append(src)
 
 from plumbum import cli
-from simulations import SimServer, Registry, Process
+from simulations import SimServer, Registry, Manager
 
 
 class SimCli(cli.Application):
@@ -40,7 +40,7 @@ class SimCli(cli.Application):
     DEF_OPT = {"simulator": "BLENDER", "simulator_path": "bin/Blender2.77", "model": "dog_vert.blend",
                "root_dir": root,
                "config_name": "default_dog_vert_simulation_config",
-               "sim_type": "RUN", "registry": False, "service": False, "local": False,
+               "sim_type": "RUN", "registry": False, "server": False, "local": False,
                "logfile": os.path.expanduser("~").replace("\\", "/") + "/.log/qSim.log",
                "fullscreen": False, "save": False, "load_file": False, "timeout": 120}
 
@@ -66,8 +66,8 @@ class SimCli(cli.Application):
     # Server modes
     registry = cli.Flag(["-r"], default=DEF_OPT["registry"],
                         help="Start registry server; no simulation will be run")
-    service = cli.Flag(["-s"], default=DEF_OPT["service"],
-                       help="Start services server; no simulation will be run")
+    server = cli.Flag(["-s"], default=DEF_OPT["server"],
+                      help="Start services server; no simulation will be run")
     local = cli.Flag(["-l"], default=DEF_OPT["local"],
                      help="Start a single local simulation. Used to bypass simulation distributed architecture")
 
@@ -103,7 +103,7 @@ class SimCli(cli.Application):
             opt["model"] = self.root + "/mdl/" + self.model
             opt["config_name"] = self.root + "/configs/" + self.config + ".json"
             opt["fullscreen"] = self.fullscreen
-        if self.service:
+        if self.server:
             opt["cpu_use"] = self.max_cpu_percentage if self.max_cpu_percentage is not None else 50
             opt["memory_use"] = self.max_memory_percentage if self.max_memory_percentage is not None else 90
 
@@ -132,14 +132,14 @@ class SimCli(cli.Application):
 
         # Start a local simulation
         if self.local:
-            s = Process(opt)
+            s = Manager(opt)
         elif self.registry:
             s = Registry(common_opt)
-        elif self.service:
+        elif self.server:
             s = SimServer(opt)
         # Else, start chosen simulation
         else:
-            s = Process(opt)
+            s = Manager(opt)
         s.start()
 
 

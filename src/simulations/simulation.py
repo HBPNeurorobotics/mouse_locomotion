@@ -36,6 +36,7 @@ class Simulation:
         :param opt_: Dictionary containing simulation parameters
         """
 
+        logging.info("Create a " + self.__class__.__name__ + " instance.")
         self.opt = opt_
         if os.name == 'posix':
             self.ipaddr = self.__get_ip_address('eth0')
@@ -43,6 +44,7 @@ class Simulation:
             self.ipaddr = socket.gethostbyname(socket.gethostname())
         self.pid = os.getpid()
         self.save_directory = self.opt["root_dir"] + "/save/"
+        self.port = 0
 
     @staticmethod
     def __get_ip_address(ifname):
@@ -67,6 +69,11 @@ class Simulation:
 
     def start(self):
         """Start the simulation process"""
+        port = (":" + str(self.port)) if self.port != 0 else ""
+        logging.info(
+            "Start " + self.__class__.__name__ + " on address: " + str(self.ipaddr) +
+            port + " with PID " + str(self.pid))
 
     def stop(self):
         """Stop the simulation process"""
+        logging.info(self.__class__.__name__ + " has terminated properly.")
