@@ -64,7 +64,10 @@ class Simulator:
         """Launch a simulation subprocess"""
 
         logging.debug("Subprocess call: " + str(args))
-        subprocess.call(args)
+        try:
+            subprocess.call(args)
+        except KeyboardInterrupt:
+            logging.warning("Keyboard interruption during simulation")
         logging.debug("Subprocess end")
 
     def get_results(self):
@@ -88,6 +91,7 @@ class Simulator:
         test.daemon = True
         cpu_consumption = []
         memory_consumption = []
+        results = {}
         try:
             # Launch the simulation in a subprocess so we can know its cpu and memory usage
             test.start()
@@ -100,10 +104,14 @@ class Simulator:
             test.join()
         except psutil.NoSuchProcess as ex:
             logging.debug("Test simulation stopped correctly.")
+        except KeyboardInterrupt as k:
+            logging.error("Keyboard interruption during test simulation")
+            results["interruption"] = True
         except Exception as e:
             logging.error("Error during the simlator test : " + str(e))
+        results["CPU"] = 0. if len(cpu_consumption) <= 0 else max(cpu_consumption)
+        results["memory"] = 0. if len(memory_consumption) <= 0 else max(memory_consumption)
         logging.info("Test Simulator " + self.__class__.__name__ +
                      ": \nCPU = " + str(cpu_consumption) +
                      "\nMemory = " + str(memory_consumption))
-        return {"CPU": 0. if len(cpu_consumption) <= 0 else max(cpu_consumption),
-                "memory": 0. if len(memory_consumption) <= 0 else max(memory_consumption)}
+        return results

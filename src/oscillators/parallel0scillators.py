@@ -15,6 +15,8 @@
 ##
 
 import numpy as np
+import time
+
 from .matsuokaNeurons import MatsuokaNeurons
 
 from .synapse import Synapse
@@ -31,7 +33,7 @@ class ParallelOscillator:
             self.neurons.append(MatsuokaNeurons(self.config["neuron_config"],
                                                 self.config["neuron_config"],
                                                 self.config["inner_weights"],
-                                                self.config["weights"]))
+                                                self.config["weights"], 0.01 * (i + 1)))
 
         self.neurons[0].add_synapse(1, self.neurons[1].output)
         self.neurons[1].add_synapse(1, self.neurons[0].output)
@@ -54,22 +56,21 @@ class ParallelOscillator:
             res = np.array(res)
             self.rec = np.hstack((self.rec, res))
 
-
 if __name__ == "__main__":
     # Configuration for Test
-    config = type('ConfigTest', (), {})()
-    config.n_osc = 1
-    config.neuron_config = {"tau": 0.6e-2, "T": 1.5e-2, "b": 2.5, "c": 0.68, "threshold": 0., "h": 1e-3}
-    config.inner_weights = 2.0
-    config.weights = 0.5
-    config.neuron_config2 = {"tau": 0.6e-2, "T": 3.2e-2, "b": 2.5, "c": 0.15, "threshold": 0., "h": 1e-3}
+    config = dict()
+    config['neuron_config'] = {"tau": 0.6e-2, "T": 1.5e-2, "b": 2.5, "c": 0.68, "threshold": 0., "h": 1e-3}
+    config["inner_weights"] = 2.0
+    config['weights'] = 0.5
+    config["neuron_config2"] = {"tau": 0.6e-2, "T": 3.2e-2, "b": 2.5, "c": 0.15, "threshold": 0., "h": 1e-3}
 
     # Test
     osc = ParallelOscillator(config)  # Oscillator with high frequency
-    perturbation = MatsuokaNeurons(config.neuron_config2,
-                                   config.neuron_config2,
-                                   config.inner_weights,
-                                   config.weights)  # Low frequency perturbation
+    osc.save = True
+    perturbation = MatsuokaNeurons(config["neuron_config2"],
+                                   config["neuron_config2"],
+                                   config["inner_weights"],
+                                   config['weights'], 0.02)  # Low frequency perturbation
     if perturbation.inhibitingNeuron.x > 0.:
         perturbation.inhibitingNeuron.set_activity(0.001)
     else:
@@ -89,3 +90,4 @@ if __name__ == "__main__":
             perturbation.reset_updates()
             perturbation.update()
         osc.update()
+    osc.plot(sim_time)

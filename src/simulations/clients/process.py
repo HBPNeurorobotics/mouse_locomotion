@@ -50,7 +50,6 @@ class Process(Simulation):
         self.opt = opt
         self.sim_type = opt["sim_type"] if "sim_type" in opt else None
         self.save = opt["save"] if "save" in opt else True
-        self.save_directory = self.opt["root_dir"] + "/save/"
         self.manager = Manager(opt)
         self.res_list = []
 
@@ -78,9 +77,6 @@ class Process(Simulation):
 
         # Stop and display results
         self.manager.stop()
-
-        # Delete all the simulation files that might stayed after simulation
-        PickleUtils.del_all_files(self.save_directory, "qsm")
 
     def connection_matrix_opti_sim(self):
         """Run an iterative simulation to optimize the connection matrix parameters"""

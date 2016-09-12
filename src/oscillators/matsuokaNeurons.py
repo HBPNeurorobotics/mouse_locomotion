@@ -18,11 +18,9 @@ from .neuron import Neuron
 from .integrateAndFireNeuron import IntegrateAndFireAdaptationNeuron
 from .synapse import Synapse
 
-import numpy as np
-
 
 class MatsuokaNeurons:
-    def __init__(self, exitating_config, inhibiting_config, inner_weight, out_weight):
+    def __init__(self, exitating_config, inhibiting_config, inner_weight, out_weight, start):
         self.exitatingNeuron = IntegrateAndFireAdaptationNeuron(exitating_config)
         self.inhibitingNeuron = IntegrateAndFireAdaptationNeuron(inhibiting_config)
         self.input = Neuron()
@@ -45,11 +43,7 @@ class MatsuokaNeurons:
         self.synapses.append(Synapse(self.exitatingNeuron, self.output, 1))
 
         # We give a little impact on one of the neuron to start the oscillation
-        rand = np.random.rand() * 2 - 1
-        if rand < 0:
-            self.inhibitingNeuron.set_activity(-rand)
-        else:
-            self.exitatingNeuron.set_activity(rand)
+        self.exitatingNeuron.set_activity(start)
 
         # We reset the updates
         self.updates = {}

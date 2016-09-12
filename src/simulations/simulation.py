@@ -42,6 +42,7 @@ class Simulation:
         else:
             self.ipaddr = socket.gethostbyname(socket.gethostname())
         self.pid = os.getpid()
+        self.save_directory = self.opt["root_dir"] + "/save/"
 
     @staticmethod
     def __get_ip_address(ifname):

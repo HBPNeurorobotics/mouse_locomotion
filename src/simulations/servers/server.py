@@ -14,6 +14,7 @@
 #                  Dimitri Rodarie <d.rodarie@gmail.com>
 # February 2016
 ##
+
 import math
 import threading
 import socket
@@ -25,6 +26,8 @@ from simulations.simulation import Simulation
 import logging
 import sys
 from rpyc.utils.server import Server
+
+from utils import PickleUtils
 from .service import SimService
 
 
@@ -44,7 +47,9 @@ class SimServer(Simulation):
         :param opt: Dictionary containing simulation parameters
         """
 
+        logging.info("Start a server instance.")
         Simulation.__init__(self, opt)
+        self.simulator = self.opt["simulator"]
         self.max_threads = 0
         self.test()
 
@@ -55,54 +60,87 @@ class SimServer(Simulation):
             try:
                 t = ServiceServer(int(self.max_threads))
                 logging.info(
-                    "Start service server on address: " + str(self.ipaddr) + ":" + str(t.port) + " with PID " + str(
+                    "Start Service Server on address: " + str(self.ipaddr) + ":" + str(t.port) + " with PID " + str(
                         self.pid))
                 t.start()
             except KeyboardInterrupt:
-                t.stop()
                 logging.warning("SINGINT caught from user keyboard interrupt")
-                sys.exit(1)
-        else:
-            logging.warning("Server capacities does not allow simulations.")
+        self.stop()
 
     def test(self):
+        """Test the server capacities to know how many parallel simulations it can run"""
+
+        logging.info("Test the server capacities.")
         rsp_ = SimService.test_simulators(self.opt)
-        cpu_capacity = (self.opt['cpu_use'] - rsp_["common"]["CPU"]) / \
-                       (rsp_[self.opt['simulator']]["CPU"] - rsp_["common"]["CPU"])
+        if "interruption" not in rsp_[self.simulator]:
+            cpu_capacity = (self.opt['cpu_use'] - rsp_["common"]["CPU"]) / \
+                           (rsp_[self.simulator]["CPU"] - rsp_["common"]["CPU"])
 
-        memory_capacity = (self.opt['memory_use'] - rsp_["common"]["memory"]) / \
-                          (rsp_[self.opt['simulator']]["memory"] - rsp_["common"]["memory"])
-        nb_thread = math.floor(min(cpu_capacity, memory_capacity))
+            memory_capacity = (self.opt['memory_use'] - rsp_["common"]["memory"]) / \
+                              (rsp_[self.simulator]["memory"] - rsp_["common"]["memory"])
+            self.max_threads = math.floor(min(cpu_capacity, memory_capacity))
+            logging.info("Server test finished")
+            if self.max_threads >= 1:  # Change the status of the server on the cloud
+                logging.info("The server can run a maximum of " +
+                             str(self.max_threads) + " parallel simulation(s) on " + self.simulator)
+            else:
+                logging.warning("Server capacities does not allow simulations.")
+        else:
+            logging.info("User interruption during simulation test.")
+            self.max_threads = 0.
 
-        if nb_thread > 0:  # Change the status of the server on the cloud
-            self.max_threads = nb_thread
-        logging.info("The server " + str(self.ipaddr) + " is now available for a maximum of " +
-                     str(nb_thread) + " simulation(s).")
+    def stop(self):
+        """Close the Simulation Server and delete file results"""
+
+        Simulation.stop(self)
+        # Delete all the simulation files that might stayed after simulation
+        PickleUtils.del_all_files(self.save_directory, "qsm")
+        logging.info("The Server is now closed.")
 
 
 class ServiceServer(Server):
+    """
+    ServiceServer class is a rpyc server implementation to control the number of threads the server will run in parallel
+    and to get errors during simulation
+    """
+
     def __init__(self, max_threads):
+        """
+        Class initialization
+        :param max_threads: Integer for the maximum number of thread that the server can run in parallel
+        """
         Server.__init__(self, SimService, auto_register=True, protocol_config=PROTOCOL_CONFIG)
         self.workers = 0
         self.max_threads = max_threads
         self.lock = threading.Lock()
 
     def _accept_method(self, sock):
-        t = threading.Thread(target=self._serve_clients, args=(sock, self))
+        """
+        Add a new working thread for a simulation
+        :param sock: Socket of the connection with the client
+        """
+        t = threading.Thread(target=self._serve_client, args=(sock, self))
         t.setDaemon(True)
         self.lock.acquire()
         self.workers += 1
         self.lock.release()
         t.start()
 
-    def _serve_clients(self, sock, parent):
+    def _serve_client(self, sock, parent):
+        """
+        Serve the client request
+        :param sock: Socket of the connection with the client
+        :param parent: Thread to update the number of working thread after simulation
+        """
+
         self._authenticate_and_serve_client(sock)
         parent.lock.acquire()
         parent.workers -= 1
         parent.lock.release()
 
     def accept(self):
-        """accepts an incoming socket connection (blocking)"""
+        """Accepts incoming socket connections if the number of working threads is not too high"""
+
         if self.workers < self.max_threads:
             while self.active:
                 try:
@@ -124,3 +162,26 @@ class ServiceServer(Server):
             self.logger.info("accepted %s:%s", addrinfo[0], addrinfo[1])
             self.clients.add(sock)
             self._accept_method(sock)
+
+    def start(self):
+        """
+        Starts the server. Use :meth:`close` to stop.
+        :raise KeyboardInterrupt exception"""
+
+        self.listener.listen(self.backlog)
+        self.logger.info("server started on [%s]:%s", self.host, self.port)
+        self.active = True
+        if self.auto_register:
+            t = threading.Thread(target=self._bg_register)
+            t.setDaemon(True)
+            t.start()
+        try:
+            while self.active:
+                self.accept()
+        except EOFError:
+            self.logger.info("Server has terminated")
+            self.close()
+        except KeyboardInterrupt as e:
+            self.logger.info("Server has terminated")
+            self.close()
+            raise e

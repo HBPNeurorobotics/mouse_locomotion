@@ -230,7 +230,6 @@ class GeneticMetaOptimization(MetaOptimization):
         self.display()
         self.plot(self.save_directory + "GeneticMetaOptimization" +
                   datetime.datetime.now().strftime("_%Y_%m_%d_%H_%M") + ".pdf")
-        PickleUtils.del_all_files(self.save_directory, "qsm")
 
     def mut_bench(self):
         """Benchmark evolution of the mutation parameter"""
