@@ -15,7 +15,6 @@
 ##
 
 import numpy as np
-import time
 
 from .matsuokaNeurons import MatsuokaNeurons
 
@@ -90,4 +89,3 @@ if __name__ == "__main__":
             perturbation.reset_updates()
             perturbation.update()
         osc.update()
-    osc.plot(sim_time)

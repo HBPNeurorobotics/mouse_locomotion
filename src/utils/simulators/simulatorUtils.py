@@ -28,3 +28,6 @@ class SimulatorUtils:
 
     def get_object(self, name):
         pass
+
+    def get_orientation(self, name):
+        pass

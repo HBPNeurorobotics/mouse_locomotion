@@ -14,11 +14,12 @@
 #                  Dimitri Rodarie <d.rodarie@gmail.com>
 # February 2016
 ##
-import math
+
 from mathutils import Vector as vec
 
 from muscles import *
 from oscillators import ParallelOscillator
+from sensors import Vestibular
 
 
 class Part:
@@ -191,9 +192,7 @@ class Body(Part):
             self.active = False
 
         # Create and init variables for loss function
-        self.origin = self.body_obj.worldTransform * vec((0, 0, 0))
-        self.position = self.origin
-        self.dist = vec(self.position - self.origin).y
+        self.origin = self.body_obj.worldPosition
         self.powers = []
         self.av_power = 0.0
         self.loss_fct = 0.0
@@ -206,6 +205,9 @@ class Body(Part):
         self.l_ba_leg = Backleg(config_, "L", simulator)
         self.r_ba_leg = Backleg(config_, "R", simulator)
 
+        # Create the sensors objects
+        self.sensors = [Vestibular(self.simulator)]
+
         # Create the brain object
         self.brain = ParallelOscillator(config_.brain)
 
@@ -213,21 +215,22 @@ class Body(Part):
         for muscle_config in config_.body["muscles"]:
             self.muscles.append(eval(self.muscle_type))
 
-            # for i_ in range(100):
-            #    brain_output = self.get_brain_output()
-            #    self.l_ba_leg.update_osci(brain_output)
-            #    self.r_ba_leg.update_osci(brain_output)
-            #    self.l_fo_leg.update_osci(brain_output)
-            #    self.r_fo_leg.update_osci(brain_output)
-
     def compute_traveled_dist(self):
         """Return a float representing the distance between origin and the current position"""
+        return vec(self.body_obj.worldTransform * self.origin - self.origin).x
 
-        # Get current position
-        self.position = self.body_obj.worldTransform * vec((0, 0, 0))
+    def compute_average_power(self):
+        return sum(self.powers) / float(len(self.powers))
 
-        # Get distance
-        self.dist = math.fabs(vec(self.position - self.origin).x)
+    def compute_average_stability(self):
+        for sensor in self.sensors:
+            if sensor.__class__ == Vestibular:
+                return sensor.get_stability()
+        return 0.
+
+    def update_sensors(self):
+        for sensor in self.sensors:
+            sensor.update()
 
     def compute_power(self):
         """Compute time-step power at each iteration"""
@@ -252,31 +255,13 @@ class Body(Part):
 
         # Do it here
         head_pos = self.simulator.get_object("obj_head").worldPosition.z
-        if head_pos < -1.8:
+        foot_pos = self.simulator.get_object("obj_wrist.L").worldPosition.z
+        if head_pos < -1.8 or foot_pos > head_pos:
             if self.count > 20:
                 self.penalty = True
             self.count += 1
         else:
             self.count = 0
-            # a = self.body_obj.worldTransform * vec((0, 0, 0))
-            # Get distance
-            # print("Pos X : " + str(math.fabs(vec(a - self.origin).x)) + " Y : " + str(math.fabs(vec(a - self.origin).y)) + " Z : " + str(math.fabs(vec(a - self.origin).z)))
-
-    def get_loss_fct(self):
-        """
-        Compute the body loss function. This should be called only at the end of the simulation
-        in order to avoid useless computation at each iteration
-        :return: Float loss function score
-        """
-
-        self.compute_traveled_dist()
-        self.av_power = sum(self.powers) / float(len(self.powers))
-
-        if self.penalty:
-            self.dist = 0
-        self.loss_fct = self.dist  # math.tanh(self.dist / self.config.dist_ref) * math.tanh(self.config.power_ref / self.av_power)
-
-        return self.loss_fct  # + 1
 
     def get_brain_output(self):
         """
@@ -302,8 +287,11 @@ class Body(Part):
         self.r_fo_leg.update(brain_output)
 
         # Update other muscles
-        for muscle in self.muscles:
-            muscle.update()
+        for muscle_ in self.muscles:
+            muscle_.update()
+
+        # Update the sensory feedback
+        self.update_sensors()
 
         # Update powers list
         self.compute_power()
@@ -312,7 +300,6 @@ class Body(Part):
         self.monitor_fall()
 
         self.n_iter += 1
-        # self.l_ba_leg.muscles[0].print_update()
         self.logger.debug("Body " + self.name + " iteration " + str(self.n_iter))
         self.logger.debug("Average power: " + "{0:0.2f}".format(self.av_power))
         return self.penalty

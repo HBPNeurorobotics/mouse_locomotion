@@ -51,10 +51,10 @@ class Result:
         """Compute key values to report the simulation results"""
 
         # Time features
-        self.result_dict["t_end"] = round(self.config.t_end, 3)
-        self.result_dict["t_init"] = round(self.config.t_init, 3)
-        self.result_dict["t_sim"] = round(self.result_dict["t_end"] - self.result_dict["t_init"], 3)
-        self.result_dict["t_out"] = round(self.config.timeout, 3)
+        self.result_dict["t_end"] = self.config.t_end
+        self.result_dict["t_init"] = self.config.t_init
+        self.result_dict["t_sim"] = self.result_dict["t_end"] - self.result_dict["t_init"]
+        self.result_dict["t_out"] = self.config.timeout
 
         try:
             test = eval(self.config.exit_condition)
@@ -73,7 +73,10 @@ class Result:
         self.result_dict["sim_speed"] = self.config.sim_speed
 
         # Optimization features
-        self.result_dict["score"] = self.body.get_loss_fct()
+        self.result_dict["distance"] = self.body.compute_traveled_dist()
+        self.result_dict["penalty"] = self.body.penalty
+        self.result_dict["power"] = self.body.compute_average_power()
+        self.result_dict["stability"] = self.body.compute_average_stability()
 
         # Config  features
         self.result_dict["config_name"] = self.config.name

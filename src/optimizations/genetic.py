@@ -86,7 +86,7 @@ class Genetic(Optimization):
         self.ga.setInteractiveMode(self.interactive_mode)
         self.ga.terminationCriteria.set(self.conv_fct)
         self.ga.setEvaluator(self.eval_fct)
-        self.ga.setMinimax(Consts.minimaxType["maximize"])
+        self.ga.setMinimax(Consts.minimaxType["minimize"])
 
         self.results = []
         self.configs = []
@@ -115,14 +115,20 @@ class Genetic(Optimization):
 
         self.observable.simulate(sim_list)
 
+        c0 = 70.
         for res in self.res_list:
-            scores.append(res["score"] if "score" in res else 0.)
+            if "penalty" not in res or "distance" not in res or "stability" not in res:
+                score = 0.
+            elif res["penalty"]:
+                score = 2 * c0 - res["distance"]
+            else:
+                score = c0 - res["distance"] + res["stability"]
+            scores.append(score)
 
         logging.info("Population gen " + str(self.ga.getCurrentGeneration() + 1) + " scores: " + str(scores))
         if len(scores) > 0:
             logging.info("Population gen " + str(self.ga.getCurrentGeneration() + 1) + " mean score: " + str(
                 sum(scores) / len(scores)))
-        # self.ga.printStats()
 
         # Update the score of each specimen
         i = 0

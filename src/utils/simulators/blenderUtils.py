@@ -15,8 +15,9 @@
 # May 2016
 ##
 
+import copy
 import bge
-from utils.simulators import SimulatorUtils
+from .simulatorUtils import SimulatorUtils
 
 
 class BlenderUtils(SimulatorUtils):
@@ -35,4 +36,10 @@ class BlenderUtils(SimulatorUtils):
     def get_object(self, name):
         if self.exists_Object(name):
             return self.scene.objects[name]
+        return None
+
+    def get_orientation(self, name):
+        obj = self.get_object(name)
+        if obj is not None:
+            return copy.copy(obj.worldOrientation.to_euler())
         return None
