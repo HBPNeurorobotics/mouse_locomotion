@@ -59,7 +59,8 @@ class Genetic(Optimization):
         Optimization.__init__(self, opt, observable, num_max_generation, population_size, stop_thresh)
 
         # Algorithm parameters
-        self.genome_size = Config(opt["config_name"]).get_conn_matrix_len() if genome_size is None else genome_size
+        self.genome_size = Config(opt["simulator"],
+                                  opt["config_name"]).get_conn_matrix_len() if genome_size is None else genome_size
         self.mutation_rate = mutation_rate
         self.cross_over_rate = cross_over_rate
         self.genome_min = genome_min

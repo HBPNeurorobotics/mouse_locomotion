@@ -305,7 +305,8 @@
     "obj": "obj_body",
     "name": "Doggy Vertebrate"
   },
-  "back_leg_L_muscles": {
+  "legs": {
+    "BackLeg_L": {
     "muscles": [
     {
       "kc": -40,
@@ -325,7 +326,7 @@
       ],
       "kl0": 1,
       "logger": "INFO",
-      "brain_sig": 2,
+      "brain_sig": 3,
       "k": 500
     },
     {
@@ -346,7 +347,7 @@
       ],
       "kl0": 0.6,
       "logger": "INFO",
-      "brain_sig": 2,
+      "brain_sig": 4,
       "k": 1000
     },
     {
@@ -367,15 +368,13 @@
       ],
       "kl0": 1,
       "logger": "INFO",
-      "brain_sig": 2,
+      "brain_sig": 4,
       "k": 200
     }
   ],
     "muscle_type": "DampedSpringMuscle"
   },
-  "name": "default_dog_vert_simulation_config",
-  "simulator": "Simulator",
-  "back_leg_R_muscles": {
+    "BackLeg_R": {
     "muscles": [
     {
       "kc": -40,
@@ -416,7 +415,7 @@
       ],
       "kl0": 0.6,
       "logger": "INFO",
-      "brain_sig": 4,
+      "brain_sig": 3,
       "k": 1000
     },
     {
@@ -437,15 +436,13 @@
       ],
       "kl0": 1,
       "logger": "INFO",
-      "brain_sig": 4,
+      "brain_sig": 3,
       "k": 200
     }
     ],
     "muscle_type": "DampedSpringMuscle"
   },
-  "timeout": 20,
-  "dist_ref": 20,
-  "front_leg_L_muscles": {
+    "ForeLeg_L": {
     "muscles": [
     {
       "kc": -7,
@@ -465,7 +462,7 @@
       ],
       "kl0": 1,
       "logger": "INFO",
-      "brain_sig": 3,
+      "brain_sig": 1,
       "k": 400
     },
     {
@@ -486,7 +483,7 @@
       ],
       "kl0": 0.4,
       "logger": "INFO",
-      "brain_sig": 3,
+      "brain_sig": 2,
       "k": 1500
     },
     {
@@ -507,14 +504,13 @@
       ],
       "kl0": 1,
       "logger": "INFO",
-      "brain_sig": 3,
+      "brain_sig": 2,
       "k": 10
     }
     ],
     "muscle_type": "DampedSpringMuscle"
   },
-  "power_ref": 20,
-  "front_leg_R_muscles": {
+    "ForeLeg_R": {
     "muscles": [
     {
       "kc": -7,
@@ -534,7 +530,7 @@
       ],
       "kl0": 1,
       "logger": "INFO",
-      "brain_sig": 1,
+      "brain_sig": 2,
       "k": 400
     },
     {
@@ -581,7 +577,12 @@
     }
     ],
     "muscle_type": "DampedSpringMuscle"
+    }
   },
+  "name": "default_dog_vert_simulation_config",
+  "timeout": 20,
+  "dist_ref": 20,
+  "power_ref": 20,
   "brain": {
     "neuron_config": {
       "tau": 0.6e-2,
@@ -596,171 +597,6 @@
     "weights": 0.5
   },
   "logger_name": "INFO",
-  "save_path": "default",
   "sim_speed": 1.0,
-  "exit_condition": "owner['config'].n_iter > 3500",
-  "connection_matrix": {
-    "muscle_vert5_up": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "muscle_neck2": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "muscle_neck1": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "muscle_vert2_up": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "muscle_vert3_up": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "muscle_vert2_down": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "muscle_vert5_down": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "muscle_vert1_down": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "muscle_vert4_up": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "muscle_vert1_up": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "muscle_vert6_up": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "muscle_abdos": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "muscle_vert4_down": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "muscle_vert3_down": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "muscle_vert6_down": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "F_gastro.R": [
-      0,
-      1,
-      0,
-      0
-    ],
-    "F_gastro.L": [
-      1,
-      0,
-      0,
-      0
-    ],
-    "F_biceps.L": [
-      1,
-      0,
-      0,
-      0
-    ],
-    "F_biceps.R": [
-      0,
-      1,
-      0,
-      0
-    ],
-    "F_triceps.L": [
-      0,
-      0.1,
-      0,
-      0
-    ],
-    "F_triceps.R": [
-      0.1,
-      0,
-      0,
-      0
-    ],
-    "B_biceps.L": [
-      0,
-      0,
-      0.5,
-      0
-    ],
-    "B_biceps.R": [
-      0,
-      0,
-      0,
-      0.5
-    ],
-    "B_gastro.L": [
-      0,
-      0,
-      0.5,
-      0
-    ],
-    "B_gastro.R": [
-      0,
-      0,
-      0,
-      0.5
-    ],
-    "B_triceps.L": [
-      0,
-      0,
-      0,
-      0.5
-    ],
-    "B_triceps.R": [
-      0,
-      0,
-      0.5,
-      0
-    ]
-  }
+  "exit_condition": "owner['config'].n_iter > 3500"
 }

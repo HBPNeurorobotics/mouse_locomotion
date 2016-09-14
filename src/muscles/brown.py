@@ -60,16 +60,7 @@ class BrownMuscle(Muscle):
         self.last_signal = 0.
         self.start_period = 0.
         self.current_time = 0.
-        self.current_frequency = 0.
         self.current_force = 0.
-
-    def update_frequency(self, ctrl_sig):
-        self.current_time += self.h
-        if self.last_signal <= 0 < ctrl_sig:
-            self.current_frequency = self.f_05 / (self.current_time - self.start_period)
-            self.start_period = 0
-            self.current_time = 0
-        self.last_signal = ctrl_sig
 
     def update_contractile_element(self):
         l_se = 0.
@@ -81,8 +72,6 @@ class BrownMuscle(Muscle):
         self.app_point_1_world = self.obj1.worldTransform * self.app_point_1
         self.app_point_2_world = self.obj2.worldTransform * self.app_point_2
         l = np.linalg.norm(self.app_point_2_world - self.app_point_1_world)
-        print("L_CE: " + str(l))
-        print("Old L_CE: " + str(self.l_ce))
         old_l_ce = self.l_ce
         # self.l_ce = (l - l_se) / (self.angle * self.l_0) if self.l_0 > 0 and self.angle != 0. else self.l_0
         self.l_ce = l
@@ -93,11 +82,9 @@ class BrownMuscle(Muscle):
             ctrl_sig = kwargs["ctrl_sig"]
         else:
             ctrl_sig = None
-
-        self.update_frequency(ctrl_sig)
         force = 0.
         for fiber, percent in self.fibers.items():
-            force += fiber.update_force(self.current_frequency, self.l_ce, self.v_ce) * percent
+            force += fiber.update_force(ctrl_sig, self.l_ce, self.v_ce) * percent
         self.current_force = force
         self.update_contractile_element()
         return force
@@ -111,11 +98,10 @@ class BrownMuscle(Muscle):
     def print_update(self):
         print("-------------------------------------------------------------------------\n" +
               "Update " + str(self.n_iter) + " Muscle " + self.name + ":\n" +
-              "Lenght: " + str(self.l_ce) + "\n" +
+              "Length: " + str(self.l_ce) + "\n" +
               "Velocity: " + str(self.v_ce) + "\n" +
-              "Frequency: " + str(self.current_frequency) + "\n" +
               "Fibers: \n")
         for fiber in self.fibers:
             fiber.print_updates()
-        print ("Force: " + str(self.current_force) + "\n" +
-               "-------------------------------------------------------------------------\n")
+        print("Force: " + str(self.current_force) + "\n" +
+              "-------------------------------------------------------------------------\n")

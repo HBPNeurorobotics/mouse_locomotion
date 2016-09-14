@@ -69,7 +69,7 @@ class Result:
             self.result_dict["stop"] = "User interruption"
 
         # Simulator features
-        self.result_dict["simulator"] = "Blender"
+        self.result_dict["simulator"] = self.config.simulator
         self.result_dict["sim_speed"] = self.config.sim_speed
 
         # Optimization features

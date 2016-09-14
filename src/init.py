@@ -69,7 +69,7 @@ if not os.path.exists(LOG_FILE):
 # Init configuration
 logging.config.fileConfig(root + "/etc/logging.conf",
                           defaults={'logfilename': LOG_FILE, 'simLevel': "DEBUG"})
-configuration = Config(CONFIG_NAME)
+configuration = Config("Blender", CONFIG_NAME)
 logger = configuration.logger
 configuration.save_path = SAVE_NAME
 configuration.n_iter = 0

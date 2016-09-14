@@ -45,426 +45,340 @@
     "obj": "obj_body",
     "name": "Cheesy"
   },
-  "back_leg_L_muscles": [
-    {
-      "obj_2": "obj_shin.L",
-      "obj_1": "obj_hips",
-      "brain_sig": null,
-      "kc": 0,
-      "c": 0,
-      "name": "B_biceps.L",
-      "k": 0,
-      "anch_2": [
-        0.017,
-        -0.13,
-        0.1
+  "legs": {
+    "BackLeg_L": {
+      "muscles": [
+        {
+          "obj_2": "obj_shin.L",
+          "obj_1": "obj_hips",
+          "brain_sig": 3,
+          "kc": 0,
+          "c": 0,
+          "name": "B_biceps.L",
+          "k": 0,
+          "anch_2": [
+            0.017,
+            -0.13,
+            0.1
+          ],
+          "anch_1": [
+            0.14,
+            -0.01,
+            0.06
+          ],
+          "kl0": 1,
+          "logger": "INFO"
+        },
+        {
+          "obj_2": "obj_shin.L",
+          "obj_1": "obj_hips",
+          "brain_sig": 3,
+          "kc": 0,
+          "c": 10,
+          "name": "B_rectus.L",
+          "k": 100,
+          "anch_2": [
+            0.017,
+            -0.22,
+            0.16
+          ],
+          "anch_1": [
+            0.15,
+            -0.11,
+            0.17
+          ],
+          "kl0": 0.6,
+          "logger": "INFO"
+        },
+        {
+          "obj_2": "obj_shin_lower.L",
+          "obj_1": "obj_thigh.L",
+          "brain_sig": 4,
+          "kc": 0,
+          "c": 1,
+          "name": "B_gastro.L",
+          "k": 0,
+          "anch_2": [
+            0,
+            0.18,
+            0.015
+          ],
+          "anch_1": [
+            -0.01,
+            -0.05,
+            -0.03
+          ],
+          "kl0": 0.2,
+          "logger": "INFO"
+        },
+        {
+          "obj_2": "obj_shin_lower.L",
+          "obj_1": "obj_thigh.L",
+          "brain_sig": 4,
+          "kc": 0,
+          "c": 0,
+          "name": "B_tensor.L",
+          "k": 0,
+          "anch_2": [
+            0,
+            0.09,
+            0.015
+          ],
+          "anch_1": [
+            -0.01,
+            -0.16,
+            -0.07
+          ],
+          "kl0": 1,
+          "logger": "INFO"
+        }
       ],
-      "anch_1": [
-        0.14,
-        -0.01,
-        0.06
-      ],
-      "kl0": 1,
-      "logger": "INFO"
+      "muscle_type": "DampedSpringReducedTorqueMuscle"
     },
-    {
-      "obj_2": "obj_shin.L",
-      "obj_1": "obj_hips",
-      "brain_sig": null,
-      "kc": 0,
-      "c": 10,
-      "name": "B_rectus.L",
-      "k": 100,
-      "anch_2": [
-        0.017,
-        -0.22,
-        0.16
+    "ForeLeg_L": {
+      "muscles": [
+        {
+          "obj_2": "obj_upper_arm.L",
+          "obj_1": "obj_shoulder.L",
+          "brain_sig": 1,
+          "kc": -5,
+          "c": 40,
+          "name": "F_biceps.L",
+          "k": 400,
+          "anch_2": [
+            -0.01,
+            0,
+            0.33
+          ],
+          "anch_1": [
+            -0.93,
+            -1,
+            0.48
+          ],
+          "kl0": 1,
+          "logger": "INFO"
+        },
+        {
+          "obj_2": "obj_upper_arm.L",
+          "obj_1": "obj_shoulder.L",
+          "brain_sig": 2,
+          "kc": 30,
+          "c": 100,
+          "name": "F_triceps.L",
+          "k": 1000,
+          "anch_2": [
+            0.13,
+            0,
+            0.978
+          ],
+          "anch_1": [
+            -0.61,
+            -1,
+            0.5
+          ],
+          "kl0": 0.4,
+          "logger": "INFO"
+        },
+        {
+          "obj_2": "obj_wrist.L",
+          "obj_1": "obj_upper_arm.L",
+          "brain_sig": 2,
+          "kc": 0,
+          "c": 2,
+          "name": "F_gastro.L",
+          "k": 10,
+          "anch_2": [
+            0.085,
+            0,
+            0
+          ],
+          "anch_1": [
+            0.175,
+            0,
+            0.752
+          ],
+          "kl0": 1,
+          "logger": "INFO"
+        }
       ],
-      "anch_1": [
-        0.15,
-        -0.11,
-        0.17
-      ],
-      "kl0": 0.6,
-      "logger": "INFO"
+      "muscle_type": "DampedSpringReducedTorqueMuscle"
     },
-    {
-      "obj_2": "obj_shin_lower.L",
-      "obj_1": "obj_thigh.L",
-      "brain_sig": null,
-      "kc": 0,
-      "c": 1,
-      "name": "B_gastro.L",
-      "k": 0,
-      "anch_2": [
-        0,
-        0.18,
-        0.015
+    "ForeLeg_R": {
+      "muscles": [
+        {
+          "obj_2": "obj_upper_arm.R",
+          "obj_1": "obj_shoulder.R",
+          "brain_sig": 2,
+          "kc": -5,
+          "c": 40,
+          "name": "F_biceps.R",
+          "k": 400,
+          "anch_2": [
+            -0.01,
+            0,
+            0.33
+          ],
+          "anch_1": [
+            -0.93,
+            1,
+            0.48
+          ],
+          "kl0": 1,
+          "logger": "INFO"
+        },
+        {
+          "obj_2": "obj_upper_arm.R",
+          "obj_1": "obj_shoulder.R",
+          "brain_sig": 1,
+          "kc": 30,
+          "c": 100,
+          "name": "F_triceps.R",
+          "k": 1000,
+          "anch_2": [
+            0.13,
+            0,
+            0.978
+          ],
+          "anch_1": [
+            -0.61,
+            1,
+            0.5
+          ],
+          "kl0": 0.4,
+          "logger": "INFO"
+        },
+        {
+          "obj_2": "obj_wrist.R",
+          "obj_1": "obj_upper_arm.R",
+          "brain_sig": 1,
+          "kc": 0,
+          "c": 2,
+          "name": "F_gastro.R",
+          "k": 10,
+          "anch_2": [
+            0.085,
+            0,
+            0
+          ],
+          "anch_1": [
+            0.175,
+            0,
+            0.752
+          ],
+          "kl0": 1,
+          "logger": "INFO"
+        }
       ],
-      "anch_1": [
-        -0.01,
-        -0.05,
-        -0.03
-      ],
-      "kl0": 0.2,
-      "logger": "INFO"
+      "muscle_type": "DampedSpringReducedTorqueMuscle"
     },
-    {
-      "obj_2": "obj_shin_lower.L",
-      "obj_1": "obj_thigh.L",
-      "brain_sig": null,
-      "kc": 0,
-      "c": 0,
-      "name": "B_tensor.L",
-      "k": 0,
-      "anch_2": [
-        0,
-        0.09,
-        0.015
+    "BackLeg_R": {
+      "muscles": [
+        {
+          "obj_2": "obj_shin.R",
+          "obj_1": "obj_hips",
+          "brain_sig": 4,
+          "kc": 0,
+          "c": 10,
+          "name": "B_biceps.R",
+          "k": 0,
+          "anch_2": [
+            -0.017,
+            -0.13,
+            0.1
+          ],
+          "anch_1": [
+            -0.14,
+            -0.01,
+            0.06
+          ],
+          "kl0": 1,
+          "logger": "INFO"
+        },
+        {
+          "obj_2": "obj_shin.R",
+          "obj_1": "obj_hips",
+          "brain_sig": 4,
+          "kc": 0,
+          "c": 10,
+          "name": "B_rectus.R",
+          "k": 100,
+          "anch_2": [
+            -0.017,
+            -0.22,
+            0.16
+          ],
+          "anch_1": [
+            -0.15,
+            -0.11,
+            0.17
+          ],
+          "kl0": 0.6,
+          "logger": "INFO"
+        },
+        {
+          "obj_2": "obj_shin_lower.R",
+          "obj_1": "obj_thigh.R",
+          "brain_sig": 3,
+          "kc": 0,
+          "c": 1,
+          "name": "B_gastro.R",
+          "k": 0,
+          "anch_2": [
+            0,
+            0.18,
+            0.015
+          ],
+          "anch_1": [
+            0.01,
+            -0.05,
+            -0.03
+          ],
+          "kl0": 0.2,
+          "logger": "INFO"
+        },
+        {
+          "obj_2": "obj_shin_lower.R",
+          "obj_1": "obj_thigh.R",
+          "brain_sig": 3,
+          "kc": 0,
+          "c": 0,
+          "name": "B_tensor.R",
+          "k": 0,
+          "anch_2": [
+            0,
+            0.09,
+            0.015
+          ],
+          "anch_1": [
+            0.01,
+            -0.16,
+            -0.07
+          ],
+          "kl0": 1,
+          "logger": "INFO"
+        }
       ],
-      "anch_1": [
-        -0.01,
-        -0.16,
-        -0.07
-      ],
-      "kl0": 1,
-      "logger": "INFO"
+      "muscle_type": "DampedSpringReducedTorqueMuscle"
     }
-  ],
-  "muscle_type": "DampedSpringReducedTorqueMuscle",
+  },
   "name": "default_cheesy_simulation_config",
-  "simulator": "Simulator",
-  "back_leg_R_muscles": [
-    {
-      "obj_2": "obj_shin.R",
-      "obj_1": "obj_hips",
-      "brain_sig": null,
-      "kc": 0,
-      "c": 10,
-      "name": "B_biceps.R",
-      "k": 0,
-      "anch_2": [
-        -0.017,
-        -0.13,
-        0.1
-      ],
-      "anch_1": [
-        -0.14,
-        -0.01,
-        0.06
-      ],
-      "kl0": 1,
-      "logger": "INFO"
-    },
-    {
-      "obj_2": "obj_shin.R",
-      "obj_1": "obj_hips",
-      "brain_sig": null,
-      "kc": 0,
-      "c": 10,
-      "name": "B_rectus.R",
-      "k": 100,
-      "anch_2": [
-        -0.017,
-        -0.22,
-        0.16
-      ],
-      "anch_1": [
-        -0.15,
-        -0.11,
-        0.17
-      ],
-      "kl0": 0.6,
-      "logger": "INFO"
-    },
-    {
-      "obj_2": "obj_shin_lower.R",
-      "obj_1": "obj_thigh.R",
-      "brain_sig": null,
-      "kc": 0,
-      "c": 1,
-      "name": "B_gastro.R",
-      "k": 0,
-      "anch_2": [
-        0,
-        0.18,
-        0.015
-      ],
-      "anch_1": [
-        0.01,
-        -0.05,
-        -0.03
-      ],
-      "kl0": 0.2,
-      "logger": "INFO"
-    },
-    {
-      "obj_2": "obj_shin_lower.R",
-      "obj_1": "obj_thigh.R",
-      "brain_sig": null,
-      "kc": 0,
-      "c": 0,
-      "name": "B_tensor.R",
-      "k": 0,
-      "anch_2": [
-        0,
-        0.09,
-        0.015
-      ],
-      "anch_1": [
-        0.01,
-        -0.16,
-        -0.07
-      ],
-      "kl0": 1,
-      "logger": "INFO"
-    }
-  ],
-  "timeout": 10,
+  "timeout": 20,
   "dist_ref": 20,
-  "front_leg_L_muscles": [
-    {
-      "obj_2": "obj_upper_arm.L",
-      "obj_1": "obj_shoulder.L",
-      "brain_sig": 1,
-      "kc": -5,
-      "c": 40,
-      "name": "F_biceps.L",
-      "k": 400,
-      "anch_2": [
-        -0.01,
-        0,
-        0.33
-      ],
-      "anch_1": [
-        -0.93,
-        -1,
-        0.48
-      ],
-      "kl0": 1,
-      "logger": "INFO"
-    },
-    {
-      "obj_2": "obj_upper_arm.L",
-      "obj_1": "obj_shoulder.L",
-      "brain_sig": 0,
-      "kc": 30,
-      "c": 100,
-      "name": "F_triceps.L",
-      "k": 1000,
-      "anch_2": [
-        0.13,
-        0,
-        0.978
-      ],
-      "anch_1": [
-        -0.61,
-        -1,
-        0.5
-      ],
-      "kl0": 0.4,
-      "logger": "INFO"
-    },
-    {
-      "obj_2": "obj_wrist.L",
-      "obj_1": "obj_upper_arm.L",
-      "brain_sig": null,
-      "kc": 0,
-      "c": 2,
-      "name": "F_gastro.L",
-      "k": 10,
-      "anch_2": [
-        0.085,
-        0,
-        0
-      ],
-      "anch_1": [
-        0.175,
-        0,
-        0.752
-      ],
-      "kl0": 1,
-      "logger": "INFO"
-    }
-  ],
-  "power_ref": 1000,
-  "front_leg_R_muscles": [
-    {
-      "obj_2": "obj_upper_arm.R",
-      "obj_1": "obj_shoulder.R",
-      "brain_sig": 1,
-      "kc": -5,
-      "c": 40,
-      "name": "F_biceps.R",
-      "k": 400,
-      "anch_2": [
-        -0.01,
-        0,
-        0.33
-      ],
-      "anch_1": [
-        -0.93,
-        1,
-        0.48
-      ],
-      "kl0": 1,
-      "logger": "INFO"
-    },
-    {
-      "obj_2": "obj_upper_arm.R",
-      "obj_1": "obj_shoulder.R",
-      "brain_sig": 0,
-      "kc": 30,
-      "c": 100,
-      "name": "F_triceps.R",
-      "k": 1000,
-      "anch_2": [
-        0.13,
-        0,
-        0.978
-      ],
-      "anch_1": [
-        -0.61,
-        1,
-        0.5
-      ],
-      "kl0": 0.4,
-      "logger": "INFO"
-    },
-    {
-      "obj_2": "obj_wrist.R",
-      "obj_1": "obj_upper_arm.R",
-      "brain_sig": null,
-      "kc": 0,
-      "c": 2,
-      "name": "F_gastro.R",
-      "k": 10,
-      "anch_2": [
-        0.085,
-        0,
-        0
-      ],
-      "anch_1": [
-        0.175,
-        0,
-        0.752
-      ],
-      "kl0": 1,
-      "logger": "INFO"
-    }
-  ],
+  "power_ref": 20,
   "brain": {
-    "a": 10.5,
-    "tau": 0.01,
-    "c": 0.08,
-    "b": 20.5,
-    "name": "default_mouse_brain",
-    "time_interval": 0.001,
-    "aa": 3,
-    "h": 0.001,
-    "T": 0.05,
-    "n_osc": 4
+    "neuron_config": {
+      "tau": 0.6e-2,
+      "T": 1.5e-2,
+      "b": 2.5,
+      "c": 0.68,
+      "threshold": 0,
+      "h": 1e-3
+    },
+    "n_osc": 4,
+    "inner_weights": 2.0,
+    "weights": 0.5
   },
   "logger_name": "INFO",
-  "save_path": "default",
   "sim_speed": 1.0,
-  "exit_condition": "bge.logic.getCurrentScene().objects['obj_spine'].worldPosition.z < -1.8",
-  "connection_matrix": {
-    "muscle_neck1": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "B_rectus.L": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "muscle_neck2": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "F_triceps.L": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "B_biceps.R": [
-      0,
-      0,
-      1,
-      0
-    ],
-    "B_gastro.L": [
-      0,
-      0,
-      1,
-      0
-    ],
-    "F_gastro.R": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "B_tensor.L": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "B_gastro.R": [
-      0,
-      0,
-      1,
-      0
-    ],
-    "F_gastro.L": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "B_rectus.R": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "F_triceps.R": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "B_biceps.L": [
-      0,
-      0,
-      1,
-      0
-    ],
-    "F_biceps.R": [
-      0,
-      1,
-      0,
-      0
-    ],
-    "B_tensor.R": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "F_biceps.L": [
-      0,
-      1,
-      0,
-      0
-    ]
-  }
+  "exit_condition": "owner['config'].n_iter > 3500"
 }
