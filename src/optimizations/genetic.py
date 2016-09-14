@@ -89,42 +89,25 @@ class Genetic(Optimization):
         self.ga.setEvaluator(self.eval_fct)
         self.ga.setMinimax(Consts.minimaxType["minimize"])
 
-        self.results = []
-        self.configs = []
-
-    def eval_fct(self, population):
+    def update_population(self, population):
         """
-        Evaluation function of the genetic algorithm. For each population, it computes the
-        score of every genomes and directly write it
+        Update the current population and configuration
         :param population: List of specimen to evaluate
-        :return: Float score for the population
         """
 
-        super_score = Optimization.eval_fct(self, population)
-
-        if super_score is not None:
-            return super_score
-        scores = []
-
+        Optimization.update_population(self, population)
         # Create a config for the genome
-        sim_list = []
         gen_list = []
         for ind in population.internalPop:
             self.opt["genome"] = ind.getInternalList()
             gen_list.append(ind.getInternalList())
-            sim_list.append(copy.copy(self.opt))
+            self.sim_list.append(copy.copy(self.opt))
+        self.configs.append(gen_list)
 
-        self.observable.simulate(sim_list)
-
-        c0 = 70.
-        for res in self.res_list:
-            if "penalty" not in res or "distance" not in res or "stability" not in res:
-                score = 0.
-            elif res["penalty"]:
-                score = 2 * c0 - res["distance"]
-            else:
-                score = c0 - res["distance"] + res["stability"]
-            scores.append(score)
+    def update_scores(self, scores, population):
+        # Get the best specimens
+        bi = population.bestFitness()
+        self.best_solutions_list.append(bi.getFitnessScore())
 
         logging.info("Population gen " + str(self.ga.getCurrentGeneration() + 1) + " scores: " + str(scores))
         if len(scores) > 0:
@@ -137,10 +120,30 @@ class Genetic(Optimization):
             ind.setRawScore(scores[i] if i < len(scores) else 0.)
             i += 1
 
-        # Return the population score result
-        self.results.append(scores)
-        self.configs.append(gen_list)
-        return sum(scores)
+        return Optimization.update_scores(self, scores, population)
+
+    def evaluate(self, population):
+        """
+        Evaluation function of the genetic algorithm.
+        :param population: List of specimen to evaluate
+        :return: List of Float scores for the population
+        """
+
+        scores = []
+        c0 = 70.
+        for res in self.res_list:
+            if "penalty" not in res or "distance" not in res or "stability" not in res:
+                score = 0.
+            elif res["penalty"]:
+                score = 2 * c0 - res["distance"]
+            else:
+                score = c0 - res["distance"] + res["stability"]
+            scores.append(score)
+
+        return scores
+
+    def eval_fct(self, population):
+        return Optimization.eval_fct(self, population)
 
     def conv_fct(self, ga):
         """
@@ -152,17 +155,11 @@ class Genetic(Optimization):
         if Optimization.conv_fct(self, ga):
             return True
 
-        # Get the best specimens
-        pop = ga.getPopulation()
-        bi = pop.bestFitness()
-        self.best_solutions_list.append(bi.getFitnessScore())
-
         # Return the convergence
         if len(self.best_solutions_list) > self.stop_num_av:
             av = sum(self.best_solutions_list[-self.stop_num_av:]) / self.stop_num_av
-            # print("av: " + str(av)  + " curr: " + str(self.bf_lis[-1]) + ' abs: ' + str(abs(self.bf_lis[-1] - av)))
             if abs(self.best_solutions_list[-1] - av) < self.stop_thresh:
-                logging.info("Criterion reached. Best element : " + str(bi.getInternalList()))
+                logging.info("Criterion reached. Best element : " + str(sorted(self.best_solutions_list)[0]))
                 return True
 
         return False
@@ -175,29 +172,4 @@ class Genetic(Optimization):
 
         self.best_solutions_list.append(
             self.ga.evolve(freq_stats=kwargs["freq_stats"] if "freq_stats" in kwargs.keys() else 10).getInternalList())
-        self.notify()
-        if self.to_save:
-            self.save(filename="GeneticOptimization", result={
-                "res": self.results,
-                "configs": self.configs,
-                "current_gen": self.ga.getCurrentGeneration()
-            })
-
-    def notify(self, notification=None):
-        """
-        Notify observers with the current state of the optimization
-        :param notification: Dictionary that contains notification to add to
-        the default notification
-        """
-
-        # Default notification
-        kwargs = {
-            "res": self.results,
-            "configs": self.configs,
-            "current_gen": self.ga.getCurrentGeneration()
-        }
-
-        # Specific notification
-        if notification is not None:
-            kwargs.update(notification)
-        Optimization.notify(self, kwargs)
+        self.stop()

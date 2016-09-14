@@ -49,9 +49,30 @@ class Optimization(Observer, Observable):
         self.stop_thresh = stop_thresh
         self.max_iteration = max_iteration
         self.res_list = []
+        self.sim_list = []
+
+        # Saving parameters
         self.to_save = opt["save"] if "save" in opt else True
         self.save_directory = self.opt["root_dir"] + "/save/"
         self.extension = ".sim"
+        # Saving content
+        self.results = []
+        self.configs = []
+        self.current_gen = 0
+
+    def update_population(self, population):
+        """Update the current population to test"""
+        self.current_gen += 1
+
+    def update_scores(self, scores, population):
+        """Update the current scores"""
+
+        self.results.append(scores)
+
+        return sum(scores)
+
+    def evaluate(self, population):
+        return self.res_list
 
     def eval_fct(self, population):
         """
@@ -63,6 +84,10 @@ class Optimization(Observer, Observable):
         self.res_list = []
         if self.interruption:
             return 0.
+        self.update_population(population)
+        self.observable.simulate(self.sim_list)
+        scores = self.evaluate(population)
+        return self.update_scores(scores, population)
 
     def conv_fct(self, algorithm):
         """
@@ -92,6 +117,19 @@ class Optimization(Observer, Observable):
         :param kwargs: Dictionary parameter to pass for the simulation
         """
 
+        pass
+
+    def stop(self):
+        """Stop the optimization and save the results"""
+
+        self.notify()
+        if self.to_save:
+            self.save(filename=self.__class__.__name__, result={
+                "res": self.results,
+                "configs": self.configs,
+                "current_generation": self.current_gen
+            })
+
     def notify(self, notification=None):
         """
         Notify observers with the current state of the optimization
@@ -102,7 +140,9 @@ class Optimization(Observer, Observable):
         # Default notification
         kwargs = {
             "interruption": self.interruption,
-            "res": self.res_list
+            "res": self.results,
+            "configs": self.configs,
+            "current_gen": self.current_gen
         }
 
         # Specific notification
