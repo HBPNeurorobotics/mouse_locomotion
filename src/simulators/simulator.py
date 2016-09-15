@@ -22,11 +22,12 @@ import time
 import logging
 import os
 import subprocess
+import sys
 from multiprocessing import Process
-
-import psutil
-
 from result import Result
+
+if sys.version_info <= (3, 0):
+    import psutil  # TODO: Find another lib
 
 
 class Simulator:

@@ -17,7 +17,7 @@
 ##
 
 import math
-from muscles import Muscle
+from .muscle import Muscle
 
 
 class HillMuscle(Muscle):

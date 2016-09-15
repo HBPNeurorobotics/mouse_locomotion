@@ -16,9 +16,9 @@
 ##
 from mathutils import Vector as vec
 
-from muscles import *
+from .muscles import *
 from oscillators import ParallelOscillator
-from sensors import Vestibular
+from .sensors import Vestibular
 
 
 class Part:

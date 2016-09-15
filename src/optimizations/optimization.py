@@ -16,8 +16,7 @@
 ##
 import datetime
 
-from observers import Observer, Observable
-from utils import PickleUtils
+from utils import PickleUtils, Observer, Observable
 
 
 class Optimization(Observer, Observable):

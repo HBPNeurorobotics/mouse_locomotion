@@ -27,9 +27,9 @@ root = os.path.dirname(os.path.dirname(bge.logic.expandPath("//"))).replace("\\"
 src = root + "/src/"
 sys.path.append(src)
 
-from body import *
+from musculoskeletals import Body
 from config import Config
-from utils.simulators import BlenderUtils
+from simulators.updaters import BlenderUtils
 
 
 # Get BGE handles

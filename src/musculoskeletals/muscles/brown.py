@@ -16,7 +16,8 @@
 # July 2016
 ##
 
-from muscles import Muscle, SlowTwitchFiber, FastTwitchFiber
+from .muscle import Muscle
+from .fiber import SlowTwitchFiber, FastTwitchFiber
 import numpy as np
 
 

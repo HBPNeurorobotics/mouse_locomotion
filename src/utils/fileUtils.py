@@ -8,6 +8,17 @@ class FileUtils:
     """
 
     @staticmethod
+    def create_file(filename):
+        try:
+            if not os.path.exists(os.path.dirname(filename)):
+                os.makedirs(os.path.dirname(filename))
+            if not os.path.exists(filename):
+                f = open(filename, 'w')
+                f.close()
+        except Exception as e:
+            logging.error("Can't create file " + str(filename) + ": " + str(e))
+
+    @staticmethod
     def read_file(filename):
         return {}
 

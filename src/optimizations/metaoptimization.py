@@ -23,7 +23,6 @@ import matplotlib
 import time
 from .genetic import Genetic
 from .optimization import Optimization
-from utils import PickleUtils
 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt

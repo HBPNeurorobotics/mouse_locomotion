@@ -21,7 +21,7 @@ import logging
 import time
 import rpyc
 from rpyc.utils.factory import DiscoveryError
-from observers import Observable
+from utils import Observable
 from .connection import ServerInfo, SimulationRequest, Connexion
 from simulations import PROTOCOL_CONFIG
 

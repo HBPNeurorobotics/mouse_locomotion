@@ -1,4 +1,4 @@
-from muscles import Muscle
+from .muscle import Muscle
 from mathutils import Vector as vec
 
 
