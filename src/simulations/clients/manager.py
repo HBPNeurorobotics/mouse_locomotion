@@ -20,7 +20,7 @@ import datetime
 from optimizations import Genetic, GeneticMetaOptimization
 from utils import PickleUtils
 
-from simulations.simulation import Simulation
+from ..simulation import Simulation
 from .client import Client
 from simulators import common
 

@@ -17,7 +17,7 @@
 
 import math
 import logging
-from simulations.simulation import Simulation
+from ..simulation import Simulation
 from utils import PickleUtils
 from .service import SimService
 from .serviceServer import ServiceServer
