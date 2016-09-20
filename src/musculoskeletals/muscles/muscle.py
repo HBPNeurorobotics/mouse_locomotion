@@ -65,13 +65,21 @@ class Muscle:
         self.app_point_1 = vec((self.params["anch_1"]))
         self.app_point_2 = vec((self.params["anch_2"]))
 
+        self.app_point_1_world = None
+        self.app_point_2_world = None
+        self.length = 0.
+        self.velocity_1 = 0.
+        self.velocity_2 = 0.
+        self.force = vec((0, 0, 0))
+        self.ctrl_sig = None
+
         if self.active:
-            self.app_point_1_world = self.obj1.worldTransform * self.app_point_1  # global coordinates of app point 1 in m
-            self.app_point_2_world = self.obj2.worldTransform * self.app_point_2  # global coordinates of app point 2 in m
+            self.update_position()
+            self.update_velocity()
 
     def get_power(self):
         """
-        Return the power developped by the muscle on the two extremity objects
+        Return the power developed by the muscle on the two extremity objects
         :return: Float power consumed by the muscle
         """
 
@@ -85,6 +93,19 @@ class Muscle:
 
         self.simulator.draw_line(self.app_point_1_world, self.app_point_2_world, color_)
 
+    def update_position(self):
+        """Update the positions of a muscle and its length"""
+
+        self.app_point_1_world = self.simulator.update_position(self.obj1, self.app_point_1)
+        self.app_point_2_world = self.simulator.update_position(self.obj2, self.app_point_2)
+        self.length = self.app_point_2_world - self.app_point_1_world
+
+    def update_velocity(self):
+        """Update the velocity of the attached points of the muscle"""
+
+        self.velocity_1 = self.simulator.get_velocity(self.obj1, self.app_point_1)
+        self.velocity_2 = self.simulator.get_velocity(self.obj2, self.app_point_2)
+
     def update(self, **kwargs):
         """
         Update the muscle forces given geometry and control signal
@@ -92,3 +113,13 @@ class Muscle:
         """
 
         self.n_iter += 1
+        self.update_position()
+        self.update_velocity()
+
+        if "ctrl_sig" in kwargs:
+            self.ctrl_sig = kwargs["ctrl_sig"]
+        else:
+            self.ctrl_sig = None
+
+        self.draw_muscle()
+        return self.force

@@ -1,3 +1,2 @@
-from .blender import Blender
+from .blender import *
 from .common import *
-# from updaters import *

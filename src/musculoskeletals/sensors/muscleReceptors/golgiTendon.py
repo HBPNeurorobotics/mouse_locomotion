@@ -1,5 +1,4 @@
-##        self.fiber = fiber
-# Mouse Locomotion Simulation        self.fiber = fiber
+# Mouse Locomotion Simulation
 #
 # Human Brain Project SP10
 #

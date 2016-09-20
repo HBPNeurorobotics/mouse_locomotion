@@ -34,7 +34,6 @@ class BrownMuscle(Muscle):
 
         Muscle.__init__(self, params_, simulator)
         # Euler parameter
-        self.h = 0.01 if "h" not in self.params else self.params["h"]
 
         # Fiber type architecture of the muscle
         self.percent_slow_fiber = self.params["percent_slow_fiber"] if "percent_slow_fiber" in self.params else 3.5
@@ -54,49 +53,57 @@ class BrownMuscle(Muscle):
         self.v_ce = 0.
 
         self.fibers = {
-            SlowTwitchFiber(self.h, self.pcsa, self.l_ce, self.v_ce,
+            SlowTwitchFiber(self.simulator.get_time_scale(), self.pcsa, self.l_ce, self.v_ce,
                             self.f_05, self.l_se, self.l_max, self.l_0): self.percent_slow_fiber,
-            FastTwitchFiber(self.h, self.pcsa, self.l_ce, self.v_ce,
+            FastTwitchFiber(self.simulator.get_time_scale(), self.pcsa, self.l_ce, self.v_ce,
                             self.f_05, self.l_se, self.l_max, self.l_0): 100. - self.percent_slow_fiber}
-        self.last_signal = 0.
-        self.start_period = 0.
-        self.current_time = 0.
-        self.current_force = 0.
 
     def update_contractile_element(self):
+        """Update the contractile element of the muscle"""
+
         l_se = 0.
         for fiber, percent in self.fibers.items():
-            l_se += fiber.get_length_elastic(self.current_force) * percent
+            l_se += fiber.get_length_elastic(self.force) * percent
         self.l_se = l_se / len(self.fibers) if len(self.fibers) > 0 else 0.
 
         # get length and velocity
-        self.app_point_1_world = self.obj1.worldTransform * self.app_point_1
-        self.app_point_2_world = self.obj2.worldTransform * self.app_point_2
-        l = np.linalg.norm(self.app_point_2_world - self.app_point_1_world)
+        l = np.linalg.norm(self.length)
         old_l_ce = self.l_ce
         # self.l_ce = (l - l_se) / (self.angle * self.l_0) if self.l_0 > 0 and self.angle != 0. else self.l_0
         self.l_ce = l
-        self.v_ce = (self.l_ce - old_l_ce) / (self.h * self.l_0)
+        self.v_ce = (self.l_ce - old_l_ce) / (self.simulator.get_time_scale() * self.l_0)
 
     def update(self, **kwargs):
-        if "ctrl_sig" in kwargs:
-            ctrl_sig = kwargs["ctrl_sig"]
-        else:
-            ctrl_sig = None
+        """
+        Update the muscle forces given geometry and control signal
+        :param kwargs: Dictionary containing muscle updates
+        """
+
+        Muscle.update(**kwargs)
+
         force = 0.
         for fiber, percent in self.fibers.items():
-            force += fiber.update_force(ctrl_sig, self.l_ce, self.v_ce) * percent
-        self.current_force = force
+            force += fiber.update_force(self.ctrl_sig, self.l_ce, self.v_ce) * percent
+        self.force = force
         self.update_contractile_element()
+        # self.simulator.apply_impulse(self.obj1, -force, self.app_point_1_world)
+        # self.simulator.apply_impulse(self.obj2, force, self.app_point_2_world)
         return force
 
     def get_power(self):
+        """
+        Return the power developed by the muscle on the two extremity objects
+        :return: Float power consumed by the muscle
+        """
+
         energy = 0.
         for fiber, percent in self.fibers.items():
-            energy += fiber.update_energy(self.current_force) * percent
+            energy += fiber.update_energy(self.force) * percent
         return energy
 
     def print_update(self):
+        """Debug function that prints muscle update"""
+
         print("-------------------------------------------------------------------------\n" +
               "Update " + str(self.n_iter) + " Muscle " + self.name + ":\n" +
               "Length: " + str(self.l_ce) + "\n" +
@@ -104,5 +111,5 @@ class BrownMuscle(Muscle):
               "Fibers: \n")
         for fiber in self.fibers:
             fiber.print_updates()
-        print("Force: " + str(self.current_force) + "\n" +
+        print("Force: " + str(self.force) + "\n" +
               "-------------------------------------------------------------------------\n")

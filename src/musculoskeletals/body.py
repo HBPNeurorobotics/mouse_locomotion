@@ -14,8 +14,8 @@
 #                  Dimitri Rodarie <d.rodarie@gmail.com>
 # February 2016
 ##
-from mathutils import Vector as vec
 
+from mathutils import Vector as vec
 from .muscles import *
 from oscillators import ParallelOscillator
 from .sensors import Vestibular
@@ -153,7 +153,7 @@ class Body(Part):
 
     def compute_traveled_dist(self):
         """Return a float representing the distance between origin and the current position"""
-        return vec(self.body_obj.worldTransform * self.origin - self.origin).x
+        return vec(self.simulator.get_world_position(self.body_obj) - self.origin).x
 
     def compute_average_power(self):
         return sum(self.powers) / float(len(self.powers))
@@ -190,8 +190,8 @@ class Body(Part):
         """Add a fall penalty if head stay under the stand-up level for more than 20 iterations"""
 
         # Do it here
-        head_pos = self.simulator.get_object("obj_head").worldPosition.z
-        foot_pos = self.simulator.get_object("obj_wrist.L").worldPosition.z
+        head_pos = self.simulator.get_world_position(self.simulator.get_object("obj_head")).z
+        foot_pos = self.simulator.get_world_position(self.simulator.get_object("obj_wrist.L")).z
         if head_pos < -1.8 or foot_pos > head_pos:
             if self.count > 20:
                 self.penalty = True

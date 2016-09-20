@@ -43,13 +43,13 @@ class HillMuscle(Muscle):
         self.CE_v_CElimb_des = 1.5  # exponent for descending branch (Moerl et al., 2012)
         self.CE_v_CElimb_asc = 3.0  # exponent for ascending branch (Moerl et al., 2012)
         self.CE_A_rel0 = 0.25  # parameter for contraction dynamics: maximum value of A_rel (Guenther, 1997, S. 82)
-        self.CE_B_rel0 = 2.25  # parameter for contraction dynmacis: maximum value of B_rel (Guenther, 1997, S. 82)
+        self.CE_B_rel0 = 2.25  # parameter for contraction dynamics: maximum value of B_rel (Guenther, 1997, S. 82)
         # eccentric force-velocity relation:
         self.CE_S_eccentric = 2  # relation between F(v) slopes at v_CE=0 (van Soest & Bobbert, 1993)
         self.CE_F_eccentric = 1.5  # factor by which the force can exceed F_isom for large eccentric velocities (van Soest & Bobbert, 1993)
 
         # Parallel Elastic Element (PEE)
-        self.PEE_L_PEE0 = 0.9  # rest length of PEE normalized to optimal lenght of CE (Guenther et al., 2007)
+        self.PEE_L_PEE0 = 0.9  # rest length of PEE normalized to optimal length of CE (Guenther et al., 2007)
         self.PEE_l_PEE0 = self.PEE_L_PEE0 * self.CE_l_CEopt  # rest length of PEE (Guenther et al., 2007)
         self.PEE_v_PEE = 2.5  # exponent of F_PEE (Moerl et al., 2012)
         self.PEE_F_PEE = 2.0  # force of PEE if l_CE is stretched to deltaWlimb_des (Moerl et al., 2012)
@@ -65,8 +65,8 @@ class HillMuscle(Muscle):
 
         # Serial Elastic Element (SEE)
         self.SEE_l_SEE0 = 0.172  # rest length of SEE in [m] (Kistemaker et al., 2006)
-        self.SEE_DeltaU_SEEnll = 0.0425  # relativ stretch at non-linear linear transition (Moerl et al., 2012)
-        self.SEE_DeltaU_SEEl = 0.017  # relativ additional stretch in the linear part providing a force increase of deltaF_SEE0 (Moerl, 2012)
+        self.SEE_DeltaU_SEEnll = 0.0425  # relative stretch at non-linear linear transition (Moerl et al., 2012)
+        self.SEE_DeltaU_SEEl = 0.017  # relative additional stretch in the linear part providing a force increase of deltaF_SEE0 (Moerl, 2012)
         self.SEE_DeltaF_SEE0 = 568  # both force at the transition and force increase in the linear part in [N] (~ 40# of the maximal isometric muscle force)
 
         self.SEE_l_SEEnll = (1 + self.SEE_DeltaU_SEEnll) * self.SEE_l_SEE0

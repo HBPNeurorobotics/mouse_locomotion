@@ -140,6 +140,7 @@ class Fiber:
         Update intermediate firing frequency which will be used to process effective firing frequency
         :return: Float intermediate firing frequency
         """
+
         if self.f_int == 0.:
             self.f_int = self.f_env
         d_f_int = (self.f_env - self.f_int) / self.tf
@@ -151,6 +152,7 @@ class Fiber:
         Update effective firing frequency which will be used to process muscle activity
         :return:  Float effective firing frequency
         """
+
         if self.f_eff == 0.:
             self.f_eff = self.f_int
         d_f_eff = (self.f_int - self.f_eff) / self.tf
@@ -179,6 +181,7 @@ class Fiber:
         Update activation frequency which can be used to process active and passive fiber forces
         :return: Float activation frequency of the fiber
         """
+
         self.__process_nf(length)
         spec = self.__specific_function()
         param = spec * self.f_eff / (self.af * self.nf)
@@ -229,9 +232,11 @@ class Fiber:
         Process the passive force due to the tendon the fiber
         :return: Float tendon force of the fiber
         """
+
         return self.c_t * self.k_t * math.log(math.exp((self.l_se - self.l_t) / self.k_t) + 1)
 
     def get_length_elastic(self, force):
+
         return self.l_t + self.k_t * math.log(math.exp(force / (self.c_t * self.k_t)) - 1)
 
     def __passive_force(self):
@@ -251,35 +256,91 @@ class Fiber:
         return self.__force_length() * self.__force_velocity() * self.activation_frequency
 
     def __effective_activation(self, force, length):
+        """
+        Computes effective activation of the fiber
+        :param force: Float force applied on the fiber
+        :param length: Float length of the fiber
+        :return: Float effective activation frequency
+        """
+
         self.__update_activation_frequency(self.f_max, length)
         return self.activation_frequency
 
     def __initial_energy(self, force):
+        """
+        Computes the initial energy consumed by the fiber during contraction
+        :param force: Float force applied on the fiber
+        :return: Float initial energy
+        """
+
         return self.__cross_bridge_energy(force, self.length, self.velocity) + self.__activation_energy(force)
 
     def __initial_tetanic_energy(self, velocity):
+        """
+        Computes the initial tetanic energy consumed by the fiber during contraction
+        :param velocity: Float velocity of the fiber
+        :return: Float tetanic energy
+        """
+
         return (self.e1 * pow(velocity, 2) + self.e2 * velocity + self.e3) / (self.e4 - velocity)
 
     def __cross_bridge_energy(self, force, length, velocity):
+        """
+        Computes cross-bridge energy consumed by the fiber during contraction
+        :param force: Float force applied on the fiber
+        :param length: Float length of the fiber
+        :param velocity: Float velocity of the fiber
+        :return: Float cross-bridge energy
+        """
+
         return self.__effective_activation(force, length) * self.__force_length() * self.__tetanic_cross_bridge_energy(
             velocity)
 
     def __tetanic_cross_bridge_energy(self, velocity):
+        """
+        Computes tetanic cross-bridge energy consumed by the fiber during contraction
+        :param velocity: Float velocity of the fiber
+        :return: Float tetanic cross-bridge energy
+        """
+
         if velocity <= 0.:
             return self.__initial_tetanic_energy(velocity) - self.__tetanic_activation_energy()
         f_tet_xb_0 = self.__tetanic_cross_bridge_energy(0.)
         return f_tet_xb_0 + self.velocity * (f_tet_xb_0 - self.__tetanic_cross_bridge_energy(-self.h)) / self.h
 
     def __activation_energy(self, force):
+        """
+        Computes the energy consumed to activate the fiber
+        :param force: Float force applied on the fiber
+        :return: Float activation energy
+        """
+
         return self.a / (1 - self.a) * self.__cross_bridge_energy(force, self.length_0, 0.)
 
     def __tetanic_activation_energy(self):
+        """
+        Computes the tetanic energy consumed to activate the fiber
+        :return: Float tetanic activation energy
+        """
+
         return self.a * self.__initial_tetanic_energy(0.)
 
     def __recovery_energy(self, force):
+        """
+        Computes the energy consumed to recover during fiber contraction
+        :param force: Float force applied on the fiber
+        :return: Float recovery energy
+        """
+
         return self.__initial_energy(force) * self.r
 
     def __update_activation_frequency(self, spike_frequency, length):
+        """
+        Update the activation frequency of a muscle
+        :param spike_frequency: Float activation frequency of motor neurons activity
+        :param length: Float length of the muscle
+        """
+
         self.__process_recruitment(spike_frequency)
         self.__process_tf((self.f_int - self.f_eff) / self.tf if self.tf != 0 else 0., length)
         self.__intermediate_firing_frequency()
@@ -291,6 +352,7 @@ class Fiber:
         Update the force of the muscle
         :return: Float force deployed by the muscle
         """
+
         self.length = length
         self.velocity = velocity
         self.__update_activation_frequency(spike_frequency, self.length)
@@ -298,10 +360,18 @@ class Fiber:
         return self.__passive_force() + self.__active_force()
 
     def update_energy(self, force):
+        """
+        Update fiber energy consumption
+        :param force: Float Force developed by the fiber
+        :return: Float fiber energy consumption
+        """
+
         return (self.__initial_energy(force) +
                 self.__recovery_energy(force)) * self.m
 
     def print_updates(self):
+        """Debug function to print the update on a fiber"""
+
         print("F_env: " + str(self.f_env) + "\n" +
               "F_int: " + str(self.f_int) + "\n" +
               "F_eff: " + str(self.f_eff) + "\n" +

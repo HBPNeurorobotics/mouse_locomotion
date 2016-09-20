@@ -15,7 +15,7 @@
 # June 2016
 ##
 
-from sensors.sensor import Sensor
+from ..sensor import Sensor
 
 
 class MuscleReceptor(Sensor):
