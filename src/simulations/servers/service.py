@@ -16,8 +16,10 @@
 ##
 
 import logging
+import os
 
 import psutil
+import sys
 from rpyc import Service
 from simulators import common
 
@@ -46,7 +48,8 @@ class SimService(Service):
         """Launch a simulation and return its results and its cpu and memory usage"""
 
         # Get the machine current cpu usage and memory before launching simulation
-        cpu_percent = sum(psutil.cpu_percent(interval=0.5, percpu=True)) / float(psutil.cpu_count())
+        cpu_percent = sum(psutil.cpu_percent(interval=0.5, percpu=True)) / float(
+            psutil.cpu_count() if sys.version_info <= (2, 8) else os.cpu_count())
         memory_percent = psutil.virtual_memory().percent
         res = {"common": {"CPU": cpu_percent, "memory": memory_percent}}
         # Launch the simulation

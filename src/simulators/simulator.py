@@ -22,12 +22,11 @@ import time
 import logging
 import os
 import subprocess
-import sys
 from multiprocessing import Process
-from result import Result
 
-if sys.version_info <= (3, 0):
-    import psutil  # TODO: Find another lib
+import sys
+
+from result import Result
 
 
 class Simulator:
@@ -88,6 +87,7 @@ class Simulator:
         :return: Dictionary containing simulation results and mean cpu and memory consumption
         """
 
+        import psutil  # We need to import psutil there so we got no problem with simulator callback
         test = Process(target=self.launch_simulation)
         test.daemon = True
         cpu_consumption = []
@@ -97,11 +97,13 @@ class Simulator:
             # Launch the simulation in a subprocess so we can know its cpu and memory usage
             test.start()
             proc = psutil.Process(test.pid)
-
-            while proc.status() != psutil.STATUS_ZOMBIE and proc.status() != psutil.STATUS_DEAD:
-                cpu_consumption.append(sum(psutil.cpu_percent(interval=0.5, percpu=True)) / psutil.cpu_count())
+            status = psutil.STATUS_RUNNING
+            while status != psutil.STATUS_ZOMBIE and status != psutil.STATUS_DEAD:
+                cpu_consumption.append(sum(psutil.cpu_percent(interval=0.5, percpu=True)) / (
+                    psutil.cpu_count() if sys.version_info <= (2, 8) else os.cpu_count()))
                 memory_consumption.append(psutil.virtual_memory().percent)
                 time.sleep(0.1)
+                status = proc.status() if sys.version_info <= (2, 8) else proc.status
             test.join()
         except psutil.NoSuchProcess as ex:
             logging.debug("Test simulation stopped correctly.")
@@ -109,10 +111,10 @@ class Simulator:
             logging.error("Keyboard interruption during test simulation")
             results["interruption"] = True
         except Exception as e:
-            logging.error("Error during the simlator test : " + str(e))
+            logging.error("Error during the simulator test : " + str(e))
         results["CPU"] = 0. if len(cpu_consumption) <= 0 else max(cpu_consumption)
         results["memory"] = 0. if len(memory_consumption) <= 0 else max(memory_consumption)
-        logging.info("Test Simulator " + self.__class__.__name__ +
+        logging.info("Test results on " + self.__class__.__name__ +
                      ": \nCPU = " + str(cpu_consumption) +
                      "\nMemory = " + str(memory_consumption))
         return results
