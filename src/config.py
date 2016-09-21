@@ -37,7 +37,7 @@ class Config:
         self.sim_speed = data["sim_speed"] if "sim_speed" in data else 1.0
         self.logger_name = data["logger_name"] if "logger_name" in data else "INFO"
         self.logger = logging.Logger(self.logger_name)
-        self.exit_condition = data["exit_condition"] if "exit_condition" in data else "owner['config'].n_iter > 500"
+        self.exit_condition = data["exit_condition"] if "exit_condition" in data else "self.body.config.n_iter > 500"
         self.timeout = data["timeout"] if "timeout" in data else 10
         self.simulator = simulator
         self.t_init = 0

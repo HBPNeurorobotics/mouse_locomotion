@@ -96,8 +96,8 @@ class Muscle:
     def update_position(self):
         """Update the positions of a muscle and its length"""
 
-        self.app_point_1_world = self.simulator.update_position(self.obj1, self.app_point_1)
-        self.app_point_2_world = self.simulator.update_position(self.obj2, self.app_point_2)
+        self.app_point_1_world = self.simulator.update_world_position(self.obj1, self.app_point_1)
+        self.app_point_2_world = self.simulator.update_world_position(self.obj2, self.app_point_2)
         self.length = self.app_point_2_world - self.app_point_1_world
 
     def update_velocity(self):

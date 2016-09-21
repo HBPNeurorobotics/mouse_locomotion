@@ -68,7 +68,7 @@ class DampedSpringMuscle(Muscle):
         fixing manually l0
         :param kwargs: Dictionary containing muscle updates
         """
-        Muscle.update(**kwargs)
+        Muscle.update(self, **kwargs)
 
         # If muscle has not been deactivated
         if self.active:
@@ -133,7 +133,7 @@ class DampedSpringReducedTorqueMuscle(DampedSpringMuscle):
         :param kwargs: Dictionary containing muscle updates
         """
 
-        DampedSpringMuscle.update(**kwargs)
+        DampedSpringMuscle.update(self, **kwargs)
 
         # If muscle has not been deactivated
         if self.active:

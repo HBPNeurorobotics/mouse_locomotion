@@ -79,7 +79,7 @@ class BrownMuscle(Muscle):
         :param kwargs: Dictionary containing muscle updates
         """
 
-        Muscle.update(**kwargs)
+        Muscle.update(self, **kwargs)
 
         force = 0.
         for fiber, percent in self.fibers.items():
