@@ -89,6 +89,8 @@ class Genetic(Optimization):
         self.ga.setEvaluator(self.eval_fct)
         self.ga.setMinimax(Consts.minimaxType["minimize"])
 
+        self.max_score = 200.
+
     def update_population(self, population):
         """
         Update the current population and configuration
@@ -117,7 +119,7 @@ class Genetic(Optimization):
         # Update the score of each specimen
         i = 0
         for ind in population.internalPop:
-            ind.setRawScore(scores[i] if i < len(scores) else 0.)
+            ind.setRawScore(scores[i] if i < len(scores) else self.max_score)
             i += 1
 
         return Optimization.update_scores(self, scores, population)
@@ -130,14 +132,13 @@ class Genetic(Optimization):
         """
 
         scores = []
-        c0 = 70.
         for res in self.res_list:
             if "penalty" not in res or "distance" not in res or "stability" not in res:
-                score = 0.
+                score = self.max_score
             elif res["penalty"]:
-                score = 2 * c0 - res["distance"]
+                score = self.max_score - res["distance"]
             else:
-                score = c0 - res["distance"] + res["stability"]
+                score = self.max_score / 2. - res["distance"] + res["stability"]
             scores.append(score)
 
         return scores

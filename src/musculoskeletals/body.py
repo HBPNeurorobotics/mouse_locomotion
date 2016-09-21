@@ -153,7 +153,7 @@ class Body(Part):
 
     def compute_traveled_dist(self):
         """Return a float representing the distance between origin and the current position"""
-        return vec(self.simulator.get_world_position(self.body_obj) - self.origin).x
+        return vec(self.simulator.update_world_position(self.body_obj, self.origin) - self.origin).x
 
     def compute_average_power(self):
         return sum(self.powers) / float(len(self.powers))

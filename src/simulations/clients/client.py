@@ -287,7 +287,7 @@ class Client(Observable):
             self.mutex_rsp.acquire()
             self.rsp = list()
             for i in range(self.rqt_n):
-                self.rsp.append({"score": 0.})
+                self.rsp.append({})
             self.mutex_rsp.release()
             # Check for simulation and interrupt when processed or interrupted
             to = 0
