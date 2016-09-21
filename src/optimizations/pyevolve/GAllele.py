@@ -96,7 +96,7 @@ class GAlleles:
             ret += "Allele for 0 position:\n"
             ret += self.allele_list[0].__repr__()
         else:
-            for i in xrange(len(self)):
+            for i in range(len(self)):
                 ret += "Allele for %d position:\n" % (i,)
                 ret += self.allele_list[i].__repr__()
         return ret

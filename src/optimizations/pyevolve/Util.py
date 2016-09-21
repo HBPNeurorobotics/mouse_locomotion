@@ -86,7 +86,7 @@ def raiseException(message, expt=None):
     if expt is None:
         raise Exception(message)
     else:
-        raise expt, message
+        raise expt(message)
 
 
 def cmp_individual_raw(a, b):
@@ -316,7 +316,7 @@ def G1DListGetEdges(individual):
     """
     edg = {}
     ind_list = individual.getInternalList()
-    for i in xrange(len(ind_list)):
+    for i in range(len(ind_list)):
         a, b = ind_list[i], ind_list[i - 1]
 
         if a not in edg:

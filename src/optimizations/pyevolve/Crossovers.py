@@ -92,7 +92,7 @@ def G1DBinaryStringXUniform(genome, **args):
     sister.resetStats()
     brother.resetStats()
 
-    for i in xrange(len(gMom)):
+    for i in range(len(gMom)):
         if Util.randomFlipCoin(Consts.CDefG1DBinaryStringUniformProb):
             temp = sister[i]
             sister[i] = brother[i]
@@ -178,7 +178,7 @@ def G1DListCrossoverUniform(genome, **args):
     sister.resetStats()
     brother.resetStats()
 
-    for i in xrange(len(gMom)):
+    for i in range(len(gMom)):
         if Util.randomFlipCoin(Consts.CDefG1DListCrossUniformProb):
             temp = sister[i]
             sister[i] = brother[i]
@@ -236,7 +236,7 @@ def G1DListCrossoverEdge(genome, **args):
 
     for c, u in (sisterl, set(gMom)), (brotherl, set(gDad)):
         curr = None
-        for i in xrange(len(gMom)):
+        for i in range(len(gMom)):
             curr = rand_choice(tuple(u)) if not curr else curr
             c.append(curr)
             u.remove(curr)
@@ -392,8 +392,8 @@ def G2DListCrossoverUniform(genome, **args):
 
     h, w = gMom.getSize()
 
-    for i in xrange(h):
-        for j in xrange(w):
+    for i in range(h):
+        for j in range(w):
             if Util.randomFlipCoin(Consts.CDefG2DListCrossUniformProb):
                 temp = sister.getItem(i, j)
                 sister.setItem(i, j, brother.getItem(i, j))
@@ -414,13 +414,13 @@ def G2DListCrossoverSingleVPoint(genome, **args):
     if args["count"] >= 1:
         sister = gMom.clone()
         sister.resetStats()
-        for i in xrange(sister.getHeight()):
+        for i in range(sister.getHeight()):
             sister[i][cut:] = gDad[i][cut:]
 
     if args["count"] == 2:
         brother = gDad.clone()
         brother.resetStats()
-        for i in xrange(brother.getHeight()):
+        for i in range(brother.getHeight()):
             brother[i][cut:] = gMom[i][cut:]
 
     return (sister, brother)
@@ -438,13 +438,13 @@ def G2DListCrossoverSingleHPoint(genome, **args):
     if args["count"] >= 1:
         sister = gMom.clone()
         sister.resetStats()
-        for i in xrange(cut, sister.getHeight()):
+        for i in range(cut, sister.getHeight()):
             sister[i][:] = gDad[i][:]
 
     if args["count"] == 2:
         brother = gDad.clone()
         brother.resetStats()
-        for i in xrange(brother.getHeight()):
+        for i in range(brother.getHeight()):
             brother[i][:] = gMom[i][:]
 
     return (sister, brother)
@@ -473,8 +473,8 @@ def G2DBinaryStringXUniform(genome, **args):
 
     h, w = gMom.getSize()
 
-    for i in xrange(h):
-        for j in xrange(w):
+    for i in range(h):
+        for j in range(w):
             if Util.randomFlipCoin(Consts.CDefG2DBinaryStringUniformProb):
                 temp = sister.getItem(i, j)
                 sister.setItem(i, j, brother.getItem(i, j))
@@ -499,13 +499,13 @@ def G2DBinaryStringXSingleVPoint(genome, **args):
     if args["count"] >= 1:
         sister = gMom.clone()
         sister.resetStats()
-        for i in xrange(sister.getHeight()):
+        for i in range(sister.getHeight()):
             sister[i][cut:] = gDad[i][cut:]
 
     if args["count"] == 2:
         brother = gDad.clone()
         brother.resetStats()
-        for i in xrange(brother.getHeight()):
+        for i in range(brother.getHeight()):
             brother[i][cut:] = gMom[i][cut:]
 
     return (sister, brother)
@@ -528,13 +528,13 @@ def G2DBinaryStringXSingleHPoint(genome, **args):
     if args["count"] >= 1:
         sister = gMom.clone()
         sister.resetStats()
-        for i in xrange(cut, sister.getHeight()):
+        for i in range(cut, sister.getHeight()):
             sister[i][:] = gDad[i][:]
 
     if args["count"] == 2:
         brother = gDad.clone()
         brother.resetStats()
-        for i in xrange(brother.getHeight()):
+        for i in range(brother.getHeight()):
             brother[i][:] = gMom[i][:]
 
     return (sister, brother)
@@ -644,7 +644,7 @@ def GTreeCrossoverSinglePointStrict(genome, **args):
     momRandom = None
     dadRandom = None
 
-    for i in xrange(max_attempt):
+    for i in range(max_attempt):
 
         if distr_leaf is None:
             dadRandom = gDad.getRandomNode()
@@ -744,7 +744,7 @@ def GTreeGPCrossoverSinglePoint(genome, **args):
     momRandom = None
     dadRandom = None
 
-    for i in xrange(max_attempt):
+    for i in range(max_attempt):
 
         dadRandom = gDad.getRandomNode()
 

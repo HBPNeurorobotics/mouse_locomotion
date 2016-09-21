@@ -102,7 +102,7 @@ class G1DBinaryString(GenomeBase, G1DBase):
         """ Set the specified value for an gene of List
 
         >>> g = G1DBinaryString(5)
-        >>> for i in xrange(len(g)):
+        >>> for i in range(len(g)):
         ...    g.append(1)
         >>> g[4] = 0
         >>> g[4]
@@ -126,7 +126,7 @@ class G1DBinaryString(GenomeBase, G1DBase):
 
         Example:
            >>> g = G1DBinaryString(5)
-           >>> for i in xrange(len(g)):
+           >>> for i in range(len(g)):
            ...    g.append(0)
            >>> g[3] = 1
            >>> g.getDecimal()
@@ -189,7 +189,7 @@ class G1DBinaryString(GenomeBase, G1DBase):
 
         Example:
            >>> g = G1DBinaryString(5)
-           >>> for i in xrange(len(g)):
+           >>> for i in range(len(g)):
            ...    g.append(1)
            >>> clone = g.clone()
            >>> clone[0]

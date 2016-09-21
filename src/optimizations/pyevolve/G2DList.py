@@ -127,7 +127,7 @@ class G2DList(GenomeBase):
         self.width = width
 
         self.genomeList = [None] * height
-        for i in xrange(height):
+        for i in range(height):
             self.genomeList[i] = [None] * width
 
         if not cloning:
@@ -229,7 +229,7 @@ class G2DList(GenomeBase):
         del self.genomeList[:]
 
         self.genomeList = [None] * self.height
-        for i in xrange(self.height):
+        for i in range(self.height):
             self.genomeList[i] = [None] * self.width
 
     def copy(self, g):
@@ -244,7 +244,7 @@ class G2DList(GenomeBase):
         GenomeBase.copy(self, g)
         g.height = self.height
         g.width = self.width
-        for i in xrange(self.height):
+        for i in range(self.height):
             g.genomeList[i] = self.genomeList[i][:]
 
     def clone(self):

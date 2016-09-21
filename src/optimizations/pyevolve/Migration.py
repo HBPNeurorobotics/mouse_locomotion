@@ -161,7 +161,7 @@ class MigrationScheme:
         :param num_individuals: the number of individuals to select
         :rtype: list with individuals
         """
-        pool = [self.select() for i in xrange(num_individuals)]
+        pool = [self.select() for i in range(num_individuals)]
         return pool
 
     def exchange(self):
@@ -260,7 +260,7 @@ class WANMigration(MigrationScheme):
 
         population = self.GAEngine.getPopulation()
 
-        for i in xrange(self.getNumReplacement()):
+        for i in range(self.getNumReplacement()):
             if len(pool) <= 0: break
             choice = rand_choice(pool)
             pool.remove(choice)

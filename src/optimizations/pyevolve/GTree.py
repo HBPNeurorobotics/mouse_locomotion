@@ -219,7 +219,7 @@ def buildGTreeGrow(depth, value_callback, max_siblings, max_depth):
 
     if depth == max_depth: return n
 
-    for i in xrange(random.randint(0, abs(max_siblings))):
+    for i in range(random.randint(0, abs(max_siblings))):
         child = buildGTreeGrow(depth + 1, value_callback, max_siblings, max_depth)
         child.setParent(n)
         n.addChild(child)
@@ -249,7 +249,7 @@ def buildGTreeFull(depth, value_callback, max_siblings, max_depth):
     else:
         range_val = random.randint(1, abs(max_siblings))
 
-    for i in xrange(range_val):
+    for i in range(range_val):
         child = buildGTreeFull(depth + 1, value_callback, max_siblings, max_depth)
         child.setParent(n)
         n.addChild(child)
@@ -423,7 +423,7 @@ class GTreeGP(GenomeBase, GTreeBase):
         :param startNode: used to plot more than one individual
         """
         if not HAVE_PYDOT:
-            print "You must install Pydot to use this feature !"
+            print("You must install Pydot to use this feature !")
             return
 
         count = startNode
@@ -432,7 +432,7 @@ class GTreeGP(GenomeBase, GTreeBase):
         tmp = None
         import __main__ as main_module
 
-        for i in xrange(len(self.nodes_list)):
+        for i in range(len(self.nodes_list)):
             newnode = pydot.Node(str(count), style="filled")
             count += 1
 
@@ -514,7 +514,7 @@ class GTreeGP(GenomeBase, GTreeBase):
             all_childs = start_node.getChilds()
             str_buff += "(" + self.getPreOrderExpression(all_childs[0])
 
-            for index in xrange(1, len(all_childs)):
+            for index in range(1, len(all_childs)):
                 child = all_childs[index]
                 str_buff += ", " + self.getPreOrderExpression(child)
             str_buff += ")"
@@ -572,7 +572,7 @@ class GTreeGP(GenomeBase, GTreeBase):
                 return -1
 
             tmp_self, tmp_other = stack_self.pop(), stack_other.pop()
-            if tmp_self.compare(tmp_other) <> 0:
+            if tmp_self.compare(tmp_other) != 0:
                 return -1
 
             stack_self.extend(tmp_self.getChilds())
@@ -606,7 +606,7 @@ class GTreeGP(GenomeBase, GTreeBase):
 
         n = 0
         end_index = len(pop) if end == 0 else end
-        for i in xrange(start, end_index):
+        for i in range(start, end_index):
             ind = pop[i]
             subg = pydot.Cluster("cluster_%d" % i, label="\"Ind. #%d - Score Raw/Fit.: %.4f/%.4f\"" % (
             i, ind.getRawScore(), ind.getFitnessScore()))
@@ -641,7 +641,7 @@ class GTreeGP(GenomeBase, GTreeBase):
 
         n = 0
         end_index = len(pop) if end == 0 else end
-        for i in xrange(start, end_index):
+        for i in range(start, end_index):
             ind = pop[i]
             subg = pydot.Cluster("cluster_%d" % i, label="\"Ind. #%d - Score Raw/Fit.: %.4f/%.4f\"" % (
             i, ind.getRawScore(), ind.getFitnessScore()))
@@ -716,7 +716,7 @@ def buildGTreeGPGrow(ga_engine, depth, max_depth):
             n = GTreeNodeGP(random_node, Consts.nodeType["NONTERMINAL"])
 
     if n.getType() == Consts.nodeType["NONTERMINAL"]:
-        for i in xrange(gp_function_set[n.getData()]):
+        for i in range(gp_function_set[n.getData()]):
             child = buildGTreeGPGrow(ga_engine, depth + 1, max_depth)
             child.setParent(n)
             n.addChild(child)
@@ -748,7 +748,7 @@ def buildGTreeGPFull(ga_engine, depth, max_depth):
         n = GTreeNodeGP(random_oper, Consts.nodeType["NONTERMINAL"])
 
     if n.getType() == Consts.nodeType["NONTERMINAL"]:
-        for i in xrange(gp_function_set[n.getData()]):
+        for i in range(gp_function_set[n.getData()]):
             child = buildGTreeGPFull(ga_engine, depth + 1, max_depth)
             child.setParent(n)
             n.addChild(child)

@@ -150,21 +150,21 @@ class G1DList(GenomeBase, G1DBase):
     def __mul__(self, other):
         """ Multiply every element of G1DList by "other" """
         newObj = self.clone()
-        for i in xrange(len(newObj)):
+        for i in range(len(newObj)):
             newObj[i] *= other
         return newObj
 
     def __add__(self, other):
         """ Plus every element of G1DList by "other" """
         newObj = self.clone()
-        for i in xrange(len(newObj)):
+        for i in range(len(newObj)):
             newObj[i] += other
         return newObj
 
     def __sub__(self, other):
         """ Plus every element of G1DList by "other" """
         newObj = self.clone()
-        for i in xrange(len(newObj)):
+        for i in range(len(newObj)):
             newObj[i] -= other
         return newObj
 

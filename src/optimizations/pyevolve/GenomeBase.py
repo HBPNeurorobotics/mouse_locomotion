@@ -625,7 +625,7 @@ class GTreeBase:
             newnode.setParent(node_parent)
             node_parent.replaceChild(node, newnode)
 
-        for ci in xrange(len(newnode)):
+        for ci in range(len(newnode)):
             GTreeBase.copy(self, g, newnode.getChild(ci), newnode)
 
         return newnode

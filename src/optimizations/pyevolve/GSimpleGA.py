@@ -72,7 +72,6 @@ import random
 import logging
 
 from time import time
-from types import BooleanType
 from sys import platform as sys_platform
 from sys import stdout as sys_stdout
 
@@ -224,7 +223,7 @@ class GSimpleGA:
         """ Initializator of GSimpleGA """
         if seed: random.seed(seed)
 
-        if type(interactiveMode) != BooleanType:
+        if type(interactiveMode) != bool:
             Util.raiseException("Interactive Mode option must be True or False", TypeError)
 
         if not isinstance(genome, GenomeBase):
@@ -383,7 +382,7 @@ class GSimpleGA:
            The *setInteractiveMode* method.
 
         """
-        if type(flag) != BooleanType:
+        if type(flag) != bool:
             Util.raiseException("Interactive Mode option must be True or False", TypeError)
         self.interactiveMode = flag
 
@@ -441,10 +440,10 @@ class GSimpleGA:
            The `setMultiProcessing` method.
 
         """
-        if type(flag) != BooleanType:
+        if type(flag) != bool:
             Util.raiseException("Multiprocessing option must be True or False", TypeError)
 
-        if type(full_copy) != BooleanType:
+        if type(full_copy) != bool:
             Util.raiseException("Multiprocessing 'full_copy' option must be True or False", TypeError)
 
         self.internalPop.setMultiProcessing(flag, full_copy)
@@ -571,7 +570,7 @@ class GSimpleGA:
         :param flag: True or False
 
         """
-        if type(flag) != BooleanType:
+        if type(flag) != bool:
             Util.raiseException("Elitism option must be True or False", TypeError)
         self.elitism = flag
 
@@ -654,7 +653,7 @@ class GSimpleGA:
 
         crossover_empty = self.select(popID=self.currentGeneration).crossover.isEmpty()
 
-        for i in xrange(0, size_iterate, 2):
+        for i in range(0, size_iterate, 2):
             genomeMom = self.select(popID=self.currentGeneration)
             genomeDad = self.select(popID=self.currentGeneration)
 
@@ -700,11 +699,11 @@ class GSimpleGA:
         if self.elitism:
             logging.debug("Doing elitism.")
             if self.getMinimax() == Consts.minimaxType["maximize"]:
-                for i in xrange(self.nElitismReplacement):
+                for i in range(self.nElitismReplacement):
                     if self.internalPop.bestRaw(i).score > newPop.bestRaw(i).score:
                         newPop[len(newPop) - 1 - i] = self.internalPop.bestRaw(i)
             elif self.getMinimax() == Consts.minimaxType["minimize"]:
-                for i in xrange(self.nElitismReplacement):
+                for i in range(self.nElitismReplacement):
                     if self.internalPop.bestRaw(i).score < newPop.bestRaw(i).score:
                         newPop[len(newPop) - 1 - i] = self.internalPop.bestRaw(i)
 
@@ -735,7 +734,7 @@ class GSimpleGA:
     def printTimeElapsed(self):
         """ Shows the time elapsed since the begin of evolution """
         total_time = time() - self.time_init
-        print "Total time elapsed: %.3f seconds." % total_time
+        print("Total time elapsed: %.3f seconds." % total_time)
         return total_time
 
     def dumpStatsDB(self):
@@ -807,24 +806,24 @@ class GSimpleGA:
                 if stopFlagTerminationCriteria:
                     logging.debug("Evolution stopped by the Termination Criteria !")
                     if freq_stats:
-                        print "\n\tEvolution stopped by Termination Criteria function !\n"
+                        print("\n\tEvolution stopped by Termination Criteria function !\n")
                     break
 
                 if stopFlagCallback:
                     logging.debug("Evolution stopped by Step Callback function !")
                     if freq_stats:
-                        print "\n\tEvolution stopped by Step Callback function !\n"
+                        print("\n\tEvolution stopped by Step Callback function !\n")
                     break
 
                 if self.interactiveMode:
                     if sys_platform[:3] == "win":
                         if msvcrt.kbhit():
                             if ord(msvcrt.getch()) == Consts.CDefESCKey:
-                                print "Loading modules for Interactive Mode...",
+                                print("Loading modules for Interactive Mode..."),
                                 logging.debug("Windows Interactive Mode key detected ! generation=%d",
                                               self.getCurrentGeneration())
                                 from optimizations.pyevolve import Interaction
-                                print " done !"
+                                print(" done !")
                                 interact_banner = "## Pyevolve v.%s - Interactive Mode ##\nPress CTRL-Z to quit interactive mode." % (
                                     optimizations.pyevolve.__version__,)
                                 session_locals = {"ga_engine": self,
@@ -836,25 +835,24 @@ class GSimpleGA:
 
                     if (self.getInteractiveGeneration() >= 0) and (
                         self.getInteractiveGeneration() == self.getCurrentGeneration()):
-                        print "Loading modules for Interactive Mode...",
+                        print("Loading modules for Interactive Mode..."),
                         logging.debug("Manual Interactive Mode key detected ! generation=%d",
                                       self.getCurrentGeneration())
                         from optimizations.pyevolve import Interaction
-                        print " done !"
+                        print(" done !")
                         interact_banner = "## Pyevolve v.%s - Interactive Mode ##" % (
                             optimizations.pyevolve.__version__,)
                         session_locals = {"ga_engine": self,
                                           "population": self.getPopulation(),
                                           "pyevolve": optimizations.pyevolve,
                                           "it": Interaction}
-                        print
-                        code.interact(interact_banner, local=session_locals)
+                        print(code.interact(interact_banner, local=session_locals))
 
                 if self.step(): break  # exit if the number of generations is equal to the max. number of gens.
 
         except KeyboardInterrupt:
             logging.debug("CTRL-C detected, finishing evolution.")
-            if freq_stats: print "\n\tA break was detected, you have interrupted the evolution !\n"
+            if freq_stats: print("\n\tA break was detected, you have interrupted the evolution !\n")
 
         if freq_stats != 0:
             self.printStats()
@@ -868,9 +866,9 @@ class GSimpleGA:
 
         if self.migrationAdapter:
             logging.debug("Closing the Migration Adapter")
-            if freq_stats: print "Stopping the migration adapter... ",
+            if freq_stats: print("Stopping the migration adapter... "),
             self.migrationAdapter.stop()
-            if freq_stats: print "done !"
+            if freq_stats: print("done !")
 
         return self.bestIndividual()
 
