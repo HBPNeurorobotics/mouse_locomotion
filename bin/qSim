@@ -22,6 +22,12 @@
 import logging.config
 import logging.handlers
 import os
+import sys
+
+if sys.version_info < (3, 0):
+    import ConfigParser
+else:
+    from configparser import ConfigParser
 from os.path import dirname, realpath
 import sys
 
@@ -35,15 +41,9 @@ from simulations import SimServer, Registry, Manager
 
 class SimCli(cli.Application):
     """This script provide a framework for quadruped locomotion driven by reservoir computing"""
-
-    # Default CLI application options
-    DEF_OPT = {"simulator": "BLENDER", "simulator_path": "bin/Blender2.77", "model": "dog_vert.blend",
-               "root_dir": root,
-               "config_name": "default_dog_vert_simulation_config",
-               "sim_type": "RUN", "registry": False, "server": False, "local": False,
-               "logfile": os.path.expanduser("~").replace("\\", "/") + "/.log/qSim.log",
-               "fullscreen": False, "save": False, "load_file": False, "timeout": 120}
-
+    defaults = ConfigParser.ConfigParser()
+    defaults.read(os.path.join(src, 'config.ini'))
+    DEF_OPT = eval(defaults.get('defaults', 'DEF_OPT'))
     # Simulation parameters
     max_cpu_percentage = cli.SwitchAttr(["-cpu", "--cpu_use"], str, default=None,
                                         help="Max CPU usage for the simulation servers")

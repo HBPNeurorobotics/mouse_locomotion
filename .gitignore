@@ -1,5 +1,9 @@
 .directory
 
+# Ignore Make output
+dist
+*.egg-info
+
 # Ignore python compiled files
 *__pycache__/
 *.pyc
@@ -14,11 +18,8 @@ mdl/*_pop.blend
 mdl/other/*_pop.blend
 
 # Ignore saved simulations
-save/*
-
-# Ignore blender binaries
-bin/blender*
-bin/Blender*
+save
+sh
 
 # Ignore IDE folders
 .idea

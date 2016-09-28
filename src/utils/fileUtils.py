@@ -7,6 +7,9 @@ class FileUtils:
     Abstract utility class to manipulate files
     """
 
+    def __init__(self):
+        pass
+
     @staticmethod
     def create_file(filename):
         try:

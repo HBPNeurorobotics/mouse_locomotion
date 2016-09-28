@@ -1,0 +1,6 @@
+include requirements.txt
+include src/config.ini
+include configs/*
+include etc/logging.conf
+include mdl/*.blend
+include README.md

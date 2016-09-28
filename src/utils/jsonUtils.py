@@ -29,6 +29,7 @@ class JsonUtils(FileUtils):
 
     def __init__(self):
         """Class initialization"""
+        FileUtils.__init__(self)
 
     @staticmethod
     def read_file(filename):

@@ -28,6 +28,7 @@ class NumpyUtils(FileUtils):
 
     def __init__(self):
         """Class initialization"""
+        FileUtils.__init__(self)
 
     @staticmethod
     def write_file(filename, element):
