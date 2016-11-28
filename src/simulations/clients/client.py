@@ -15,15 +15,19 @@
 # February 2016
 ##
 import copy
-import threading
-from threading import Thread, Lock
 import logging
+import threading
 import time
+from threading import Thread, Lock
+
 import rpyc
 from rpyc.utils.factory import DiscoveryError
+from rpyc.utils.registry import UDPRegistryClient, REGISTRY_PORT
+
+from simulations import PROTOCOL_CONFIG
+from simulations import Registry
 from utils import Observable
 from .connection import ServerInfo, SimulationRequest, Connexion
-from simulations import PROTOCOL_CONFIG
 
 REQUESTS = {"Simulation": "simulation", "Test": "test"}
 
@@ -60,6 +64,7 @@ class Client(Observable):
         self.conn_list = []  # list of active RPYC connections
         # Server parameters
         self.simulator = opt["simulator"]
+        self.ip_register = opt['register_ip'] if 'register_ip' in opt else None
         # Simulation client parameter
         self.rqt_n = 0
         self.sim_prun_t = 0.1
@@ -91,7 +96,8 @@ class Client(Observable):
 
         # Check network with rpyc registry thread
         try:
-            self.server_list = rpyc.discover("BLENDERSIM")
+            self.server_list = rpyc.discover("BLENDERSIM",
+                                             registrar=UDPRegistryClient(ip=self.ip_register, port=REGISTRY_PORT))
             logging.debug("Server list " + str(self.server_list))
         except DiscoveryError:
             if self.reg_found:
@@ -324,12 +330,13 @@ class Client(Observable):
         # Stop managing loop
         self.mng_stop = True
         self.sim_time = time.time() - self.t_sim_init
-        if self.thread.is_alive():
+        if self.thread and self.thread.is_alive():
             self.thread.join()
 
     def start(self):
         """Start a simulation client"""
 
+        self.ip_register = Registry.test_register(self.ip_register)
         self.t_sim_init = time.time()
         self.terminated = False
         self.mng_stop = False

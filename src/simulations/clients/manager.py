@@ -15,14 +15,14 @@
 # February 2016
 ##
 
-import logging
 import datetime
-from optimizations import Genetic, GeneticMetaOptimization
-from utils import PickleUtils
+import logging
 
-from ..simulation import Simulation
-from .client import Client
+from optimizations import Genetic, GeneticMetaOptimization
 from simulators import common
+from utils import PickleUtils
+from .client import Client
+from ..simulation import Simulation
 
 
 class Manager(Simulation):
@@ -57,8 +57,13 @@ class Manager(Simulation):
 
         # Start client
         Simulation.start(self)
-        self.client.start()
         self.res_list = []
+        try:
+            self.client.start()
+        except Exception as e:
+            logging.error(e.message)
+            self.stop()
+            return
 
         if self.sim_type is None:
             self.run_sim(self.opt)

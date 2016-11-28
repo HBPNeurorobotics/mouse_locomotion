@@ -14,7 +14,7 @@
 #                  Dimitri Rodarie <d.rodarie@gmail.com>
 # September 2016
 ##
-import logging
+
 import socket
 import sys
 import threading
@@ -24,7 +24,7 @@ from rpyc.utils.registry import UDPRegistryClient, REGISTRY_PORT
 from rpyc.utils.server import Server
 
 from simulations import PROTOCOL_CONFIG
-from simulations.simulation import Simulation
+from simulations import Registry
 
 
 class ServiceServer(Server):
@@ -40,15 +40,7 @@ class ServiceServer(Server):
         :param max_threads: Integer for the maximum number of thread that the server can run in parallel
         """
 
-        logging.info("Test for registry presence on the network.")
-        self.ip_register = Simulation.get_ip_address() if ip_register is None else ip_register
-        if not self.test_register(self.ip_register) and self.ip_register != "0.0.0.0":
-            logging.warning("No registry find on the defined IP. Testing on localhost")
-            if self.test_register("0.0.0.0"):
-                self.ip_register = "0.0.0.0"
-            else:
-                raise AttributeError("No register found on the network. Check your configuration. Abort.")
-        logging.info("Registry test finished: A register was found on " + self.ip_register + "\n")
+        self.ip_register = Registry.test_register(ip_register)
         Server.__init__(self, service, auto_register=True,
                         protocol_config=PROTOCOL_CONFIG,
                         registrar=UDPRegistryClient(ip=self.ip_register, port=REGISTRY_PORT))
@@ -124,12 +116,3 @@ class ServiceServer(Server):
         except KeyboardInterrupt as e:
             self.close()
             raise e
-
-    @staticmethod
-    def test_register(ip_register):
-        register = UDPRegistryClient(ip=ip_register, port=REGISTRY_PORT)
-        did_register = register.register("Test", 0, interface="0.0.0.0")
-        # If registration did not worked out, retry to register with localhost.
-        if did_register:
-            register.unregister(0)
-        return did_register

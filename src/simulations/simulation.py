@@ -73,6 +73,7 @@ class Simulation:
 
     def start(self):
         """Start the simulation process"""
+
         port = (":" + str(self.port)) if self.port != 0 else ""
         logging.info(
             "Start " + self.__class__.__name__ + " on address: " +
@@ -81,4 +82,5 @@ class Simulation:
 
     def stop(self):
         """Stop the simulation process"""
+
         logging.info(self.__class__.__name__ + " has terminated properly.")
