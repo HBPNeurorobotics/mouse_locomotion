@@ -15,13 +15,10 @@
 # February 2016
 ##
 
-import os
 import logging
+import netifaces
+import os
 import socket
-import struct
-
-if os.name == 'posix':
-    import fcntl
 
 
 class Simulation:
@@ -36,42 +33,50 @@ class Simulation:
         :param opt_: Dictionary containing simulation parameters
         """
 
-        logging.info("Create a " + self.__class__.__name__ + " instance.")
+        logging.info("Create a " + self.__class__.__name__ + " instance.\n")
         self.opt = opt_
-        if os.name == 'posix':
-            self.ipaddr = self.__get_ip_address('eth0')
-        else:
-            self.ipaddr = socket.gethostbyname(socket.gethostname())
+
+        # Get a connected device IP
+        self.device = None
+        if self.opt is not None:
+            self.device = self.opt['device'] if 'device' in self.opt else None
+        self.ipaddr = self.get_ip_address(self.device) if os.name == 'posix' else socket.gethostbyname(
+            socket.gethostname())
+
         self.pid = os.getpid()
         self.save_directory = self.opt["root_dir"] + "/save/"
         self.port = 0
 
     @staticmethod
-    def __get_ip_address(ifname):
+    def get_ip_address(ifname=None):
         """
         Retrieve machine ip address
         :param ifname: String name of the network device
         :return: String machine ip
         """
 
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        try:
-            ip_name = socket.inet_ntoa(fcntl.ioctl(
-                s.fileno(),
-                0x8915,  # SIOCGIFADDR
-                struct.pack('256s', ifname[:15])
-            )[20:24])
-        except Exception as e:
-            logging.warning("No ethernet connection!")
-            ip_name = "localhost"
-
+        devices = filter(lambda x: 2 in netifaces.ifaddresses(x)
+                                   and 10 in netifaces.ifaddresses(x)
+                                   and 'broadcast' in netifaces.ifaddresses(x)[2][0],
+                         netifaces.interfaces())
+        if len(devices) > 0:
+            device = devices[0]
+            if ifname is not None and ifname in devices:
+                device = devices[ifname]
+            elif ifname is not None:
+                logging.warning("The device " + str(ifname) + " is not connected.")
+            ip_name = netifaces.ifaddresses(device)[2][0]['addr']
+        else:
+            logging.warning("No device connected to a network. Work in localhost")
+            ip_name = "0.0.0.0"
         return ip_name
 
     def start(self):
         """Start the simulation process"""
         port = (":" + str(self.port)) if self.port != 0 else ""
         logging.info(
-            "Start " + self.__class__.__name__ + " on address: " + str(self.ipaddr) +
+            "Start " + self.__class__.__name__ + " on address: " +
+            str(self.ipaddr if self.ipaddr != "0.0.0.0" else "localhost") +
             port + " with PID " + str(self.pid))
 
     def stop(self):

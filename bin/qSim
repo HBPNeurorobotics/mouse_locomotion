@@ -60,9 +60,12 @@ class SimCli(cli.Application):
                             help="The config class to be used for simulation")
     sim_type = cli.SwitchAttr(["-t", "--type"], str, default=DEF_OPT["sim_type"],
                               help="Specify the type of simulation: RUN, META_GA or CM")
-    sim_timeout = cli.SwitchAttr(["-d", "--timeout"], str, default=DEF_OPT["timeout"],
+    sim_timeout = cli.SwitchAttr(["-T", "--timeout"], str, default=DEF_OPT["timeout"],
                                  help="Maximum duration for the simulation")
-
+    device = cli.SwitchAttr(["-d", "--device"], str, default=None,
+                            help="IP for the registry")
+    register_ip = cli.SwitchAttr(["-i", "--ip"], str, default=None,
+                                 help="IP for the registry")
     # Server modes
     registry = cli.Flag(["-r"], default=DEF_OPT["registry"],
                         help="Start registry server; no simulation will be run")
@@ -73,7 +76,7 @@ class SimCli(cli.Application):
 
     # Save and load config
     save = cli.Flag(["-S"], default=False,
-                    help="Save the best individu at the end of sim (currently only for opti_brain)")
+                    help="Save the best individual at the end of sim (currently only for opti_brain)")
     load_file = cli.SwitchAttr(["-L"], str, default=False,
                                help="Start a single local simulation using result file")
 
@@ -90,7 +93,9 @@ class SimCli(cli.Application):
     def main(self):
         common_opt = {"root_dir": self.root,
                       "verbose": self.verbose,
-                      "logfile": self.logfile}
+                      "logfile": self.logfile,
+                      "device": self.device,
+                      "register_ip": self.register_ip}
         opt = common_opt.copy()
         if not self.registry:
             opt["simulator"] = self.simulator

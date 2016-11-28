@@ -15,9 +15,10 @@
 # February 2016
 ##
 
-from .simulation import Simulation
-from rpyc.utils.registry import REGISTRY_PORT, DEFAULT_PRUNING_TIMEOUT, UDPRegistryServer
 from rpyc.lib import setup_logger
+from rpyc.utils.registry import REGISTRY_PORT, DEFAULT_PRUNING_TIMEOUT, UDPRegistryServer
+
+from .simulation import Simulation
 
 
 class Registry(UDPRegistryServer, Simulation):
@@ -37,10 +38,7 @@ class Registry(UDPRegistryServer, Simulation):
 
         Simulation.__init__(self, opt)
         self.port = REGISTRY_PORT
-        if self.ipaddr != "localhost":
-            UDPRegistryServer.__init__(self, host=self.ipaddr, port=self.port, pruning_timeout=DEFAULT_PRUNING_TIMEOUT)
-        else:
-            UDPRegistryServer.__init__(self, port=self.port, pruning_timeout=DEFAULT_PRUNING_TIMEOUT)
+        UDPRegistryServer.__init__(self, host=self.ipaddr, port=self.port, pruning_timeout=DEFAULT_PRUNING_TIMEOUT)
 
     def start(self):
         """Start a registry server"""

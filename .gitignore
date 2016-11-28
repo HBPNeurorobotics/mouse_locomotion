@@ -4,6 +4,9 @@
 dist
 *.egg-info
 
+# Ignore simulators
+Blender*
+
 # Ignore python compiled files
 *__pycache__/
 *.pyc

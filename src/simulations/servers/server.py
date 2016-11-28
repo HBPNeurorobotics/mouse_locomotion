@@ -15,12 +15,13 @@
 # February 2016
 ##
 
-import math
 import logging
-from ..simulation import Simulation
+import math
+
 from utils import PickleUtils
 from .service import SimService
 from .serviceServer import ServiceServer
+from ..simulation import Simulation
 
 
 class SimServer(Simulation):
@@ -49,12 +50,16 @@ class SimServer(Simulation):
 
         if self.max_threads >= 1:
             try:
-                t = ServiceServer(SimService, int(self.max_threads))
+                t = ServiceServer(SimService, int(self.max_threads),
+                                  self.opt[
+                                      'register_ip'] if self.opt is not None and 'register_ip' in self.opt else None)
                 self.port = t.port
                 Simulation.start(self)
                 t.start()
             except KeyboardInterrupt:
                 logging.warning("Keyboard interruption from user. Closing the Server.")
+            except Exception as e:
+                logging.error(e.message)
         self.stop()
 
     def test(self):
@@ -71,11 +76,11 @@ class SimServer(Simulation):
             self.max_threads = math.floor(min(cpu_capacity, memory_capacity))
             if self.max_threads >= 1:  # Change the status of the server on the cloud
                 logging.info("Server tests finished: The server can run a maximum of " +
-                             str(self.max_threads) + " parallel simulation(s) on " + self.simulator)
+                             str(self.max_threads) + " parallel simulation(s) on " + self.simulator + ".\n")
             else:
-                logging.info("Server tests finished: Server capacities does not allow simulations.")
+                logging.info("Server tests finished: Server capacities does not allow simulations.\n")
         else:
-            logging.info("User interruption during simulation test.")
+            logging.info("User interruption during simulation test.\n")
             self.max_threads = 0.
 
     def stop(self):

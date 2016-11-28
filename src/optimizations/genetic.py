@@ -19,6 +19,7 @@
 
 import copy
 import logging
+
 from config import Config
 from .optimization import Optimization
 from .pyevolve import *
@@ -111,7 +112,7 @@ class Genetic(Optimization):
         bi = population.bestFitness()
         self.best_solutions_list.append(bi.getFitnessScore())
 
-        logging.info("Population gen " + str(self.ga.getCurrentGeneration() + 1) + " scores: " + str(scores))
+        logging.info("\nPopulation gen " + str(self.ga.getCurrentGeneration() + 1) + " scores: " + str(scores))
         if len(scores) > 0:
             logging.info("Population gen " + str(self.ga.getCurrentGeneration() + 1) + " mean score: " + str(
                 sum(scores) / len(scores)))

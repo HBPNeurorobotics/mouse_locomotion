@@ -32,11 +32,13 @@ Class
 
 """
 
-import Consts, Util
+import logging
+from math import sqrt as math_sqrt
+
+import Consts
+import Util
 from FunctionSlot import FunctionSlot
 from Statistics import Statistics
-from math import sqrt as math_sqrt
-import logging
 
 try:
     from multiprocessing import cpu_count, Pool
@@ -427,9 +429,9 @@ class GPopulation:
     def printStats(self):
         """ Print statistics of the current population """
         if self.sortType == Consts.sortType["scaled"]:
-            message = "Max/Min/Avg Fitness(Raw) [%(fitMax).2f(%(rawMax).2f)/%(fitMin).2f(%(rawMin).2f)/%(fitAve).2f(%(rawAve).2f)]" % self.stats
+            message = "Max/Min/Avg Fitness(Raw) [%(fitMax).2f(%(rawMax).2f)/%(fitMin).2f(%(rawMin).2f)/%(fitAve).2f(%(rawAve).2f)]\n" % self.stats
         else:
-            message = "Max/Min/Avg Raw [%(rawMax).2f/%(rawMin).2f/%(rawAve).2f]" % self.stats
+            message = "Max/Min/Avg Raw [%(rawMax).2f/%(rawMin).2f/%(rawAve).2f]\n" % self.stats
         logging.info(message)
         return message
 
