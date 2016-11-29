@@ -96,7 +96,7 @@ class Client(Observable):
 
         # Check network with rpyc registry thread
         try:
-            self.server_list = rpyc.discover("BLENDERSIM",
+            self.server_list = rpyc.discover((self.simulator + "sim").capitalize(),
                                              registrar=UDPRegistryClient(ip=self.ip_register, port=REGISTRY_PORT))
             logging.debug("Server list " + str(self.server_list))
         except DiscoveryError:

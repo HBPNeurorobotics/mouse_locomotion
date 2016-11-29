@@ -1,3 +1,4 @@
+include bin/qSim
 include requirements.txt
 include src/config.ini
 include configs/*

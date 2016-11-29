@@ -14,11 +14,15 @@
 #                  Dimitri Rodarie <d.rodarie@gmail.com>
 # February 2016
 ##
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
+from optparse import Option
 
-from distutils.core import setup
 import pip
 from pip.req import parse_requirements
-from optparse import Option
+
 import src
 
 options = Option("--workaround")
@@ -32,7 +36,6 @@ if pip.__version__.startswith('1.'):
     requirements = parse_requirements(reqs_file, options=options)
 else:
     from pip.download import PipSession
-
     options.isolated_mode = False
     requirements = parse_requirements(
         reqs_file,

@@ -75,8 +75,8 @@ class SimCli(cli.Application):
                      help="Start a single local simulation. Used to bypass simulation distributed architecture")
 
     # Save and load config
-    save = cli.Flag(["-S"], default=False,
-                    help="Save the best individual at the end of sim (currently only for opti_brain)")
+    save = cli.Flag(["-S"], default=True,
+                    help="Save the best individual at the end of sim")
     load_file = cli.SwitchAttr(["-L"], str, default=False,
                                help="Start a single local simulation using result file")
 

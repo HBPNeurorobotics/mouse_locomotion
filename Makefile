@@ -2,11 +2,15 @@ OUT_DIR?=dist
 SHELL=/bin/bash
 INSTALL_MODULES:=.
 
-PIP=/usr/bin/pip
-SETUPTOOLS_VERSION:=setuptools==15.2
-PYTHON=/usr/bin/python
-PYTHON_PIP_VERSION?=pip==1.4.1
+VENV=$(OUT_DIR)/venv
 
+PYTHON=$(VENV)/bin/python
+PYTHON_PIP_VERSION?=pip==9.0.1
+PIP=$(VENV)/bin/pip
+SETUPTOOLS_VERSION:=setuptools>=20.7.0
+
+
+######################### HELP ####################################
 define HELPTEXT
 Mouse locomotion Makefile usage
  Targets:
@@ -24,17 +28,30 @@ export HELPTEXT
 help:
 	@echo "$$HELPTEXT"
 
+
+########################### LOGGING ###############################
 #called with $(call WARN,Text to display)
 #this is idempotent: it doesn't change the $?
 WARN={ res=$$?; [ -n "$$TERM" ] && tput setaf 1; echo "$(1)"; [ -n "$$TERM" ] && tput sgr0; [ $$res -eq 0 ]; }
 
+
+################## INSTALL SIMULATORS #############################
 SIMULATORS = $(filter-out src/simulators/ src/simulators/__pycache__/, $(sort $(dir $(wildcard src/simulators/*/))))
 
 install_simulators:
 	$(foreach sim, $(SIMULATORS), $(MAKE) -C $(sim) install_$(shell basename $(sim)) OUT_DIR=../../../$(OUT_DIR) &&) true
 
-devinstall: install_simulators
-	$(PIP) install --no-install --pre -e .
+
+###################### INSTALL ####################################
+devinstall: virtualenv install_simulators
+	$(PIP) install --pre .
+
+virtualenv:
+	virtualenv --no-site-packages $(VENV)
+	touch $(VENV)/bin/activate
+	$(PIP) install '$(PYTHON_PIP_VERSION)'
+	$(PIP) install '$(SETUPTOOLS_VERSION)'
+	touch $(VENV)/new-pip.txt
 
 #delete everything we don't need
 clean: pypi-clean
@@ -42,14 +59,16 @@ clean: pypi-clean
 		find . -name $$i -delete; \
 	done
 
+
+################# DOWNLOAD REQUIREMENTS ###########################
 REQUIREMENTS:=$(foreach req, $(INSTALL_MODULES), $(wildcard $(req)/requirements*.txt))
-download-req: $(REQUIREMENTS) install_simulators
-	-mkdir $(OUT_DIR)
+download-req: devinstall
 	for d in $(REQUIREMENTS); do \
-		yes i | $(PIP) install --ignore-installed --no-install --download $(OUT_DIR) -r $$d; \
+		yes i | $(PIP) install --ignore-installed -t $(OUT_DIR)/libs -r $$d; \
 	done; true
 
 
+######################### CREATE TAR ##############################
 DISTS=$(addprefix sdist_, $(INSTALL_MODULES))
 
 pypi-sdist: $(DISTS)
@@ -69,3 +88,4 @@ pypi-clean:
 	done; true
 
 
+.PHONY: help devinstall clean pypi-sdist pypi-clean
