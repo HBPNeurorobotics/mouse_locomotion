@@ -1,45 +1,92 @@
 # Mouse Locomotion Simulation
-This repository gathered blender models and python scripts for quadruped locomotion driven by neural networks controlling muscle models anchored to the model. Joint torque-based control is not supported yet..
+This repository gathered 3D musculoskeletal models and python scripts for legged locomotion driven by neural networks.
 
-## Download:
-Installation has been tested with Ubuntu 14.04 only but should work for other OS since Blender is a multi-platform tool.
+This program has been tested with Ubuntu since version 14.04 LTS with x64 processor architecture. Windows and Mac compatibility are not provided.
+This project is working with Python 2.7, compatibility with Python 3.5 is not yet be provided.
+Only one 3D simulator is currently implemented, Blender (version 2.77). Gazebo, SOFA, Webots and Opensim compatibility are under discussion.
 
-- Import the model:
+## Contains
+
+### Sources
+
+The simulations are run with the qSim file in the bin folder (see section Installation). 
+
+- Musculoskeletals:
+It contains the muscles and the sensors classes for the musculoskeletal model. The Body class is calling them to create the legs and the sensors for feedback.
+- Optimizations:
+This package implements optimization and meta-optimization algorithms to find a good connection matrix between the different models.
+- Oscillators:
+The spinal cord code is located in this folder. We will probably use Nest to replace our current models of neurons.
+- Simulations:
+It provides client and server program to distribute the simulation between the different machines connected.
+- Simulators:
+Inside it, you will find all the classes to exchange with the 3D simulators implemented.
+- Utils:
+This folder contains all the utility classes used during simulation.
+
+### Configuration files
+The configs folder contains json files that are linked to a musculoskeletal model and are used to configure its muscles and the spinal cord parameters.
+You can also specify in here some simulation parameters such as its duration, its exit condition etc.
+
+### Models
+The mdl folder has all the musculoskeletal models which are opened by the 3D simulator. You can edit their geometry, mass, visual properties, etc. or add your own models in here. 
+
+## Installation
+
+### Prepare the environment
+You should get sudo access to run the following commands:
 ```
-git clone https://github.com/Gabs48/mouse_locomotion
+sudo apt-get update
+sudo apt-get install -y python-dev python-pip make git wget gcc pkg-config python-virtualenv libpython2.7-stdlib
 ```
 
-## Local Simulation
+### Download:
+
+- Clone the project on Github:
+```
+git clone  https://github.com/HBPNeurorobotics/mouse_locomotion.git
+```
 
 ### Dependency Installation
-This repository uses python libraries Rpyc and Plumbum. They are available on the official python distribution and can be install via pip:
-```
-sudo pip install rpyc
-sudo pip install plumbum
-```
-
-### Blender user version Installation
-
-This simulator uses features only available in Blender 2.77 version. For linux users with AMD64 processor architecture, this version of blender can be installed automatically in */opt* thanks to the *install_blender* script. Absolute paths and users parameters at the beginning of the script shall be edited manually.
-
+This repository requires Python libraries to run. A list of these libraries and their version could be find on *requirements.txt*.
+The common Makefile will automatically create a Python virtual environment with all the dependencies.
 ```
 cd mouse_locomotion
-./sh/install_blender.sh
+make devinstall
+```
+This simulator uses features available in Blender 2.77 version.
+Simulators can be installed separately in the *dist* folder thanks to the *Makefile* inside *src.simulators.SIMULATOR_NAME* package.
+```
+make install_SIMULATOR_NAME
+```
+Or you can do the complete installation, with the common *Makefile*:
+```
+make install_all
 ```
 
-### Execution
+## Execution
 
- - Start a registry server to aknowledge the cloud state (shell 1):
+You can launch simulations using the qSim file and the shell scripts inside the bin folder.
+
+ - Start a registry server. He will be used both by the client to be acknowledged of the cloud state (shell 1):
 ```
 qSim -r
 ```
- - Start a service server to process requests (shell 2):
+ - Start a service server to process requests. The following daemon can be used to start a XVFB server (to redirect the simulation display):
 ```
 qSim -s
 ``` 
- - Start simulation (shell 3):
+Notice that the number of parallel simulations that your server can run is linked to the CPU and Memory usage that one simulation is requesting.
+Therefore, the server will run a simulation test before being available to the client side. You can set the max CPU and Memory usage with the *-cpu* and *-mem* flags.
+
+ - Start simulation on the client side:
 ```
-qSim -m model.blend -c MyConfig
+qSim -m model.blend -c MyConfig -t SimulationType
+```
+
+All the parameters for qSim are described with:
+```
+qSim -h
 ```
 
 ## Cloud Simulation on Elis network
@@ -65,27 +112,4 @@ The following script download and install this repository as well as all depende
 
 ### Execution
 
-- Start a registry server to aknowledge the cloud state (shell 1):
-```
-qSim -r
-```
- - Start services server on the cloud (shell 2). The following daemon can be used to start a XVFB server (to redirect the simulation display) as well a RPYC server behind a screen shell. It also allows to stop or restart them remotely. Absolute paths and users parameters at the beginning of the script shall be edited manually to adapt to the network:
- 
-```
-./rpyser start|stop|restart|help
-```
- - Start simulation (shell 3):
-```
-qSim -m model.blend -c MyConfig
-```
-
-## Edition
-
-- To edit geometry, mass and visual properties of the 3D model, open it with blender:
-```
-./blender-2.77/blender model.blend
-```
-- To edit the brain model, the muscle model and the body configuration, open the file *config.py* with your IDE:
-```
-vi config.py
-```
+See section Installation.Execution.

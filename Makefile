@@ -43,15 +43,16 @@ install_simulators:
 
 
 ###################### INSTALL ####################################
-devinstall: virtualenv install_simulators
+devinstall: virtualenv
 	$(PIP) install --pre .
+
+install_all: devinstall install_simulators
 
 virtualenv:
 	virtualenv --no-site-packages $(VENV)
 	touch $(VENV)/bin/activate
 	$(PIP) install '$(PYTHON_PIP_VERSION)'
 	$(PIP) install '$(SETUPTOOLS_VERSION)'
-	touch $(VENV)/new-pip.txt
 
 #delete everything we don't need
 clean: pypi-clean
@@ -78,7 +79,6 @@ $(DISTS): sdist_%: devinstall
 	mkdir -p $(OUT_DIR)
 	cd $* && $(PYTHON) setup.py sdist
 	if [ "$*" != "." ] ; then mv $*/$(OUT_DIR)/*.tar.gz $(OUT_DIR) ; fi
-	rm MANIFEST
 
 pypi-clean:
 	-rm -rf dist
@@ -88,4 +88,4 @@ pypi-clean:
 	done; true
 
 
-.PHONY: help devinstall clean pypi-sdist pypi-clean
+.PHONY: help devinstall clean pypi-sdist pypi-clean install_all
