@@ -17,8 +17,8 @@
 import datetime
 import logging.config
 import os
-import time
 import sys
+import time
 
 from config import Config
 from musculoskeletals import Body
@@ -69,7 +69,7 @@ class Updater:
         self.config_name = argv[
             "config_name"] if "config_name" in argv else self.root + "/configs/default_dog_vert_simulation_config.json"
         log_file = argv[
-            "logfile"] if "logfile" in argv else os.path.expanduser("~").replace("\\", "/") + "/.log/qSim.log"
+            "logfile"] if "logfile" in argv else os.path.expanduser("~").replace("\\", "/") + "/.log/locomotionSim.log"
 
         if "filename" in argv:
             self.save_file = argv["filename"]

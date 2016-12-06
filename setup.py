@@ -21,9 +21,8 @@ except ImportError:
 from optparse import Option
 
 import pip
-from pip.req import parse_requirements
-
 import src
+from pip.req import parse_requirements
 
 options = Option("--workaround")
 options.skip_requirements_regex = None
@@ -54,8 +53,9 @@ config = {
     'packages': ['src',
                  'src.musculoskeletals', 'src.musculoskeletals.muscles', 'src.musculoskeletals.sensors',
                  'src.musculoskeletals.sensors.muscleReceptors', 'src.optimizations', 'src.optimizations.pyevolve',
-                 'src.oscillators', 'src.simulations', 'src.simulations.clients', 'src.simulations.servers',
-                 'src.simulators', 'src.simulators.blender', 'src.utils', 'src.utils.observers'
+                 'src.oscillators', 'src.simulations', 'src.simulations.clients', 'src.simulations.launchers',
+                 'src.simulations.servers', 'src.simulators', 'src.simulators.blender', 'src.utils',
+                 'src.utils.observers'
                  ],
     'package_data': {
         'defaults': ['config.ini']

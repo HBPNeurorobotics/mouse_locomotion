@@ -3,20 +3,20 @@ This repository gathered 3D musculoskeletal models and python scripts for legged
 
 This program has been tested with Ubuntu since version 14.04 LTS with x64 processor architecture. Windows and Mac compatibility are not provided.
 This project is working with Python 2.7, compatibility with Python 3.5 is not yet be provided.
-Only one 3D simulator is currently implemented, Blender (version 2.77). Gazebo, SOFA, Webots and Opensim compatibility are under discussion.
+Only one 3D simulator is currently implemented, *Blender* (version 2.77). *Gazebo*, *SOFA*, *Webots* and *Opensim* compatibility are under discussion.
 
 ## Contains
 
 ### Sources
 
-The simulations are run with the qSim file in the bin folder (see section Installation). 
+The simulations are run with the files in the bin folder (see section Installation). 
 
 - Musculoskeletals:
 It contains the muscles and the sensors classes for the musculoskeletal model. The Body class is calling them to create the legs and the sensors for feedback.
 - Optimizations:
 This package implements optimization and meta-optimization algorithms to find a good connection matrix between the different models.
 - Oscillators:
-The spinal cord code is located in this folder. We will probably use Nest to replace our current models of neurons.
+The spinal cord code is located in this folder. We will probably use *Nest* to replace our current models of neurons.
 - Simulations:
 It provides client and server program to distribute the simulation between the different machines connected.
 - Simulators:
@@ -37,7 +37,7 @@ The mdl folder has all the musculoskeletal models which are opened by the 3D sim
 You should get sudo access to run the following commands:
 ```
 sudo apt-get update
-sudo apt-get install -y python-dev python-pip make git wget gcc pkg-config python-virtualenv libpython2.7-stdlib
+sudo apt-get install -y python-dev python-pip make git wget gcc pkg-config python-virtualenv libpython2.7-stdlib libfreetype6-dev libglu1-mesa libxi6
 ```
 
 ### Download:
@@ -66,28 +66,41 @@ make install_all
 
 ## Execution
 
-You can launch simulations using the qSim file and the shell scripts inside the bin folder.
+You can launch simulations using the python files and the shell scripts inside the bin folder.
+Before starting any simulation you should start the Python virtual environment:
+```
+source dist/venv/bin/activate
+```
 
  - Start a registry server. He will be used both by the client to be acknowledged of the cloud state (shell 1):
 ```
-qSim -r
+python registry
 ```
  - Start a service server to process requests. The following daemon can be used to start a XVFB server (to redirect the simulation display):
 ```
-qSim -s
+python server
 ``` 
 Notice that the number of parallel simulations that your server can run is linked to the CPU and Memory usage that one simulation is requesting.
 Therefore, the server will run a simulation test before being available to the client side. You can set the max CPU and Memory usage with the *-cpu* and *-mem* flags.
 
  - Start simulation on the client side:
 ```
-qSim -m model.blend -c MyConfig -t SimulationType
+python client -m model.blend -c MyConfig -t SimulationType
 ```
 
-All the parameters for qSim are described with:
+All the parameters for simulations are described with:
 ```
-qSim -h
+python registry -h
+python server -h
+python client -h
 ```
+
+Stop the virtual environment:
+```
+deactivate
+```
+
+Note that the logs of your simulations will be saved in *~/.log/locomotionSim.log*. You can change the logs' level with the *--verbose* flag.
 
 ## Cloud Simulation on Elis network
 

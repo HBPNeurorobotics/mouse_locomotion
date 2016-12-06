@@ -1,4 +1,6 @@
-include bin/qSim
+include bin/server
+include bin/client
+include bin/registry
 include requirements.txt
 include src/config.ini
 include configs/*

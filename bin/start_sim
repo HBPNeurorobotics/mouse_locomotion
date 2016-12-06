@@ -1,14 +1,27 @@
 #!/usr/bin/env bash
 
+##
 # Mouse Locomotion Simulation
+#
 # Human Brain Project SP10
 #
-# This script facilitates the start of a simulation process on a remote computer behind a screen interface
+# This project provides the user with a framework based on 3D simulators allowing:
+#  - Edition of a 3D model
+#  - Edition of a physical controller model (torque-based or muscle-based)
+#  - Edition of a brain controller model (oscillator-based or neural network-based)
+#  - Simulation of the model
+#  - Optimization and Meta-optimization of the parameters in distributed cloud simulations
 #
-# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>. June 2016
+# File created by: Gabriel Urbain <gabriel.urbain@ugent.be>
+#                  Dimitri Rodarie <d.rodarie@gmail.com>
+# June 2016
+##
+
+
+# This script facilitates the start of a simulation process on a remote computer behind a screen interface
 
 WIPEP="screen -wipe"
-QSIMP="screen -dmLS qsimm qSim -S -m dog_vert.blend -t META_GA -p 'bin/Blender2.76/';"
+QSIMP="screen -dmLS qsimm -m dog_vert.blend -t META_GA -p 'bin/Blender2.76/';"
 
 ##################################
 
@@ -20,14 +33,14 @@ if [ ! ${qsimmtmp} ]; then
 else
 	qsimmprocess=${qsimmtmp[-1]};
 fi
-echo "[START MANAGER] qSim registry status:  ${qsimmprocess} "
+echo "[START MANAGER] manager status:  ${qsimmprocess} "
 
 ##################################
 
 printf "\n[START MANAGER] ======== Start screen processes ======== \n"
 
 if [ "${qsimmprocess}" == "(Detached)" ] || [ "${qsimmprocess}" == "(Attached)" ]; then
-	echo "[START MANAGER] qSim registry: nothing to do!";
+	echo "[START MANAGER] manager: nothing to do!";
 elif [ "${qsimmprocess}" == "???)" ]; then
 	eval "${WIPEP}";
 	eval "${QSIMP}";
@@ -46,4 +59,4 @@ else
 	qsimmprocess=${qsimmtmp[-1]};
 fi
 
-echo "[START MANAGER] qSim registry status:  ${qsimmprocess} "
+echo "[START MANAGER] manager status:  ${qsimmprocess} "
