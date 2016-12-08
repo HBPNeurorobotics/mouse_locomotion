@@ -22,7 +22,6 @@ import threading
 import rpyc
 from rpyc.utils.registry import UDPRegistryClient, REGISTRY_PORT
 from rpyc.utils.server import Server
-
 from simulations import PROTOCOL_CONFIG
 from simulations import Registry
 
@@ -104,10 +103,9 @@ class ServiceServer(Server):
 
         self.listener.listen(self.backlog)
         self.active = True
-        if self.auto_register:
-            t = threading.Thread(target=self._bg_register)
-            t.setDaemon(True)
-            t.start()
+        t = threading.Thread(target=self._bg_register)
+        t.setDaemon(True)
+        t.start()
         try:
             while self.active:
                 self.accept()

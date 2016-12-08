@@ -17,26 +17,33 @@
 
 
 import logging.config
-import os.path
+import sys
+from os import makedirs, getpid, unlink
+from os.path import dirname, exists, isfile
 
-from plumbum import cli
+from plumbum.cli import Application, Flag, SwitchAttr
 from simulations.launchers import DEF_OPT, ROOT
 
 
-class Launcher(cli.Application):
+class Launcher(Application):
     """
     Abstract class to launch simulations. It parses the parameter from the user and launch a simulation afterwards
     """
 
     root = ROOT
-    verbose = cli.Flag(["-v", "--verbosemode"], default=False,
-                       help="Set verbose mode")
-    logfile = cli.SwitchAttr(["--logfile"], str, default=DEF_OPT["logfile"],
-                             help="The log file to use")
-    device = cli.SwitchAttr(["-d", "--device"], str, default=None,
-                            help="Network device name")
-    register_ip = cli.SwitchAttr(["-i", "--ip"], str, default=None,
-                                 help="IP for the registry")
+    verbose = Flag(["-v", "--verbosemode"], default=False,
+                   help="Set verbose mode")
+    logfile = SwitchAttr(["--logfile"], str, default=DEF_OPT["logfile"],
+                         help="The log file to use")
+    device = SwitchAttr(["-d", "--device"], str, default=None,
+                        help="Network device name")
+    register_ip = SwitchAttr(["-i", "--ip"], str, default=None,
+                             help="IP for the registry")
+    thread_name = "Locomotion_Simulation_Thread"
+
+    def __init__(self, executable):
+        Application.__init__(self, executable)
+        self.lock_file = dirname(self.logfile) + "/" + self.thread_name + ".pid"
 
     def build_opt(self):
         """
@@ -50,6 +57,10 @@ class Launcher(cli.Application):
                 "device": self.device,
                 "register_ip": self.register_ip}
 
+    def __del__(self):
+        if isfile(self.lock_file) and file(self.lock_file, 'r').read() == str(getpid()):
+            unlink(self.lock_file)
+
     def main(self, *args):
         """
         Launch a Simulation after configuring logging
@@ -57,11 +68,17 @@ class Launcher(cli.Application):
         """
 
         # Configure logging
-        if not os.path.exists(os.path.dirname(self.logfile)):
-            os.makedirs(os.path.dirname(self.logfile))
-        if not os.path.exists(self.logfile):
+        if not exists(dirname(self.logfile)):
+            makedirs(dirname(self.logfile))
+        if not exists(self.logfile):
             f = open(self.logfile, 'w')
             f.close()
 
         logging.config.fileConfig(ROOT + "/etc/logging.conf", defaults={'logfilename': self.logfile, 'simLevel': (
             "DEBUG" if self.verbose else "INFO")})
+
+        if isfile(self.lock_file):
+            logging.error("Either there is already another " + self.thread_name + " on this machine" +
+                          " or a previous " + self.lock_file + " file was not removed. Abort.")
+            sys.exit(1)
+        file(self.lock_file, 'w').write(str(getpid()))

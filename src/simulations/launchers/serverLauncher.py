@@ -16,7 +16,7 @@
 ##
 
 
-from plumbum import cli
+from plumbum.cli import Flag, SwitchAttr
 from simulations import SimServer
 from simulations.launchers import DEF_OPT
 
@@ -31,21 +31,25 @@ class ServerLauncher(Launcher):
     """
 
     # Simulators parameters
-    model = cli.SwitchAttr(["-m", "--model"], str, default=DEF_OPT["model"],
-                           help="Model to simulation")
-    max_cpu_percentage = cli.SwitchAttr(["-cpu", "--cpu_use"], str, default=None,
-                                        help="Max CPU usage for the simulation server")
-    max_memory_percentage = cli.SwitchAttr(["-mem", "--mem_use"], str, default=None,
-                                           help="Max memory usage for the simulation server")
-    simulator = cli.SwitchAttr(["-e", "--environment"], str, default=DEF_OPT["simulator"],
-                               help="Simulator name : BLENDER")
-    path = cli.SwitchAttr(["-p", "--binpath"], str, default=DEF_OPT["simulator_path"],
-                          help="Path of Simulator binaries. Relative path start with no /. " +
+    model = SwitchAttr(["-m", "--model"], str, default=DEF_OPT["model"],
+                       help="Model to simulation")
+    max_cpu_percentage = SwitchAttr(["-cpu", "--cpu_use"], str, default=None,
+                                    help="Max CPU usage for the simulation server")
+    max_memory_percentage = SwitchAttr(["-mem", "--mem_use"], str, default=None,
+                                       help="Max memory usage for the simulation server")
+    simulator = SwitchAttr(["-e", "--environment"], str, default=DEF_OPT["simulator"],
+                           help="Simulator name : BLENDER")
+    path = SwitchAttr(["-p", "--binpath"], str, default=DEF_OPT["simulator_path"],
+                      help="Path of Simulator binaries. Relative path start with no /. " +
                                "To use PATH variable, check - p 'PATH'")
-    config = cli.SwitchAttr(["-c", "--config"], str, default=DEF_OPT["config_name"],
-                            help="The config class to be used for simulation")
-    fullscreen = cli.Flag(["-f", "--fullscreen"], default=DEF_OPT["fullscreen"],
-                          help="Enable fullscreen mode")
+    config = SwitchAttr(["-c", "--config"], str, default=DEF_OPT["config_name"],
+                        help="The config class to be used for simulation")
+    fullscreen = Flag(["-f", "--fullscreen"], default=DEF_OPT["fullscreen"],
+                      help="Enable fullscreen mode")
+
+    def __init__(self, executable):
+        self.thread_name = "Locomotion_Server_Thread"
+        Launcher.__init__(self, executable)
 
     def build_opt(self):
         """

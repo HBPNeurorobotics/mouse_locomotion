@@ -16,7 +16,7 @@
 ##
 
 
-from plumbum import cli
+from plumbum.cli import SwitchAttr, Flag
 from simulations import Manager
 from simulations.launchers import DEF_OPT
 
@@ -32,18 +32,22 @@ class ClientLauncher(ServerLauncher):
     """
 
     # Simulation parameters
-    sim_type = cli.SwitchAttr(["-t", "--type"], str, default=DEF_OPT["sim_type"],
-                              help="Specify the type of simulation: RUN, META_GA or CM")
-    sim_timeout = cli.SwitchAttr(["-T", "--timeout"], str, default=DEF_OPT["timeout"],
-                                 help="Maximum duration for the simulation")
-    local = cli.Flag(["-l"], default=DEF_OPT["local"],
-                     help="Start a single local simulation. Used to bypass simulation distributed architecture")
+    sim_type = SwitchAttr(["-t", "--type"], str, default=DEF_OPT["sim_type"],
+                          help="Specify the type of simulation: RUN, META_GA or CM")
+    sim_timeout = SwitchAttr(["-T", "--timeout"], str, default=DEF_OPT["timeout"],
+                             help="Maximum duration for the simulation")
+    local = Flag(["-l"], default=DEF_OPT["local"],
+                 help="Start a single local simulation. Used to bypass simulation distributed architecture")
 
     # Save and load config
-    save = cli.Flag(["-S"], default=False,
-                    help="Save the best individual at the end of sim")
-    load_file = cli.SwitchAttr(["-L"], str, default=False,
-                               help="Start a single local simulation using result file")
+    save = Flag(["-S"], default=False,
+                help="Save the best individual at the end of sim")
+    load_file = SwitchAttr(["-L"], str, default=False,
+                           help="Start a single local simulation using result file")
+
+    def __init__(self, executable):
+        self.thread_name = "Locomotion_Client_Thread"
+        Launcher.__init__(self, executable)
 
     def build_opt(self):
         """

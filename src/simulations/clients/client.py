@@ -23,10 +23,10 @@ from threading import Thread, Lock
 import rpyc
 from rpyc.utils.factory import DiscoveryError
 from rpyc.utils.registry import UDPRegistryClient, REGISTRY_PORT
-
 from simulations import PROTOCOL_CONFIG
 from simulations import Registry
 from utils import Observable
+
 from .connection import ServerInfo, SimulationRequest, Connexion
 
 REQUESTS = {"Simulation": "simulation", "Test": "test"}
@@ -35,7 +35,7 @@ REQUESTS = {"Simulation": "simulation", "Test": "test"}
 class Client(Observable):
     """
     Client class provides a high level interface to distribute a large number of
-    simulation requests in a variable size computation cloud using tools like asynchonous
+    simulation requests in a variable size computation cloud using tools like asynchronous
     request and registry server to monitor the network state via UDP requests.
     Usage:
             # Create and start Client thread

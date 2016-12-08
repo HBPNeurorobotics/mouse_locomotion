@@ -28,6 +28,10 @@ class RegistryLauncher(Launcher):
             RegistryLauncher.run()
     """
 
+    def __init__(self, executable):
+        self.thread_name = "Locomotion_Registry_Thread"
+        Launcher.__init__(self, executable)
+
     def main(self, *args):
         """
         Launch a Registry simulation
@@ -35,5 +39,5 @@ class RegistryLauncher(Launcher):
         """
 
         Launcher.main(self, *args)
-        s = Registry(self.build_opt())
+        s = Registry(self.build_opt().copy())
         s.start()
